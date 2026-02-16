@@ -17,13 +17,13 @@ describe('Demo Routes', () => {
       const res = await app.inject({
         method: 'POST',
         url: '/api/demo/chat',
-        payload: { message: 'Hello Luna!' },
+        payload: { message: 'Hello!' },
       });
 
       expect(res.statusCode).toBe(200);
       const body = JSON.parse(res.body);
       expect(body.response).toBeDefined();
-      expect(body.warrior).toBe('Luna');
+      expect(body.agent).toBeDefined();
     });
 
     it('rejects missing message with 400', async () => {

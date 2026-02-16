@@ -21,7 +21,7 @@ export default function ChannelPage() {
   useEffect(() => {
     const requestCode = async () => {
       try {
-        const data = await apiPost('/channels/connect/request', { channel: 'telegram' });
+        const data = await apiPost('/channels/connect/request', { channel: 'whatsapp' });
         setConnectionCode(data.code || data.connection_code);
       } catch {
         // Fall back to direct bot link approach
@@ -38,7 +38,7 @@ export default function ChannelPage() {
     pollRef.current = setInterval(async () => {
       try {
         const data = await apiFetch('/channels/status');
-        if (data.channel || data.telegram) {
+        if (data.whatsapp_connected) {
           setConnected(true);
           clearInterval(pollRef.current);
         }
@@ -79,12 +79,12 @@ export default function ChannelPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Telegram connection */}
+            {/* WhatsApp connection */}
             <div className="flex flex-col items-center gap-6">
               <div className="flex items-center gap-3">
                 <span className="text-3xl">📱</span>
                 <div>
-                  <h3 className="text-txt font-medium">{t('connectTelegram')}</h3>
+                  <h3 className="text-txt font-medium">{t('connectWhatsApp')}</h3>
                   <p className="text-txt-muted text-sm">{t('linkAccount')}</p>
                 </div>
               </div>
@@ -103,14 +103,9 @@ export default function ChannelPage() {
                 </div>
               </div>
 
-              <a
-                href="https://t.me/ClawWarriorsBot"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-accent text-white px-6 py-3 rounded-[var(--radius-btn)] font-medium hover:opacity-90 transition-all text-sm inline-flex items-center gap-2"
-              >
-                {t('openInTelegram')}
-              </a>
+              <p className="text-txt-muted text-sm text-center max-w-sm">
+                {t('whatsAppInstruction')}
+              </p>
 
               {connectionCode && (
                 <div className="text-center">

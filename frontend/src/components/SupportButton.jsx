@@ -3,7 +3,7 @@
 export default function SupportButton() {
   return (
     <a
-      href="mailto:support@clawwarriors.com"
+      href="mailto:support@evolved.ai"
       className="fixed bottom-5 right-5 z-[60] w-12 h-12 rounded-full bg-card border border-border flex items-center justify-center text-txt-muted hover:text-accent hover:border-accent transition-all shadow-lg"
       title="Contact Support"
       aria-label="Contact Support"

@@ -1,14 +1,11 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import Image from 'next/image';
 import Button from '@/components/ui/Button';
 import { useTranslations } from 'next-intl';
 
 export default function ChatWidget({
-  warriorName = 'Luna',
-  warriorClass = 'bard',
-  portraitSrc = '/warriors/luna_bard.png',
+  agentName = 'Evolved AI',
   onSend,
   messages: externalMessages,
 }) {
@@ -55,15 +52,11 @@ export default function ChatWidget({
     <div className="flex flex-col h-full bg-card border border-border rounded-[var(--radius-card)] overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
-        <Image
-          src={portraitSrc}
-          alt={warriorName}
-          width={36}
-          height={36}
-          className="rounded-full object-cover"
-        />
+        <div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center text-accent text-sm font-bold">
+          {agentName.charAt(0)}
+        </div>
         <div>
-          <span className="text-sm font-medium text-txt">{warriorName}</span>
+          <span className="text-sm font-medium text-txt">{agentName}</span>
           <span className="text-xs text-txt-dim ml-2">{t('online')}</span>
         </div>
       </div>

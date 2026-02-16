@@ -48,7 +48,7 @@ describe('Password Reset & Change Endpoints', () => {
     });
 
     it('returns 200 for non-existent email (no enumeration)', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.subscriber.findUnique.mockResolvedValue(null);
 
       const res = await app.inject({
         method: 'POST',
@@ -62,8 +62,8 @@ describe('Password Reset & Change Endpoints', () => {
       expect(sendPasswordResetEmail).not.toHaveBeenCalled();
     });
 
-    it('returns 200 for Google-only user without sending email', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({
+    it('returns 200 for Google-only subscriber without sending email', async () => {
+      mockPrisma.subscriber.findUnique.mockResolvedValue({
         id: 'g1',
         email: 'google@test.com',
         authProvider: 'google',
@@ -80,52 +80,52 @@ describe('Password Reset & Change Endpoints', () => {
       expect(sendPasswordResetEmail).not.toHaveBeenCalled();
     });
 
-    it('sends reset email for valid email+password user', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({
-        id: 'u1',
-        email: 'user@test.com',
+    it('sends reset email for valid email+password subscriber', async () => {
+      mockPrisma.subscriber.findUnique.mockResolvedValue({
+        id: 's1',
+        email: 'subscriber@test.com',
         authProvider: 'email',
         passwordHash: '$2a$10$hash',
       });
-      mockPrisma.user.update.mockResolvedValue({});
+      mockPrisma.subscriber.update.mockResolvedValue({});
 
       const res = await app.inject({
         method: 'POST',
         url: '/api/auth/forgot-password',
-        payload: { email: 'user@test.com' },
+        payload: { email: 'subscriber@test.com' },
       });
 
       expect(res.statusCode).toBe(200);
-      expect(mockPrisma.user.update).toHaveBeenCalledWith(
+      expect(mockPrisma.subscriber.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { id: 'u1' },
+          where: { id: 's1' },
           data: expect.objectContaining({
             passwordResetToken: expect.any(String),
             passwordResetExpiry: expect.any(Date),
           }),
         }),
       );
-      expect(sendPasswordResetEmail).toHaveBeenCalledWith('user@test.com', expect.any(String));
+      expect(sendPasswordResetEmail).toHaveBeenCalledWith('subscriber@test.com', expect.any(String));
     });
 
     it('stores hashed token (not raw)', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({
-        id: 'u1',
-        email: 'user@test.com',
+      mockPrisma.subscriber.findUnique.mockResolvedValue({
+        id: 's1',
+        email: 'subscriber@test.com',
         authProvider: 'email',
         passwordHash: '$2a$10$hash',
       });
-      mockPrisma.user.update.mockResolvedValue({});
+      mockPrisma.subscriber.update.mockResolvedValue({});
 
       await app.inject({
         method: 'POST',
         url: '/api/auth/forgot-password',
-        payload: { email: 'user@test.com' },
+        payload: { email: 'subscriber@test.com' },
       });
 
       // The raw token sent in email should be different from stored token
       const rawToken = sendPasswordResetEmail.mock.calls[0][1];
-      const storedToken = mockPrisma.user.update.mock.calls[0][0].data.passwordResetToken;
+      const storedToken = mockPrisma.subscriber.update.mock.calls[0][0].data.passwordResetToken;
 
       // Stored should be SHA-256 of the raw token
       const expectedHash = crypto.createHash('sha256').update(rawToken).digest('hex');
@@ -134,23 +134,23 @@ describe('Password Reset & Change Endpoints', () => {
     });
 
     it('sets 15 minute expiry', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({
-        id: 'u1',
-        email: 'user@test.com',
+      mockPrisma.subscriber.findUnique.mockResolvedValue({
+        id: 's1',
+        email: 'subscriber@test.com',
         authProvider: 'email',
         passwordHash: '$2a$10$hash',
       });
-      mockPrisma.user.update.mockResolvedValue({});
+      mockPrisma.subscriber.update.mockResolvedValue({});
 
       const before = Date.now();
       await app.inject({
         method: 'POST',
         url: '/api/auth/forgot-password',
-        payload: { email: 'user@test.com' },
+        payload: { email: 'subscriber@test.com' },
       });
       const after = Date.now();
 
-      const expiry = mockPrisma.user.update.mock.calls[0][0].data.passwordResetExpiry;
+      const expiry = mockPrisma.subscriber.update.mock.calls[0][0].data.passwordResetExpiry;
       const diff = expiry.getTime() - before;
       expect(diff).toBeGreaterThanOrEqual(14 * 60 * 1000); // at least ~14 min
       expect(diff).toBeLessThanOrEqual(16 * 60 * 1000); // no more than ~16 min
@@ -178,7 +178,7 @@ describe('Password Reset & Change Endpoints', () => {
     });
 
     it('returns 400 for invalid/expired token', async () => {
-      mockPrisma.user.findFirst.mockResolvedValue(null);
+      mockPrisma.subscriber.findFirst.mockResolvedValue(null);
 
       const res = await app.inject({
         method: 'POST',
@@ -195,14 +195,14 @@ describe('Password Reset & Change Endpoints', () => {
       const rawToken = 'valid-token-hex';
       const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
 
-      mockPrisma.user.findFirst.mockResolvedValue({
-        id: 'u1',
-        email: 'user@test.com',
+      mockPrisma.subscriber.findFirst.mockResolvedValue({
+        id: 's1',
+        email: 'subscriber@test.com',
         authProvider: 'email',
         passwordResetToken: hashedToken,
         passwordResetExpiry: new Date(Date.now() + 10 * 60 * 1000),
       });
-      mockPrisma.user.update.mockResolvedValue({});
+      mockPrisma.subscriber.update.mockResolvedValue({});
 
       const res = await app.inject({
         method: 'POST',
@@ -215,7 +215,7 @@ describe('Password Reset & Change Endpoints', () => {
       expect(body.message).toContain('Password reset successfully');
 
       // Verify it looked up by hashed token
-      expect(mockPrisma.user.findFirst).toHaveBeenCalledWith({
+      expect(mockPrisma.subscriber.findFirst).toHaveBeenCalledWith({
         where: {
           passwordResetToken: hashedToken,
           passwordResetExpiry: { gt: expect.any(Date) },
@@ -223,7 +223,7 @@ describe('Password Reset & Change Endpoints', () => {
       });
 
       // Verify token is cleared after reset
-      expect(mockPrisma.user.update).toHaveBeenCalledWith(
+      expect(mockPrisma.subscriber.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             passwordHash: expect.any(String),
@@ -234,18 +234,18 @@ describe('Password Reset & Change Endpoints', () => {
       );
     });
 
-    it('upgrades Google-only user to "both" when setting password', async () => {
-      const rawToken = 'google-user-token';
+    it('upgrades Google-only subscriber to "both" when setting password', async () => {
+      const rawToken = 'google-subscriber-token';
       const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
 
-      mockPrisma.user.findFirst.mockResolvedValue({
+      mockPrisma.subscriber.findFirst.mockResolvedValue({
         id: 'g1',
         email: 'google@test.com',
         authProvider: 'google',
         passwordResetToken: hashedToken,
         passwordResetExpiry: new Date(Date.now() + 10 * 60 * 1000),
       });
-      mockPrisma.user.update.mockResolvedValue({});
+      mockPrisma.subscriber.update.mockResolvedValue({});
 
       const res = await app.inject({
         method: 'POST',
@@ -254,7 +254,7 @@ describe('Password Reset & Change Endpoints', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(mockPrisma.user.update).toHaveBeenCalledWith(
+      expect(mockPrisma.subscriber.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             authProvider: 'both',
@@ -276,7 +276,7 @@ describe('Password Reset & Change Endpoints', () => {
     });
 
     it('returns 400 without required fields', async () => {
-      const token = getAuthToken(app, 'u1', 'user@test.com');
+      const token = getAuthToken(app, 's1', 'subscriber@test.com');
       const res = await app.inject({
         method: 'POST',
         url: '/api/auth/change-password',
@@ -287,7 +287,7 @@ describe('Password Reset & Change Endpoints', () => {
     });
 
     it('returns 400 with short new password', async () => {
-      const token = getAuthToken(app, 'u1', 'user@test.com');
+      const token = getAuthToken(app, 's1', 'subscriber@test.com');
       const res = await app.inject({
         method: 'POST',
         url: '/api/auth/change-password',
@@ -297,9 +297,9 @@ describe('Password Reset & Change Endpoints', () => {
       expect(res.statusCode).toBe(400);
     });
 
-    it('returns 400 for Google-only user with no password', async () => {
+    it('returns 400 for Google-only subscriber with no password', async () => {
       const token = getAuthToken(app, 'g1', 'google@test.com');
-      mockPrisma.user.findUnique.mockResolvedValue({
+      mockPrisma.subscriber.findUnique.mockResolvedValue({
         id: 'g1',
         email: 'google@test.com',
         authProvider: 'google',
@@ -320,10 +320,10 @@ describe('Password Reset & Change Endpoints', () => {
 
     it('returns 401 for wrong current password', async () => {
       const bcrypt = await import('bcryptjs');
-      const token = getAuthToken(app, 'u1', 'user@test.com');
-      mockPrisma.user.findUnique.mockResolvedValue({
-        id: 'u1',
-        email: 'user@test.com',
+      const token = getAuthToken(app, 's1', 'subscriber@test.com');
+      mockPrisma.subscriber.findUnique.mockResolvedValue({
+        id: 's1',
+        email: 'subscriber@test.com',
         authProvider: 'email',
         passwordHash: await bcrypt.default.hash('correctpass', 10),
       });
@@ -340,14 +340,14 @@ describe('Password Reset & Change Endpoints', () => {
 
     it('updates password for correct current password', async () => {
       const bcrypt = await import('bcryptjs');
-      const token = getAuthToken(app, 'u1', 'user@test.com');
-      mockPrisma.user.findUnique.mockResolvedValue({
-        id: 'u1',
-        email: 'user@test.com',
+      const token = getAuthToken(app, 's1', 'subscriber@test.com');
+      mockPrisma.subscriber.findUnique.mockResolvedValue({
+        id: 's1',
+        email: 'subscriber@test.com',
         authProvider: 'email',
         passwordHash: await bcrypt.default.hash('correctpass', 10),
       });
-      mockPrisma.user.update.mockResolvedValue({});
+      mockPrisma.subscriber.update.mockResolvedValue({});
 
       const res = await app.inject({
         method: 'POST',
@@ -359,9 +359,9 @@ describe('Password Reset & Change Endpoints', () => {
       expect(res.statusCode).toBe(200);
       const body = JSON.parse(res.body);
       expect(body.message).toContain('Password updated');
-      expect(mockPrisma.user.update).toHaveBeenCalledWith(
+      expect(mockPrisma.subscriber.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { id: 'u1' },
+          where: { id: 's1' },
           data: expect.objectContaining({
             passwordHash: expect.any(String),
           }),

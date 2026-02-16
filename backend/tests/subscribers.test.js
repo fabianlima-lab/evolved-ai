@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { buildTestApp, mockPrisma, getAuthToken } from './helpers.js';
 
-describe('User Routes', () => {
+describe('Subscriber Routes', () => {
   let app;
   let token;
 
@@ -15,25 +15,25 @@ describe('User Routes', () => {
   });
 
   beforeEach(() => {
-    mockPrisma.user.update.mockReset();
+    mockPrisma.subscriber.update.mockReset();
   });
 
-  describe('POST /api/users/goals', () => {
+  describe('POST /api/subscribers/goals', () => {
     it('requires authentication', async () => {
       const res = await app.inject({
         method: 'POST',
-        url: '/api/users/goals',
+        url: '/api/subscribers/goals',
         payload: { goals: 'productivity' },
       });
       expect(res.statusCode).toBe(401);
     });
 
     it('saves goals as string', async () => {
-      mockPrisma.user.update.mockResolvedValue({});
+      mockPrisma.subscriber.update.mockResolvedValue({});
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/users/goals',
+        url: '/api/subscribers/goals',
         headers: { authorization: 'Bearer ' + token },
         payload: { goals: 'productivity' },
       });
@@ -44,11 +44,11 @@ describe('User Routes', () => {
     });
 
     it('saves goals as array', async () => {
-      mockPrisma.user.update.mockResolvedValue({});
+      mockPrisma.subscriber.update.mockResolvedValue({});
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/users/goals',
+        url: '/api/subscribers/goals',
         headers: { authorization: 'Bearer ' + token },
         payload: { goals: ['productivity', 'content'] },
       });
@@ -61,7 +61,7 @@ describe('User Routes', () => {
     it('rejects missing goals with 400', async () => {
       const res = await app.inject({
         method: 'POST',
-        url: '/api/users/goals',
+        url: '/api/subscribers/goals',
         headers: { authorization: 'Bearer ' + token },
         payload: {},
       });

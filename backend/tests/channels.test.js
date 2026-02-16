@@ -15,9 +15,9 @@ describe('Channel Routes', () => {
   });
 
   beforeEach(() => {
-    mockPrisma.user.findUnique.mockReset();
-    mockPrisma.user.findFirst.mockReset();
-    mockPrisma.user.update.mockReset();
+    mockPrisma.subscriber.findUnique.mockReset();
+    mockPrisma.subscriber.findFirst.mockReset();
+    mockPrisma.subscriber.update.mockReset();
   });
 
   // ── Connect Request ──
@@ -65,12 +65,10 @@ describe('Channel Routes', () => {
     });
 
     it('returns connected channels', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({
-        id: 'test-user-id',
-        channel: 'telegram',
-        channelId: '123456',
-        channel2: null,
-        channel2Id: null,
+      mockPrisma.subscriber.findUnique.mockResolvedValue({
+        id: 'test-subscriber-id',
+        telegramChatId: '123456',
+        whatsappJid: null,
       });
 
       const res = await app.inject({
@@ -83,21 +81,18 @@ describe('Channel Routes', () => {
       const body = JSON.parse(res.body);
       expect(body.channels).toHaveLength(1);
       expect(body.channels[0].channel).toBe('telegram');
-      expect(body.channels[0].slot).toBe('primary');
     });
   });
 
   // ── Disconnect ──
   describe('DELETE /api/channels/:channel', () => {
     it('disconnects a connected channel', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({
-        id: 'test-user-id',
-        channel: 'telegram',
-        channelId: '123456',
-        channel2: null,
-        channel2Id: null,
+      mockPrisma.subscriber.findUnique.mockResolvedValue({
+        id: 'test-subscriber-id',
+        telegramChatId: '123456',
+        whatsappJid: null,
       });
-      mockPrisma.user.update.mockResolvedValue({});
+      mockPrisma.subscriber.update.mockResolvedValue({});
 
       const res = await app.inject({
         method: 'DELETE',
@@ -111,12 +106,10 @@ describe('Channel Routes', () => {
     });
 
     it('returns 404 for non-connected channel', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({
-        id: 'test-user-id',
-        channel: null,
-        channelId: null,
-        channel2: null,
-        channel2Id: null,
+      mockPrisma.subscriber.findUnique.mockResolvedValue({
+        id: 'test-subscriber-id',
+        telegramChatId: null,
+        whatsappJid: null,
       });
 
       const res = await app.inject({

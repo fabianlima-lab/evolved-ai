@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
-import Image from 'next/image';
 import Card from '@/components/ui/Card';
 import SectionLabel from '@/components/ui/SectionLabel';
 import { apiFetch } from '@/lib/api';
@@ -78,7 +77,7 @@ export default function AdminPage() {
   const [users, setUsers] = useState(null);
   const [userTotal, setUserTotal] = useState(0);
   const [msgVolume, setMsgVolume] = useState(null);
-  const [warriors, setWarriors] = useState(null);
+  const [popularAgents, setPopularAgents] = useState(null);
   const [channels, setChannels] = useState(null);
   const [loading, setLoading] = useState(true);
   const [denied, setDenied] = useState(false);
@@ -102,7 +101,7 @@ export default function AdminPage() {
           setUserTotal(d.total);
         }).catch(() => {});
         apiFetch('/admin/messages?days=30').then(setMsgVolume).catch(() => {});
-        apiFetch('/admin/popular-warriors').then(setWarriors).catch(() => {});
+        apiFetch('/admin/popular-agents').then(setPopularAgents).catch(() => {});
         apiFetch('/admin/channels').then(setChannels).catch(() => {});
       })
       .catch(err => {
@@ -179,7 +178,7 @@ export default function AdminPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
           <MetricCard label={t('totalUsers')} value={overview?.total_users} />
           <MetricCard label={t('totalMessages')} value={overview?.total_messages} />
-          <MetricCard label={t('totalWarriors')} value={overview?.total_warriors} />
+          <MetricCard label={t('totalAgents')} value={overview?.total_agents} />
           <MetricCard label={t('activeUsers7d')} value={overview?.active_users_7d} />
         </div>
       </section>
@@ -231,7 +230,7 @@ export default function AdminPage() {
                   { key: 'tier', label: t('tier') },
                   { key: 'created_at', label: t('signupDate') },
                   { key: null, label: t('messageCount') },
-                  { key: null, label: t('warriorCount') },
+                  { key: null, label: t('agentCount') },
                   { key: null, label: t('lastActive') },
                   { key: null, label: t('authProvider') },
                   { key: null, label: t('channels') },
@@ -258,7 +257,7 @@ export default function AdminPage() {
                     {new Date(u.signup_date).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3 text-txt-body">{u.message_count}</td>
-                  <td className="px-4 py-3 text-txt-body">{u.warrior_count}</td>
+                  <td className="px-4 py-3 text-txt-body">{u.agent_count}</td>
                   <td className="px-4 py-3 text-txt-muted text-xs">
                     {u.last_active ? new Date(u.last_active).toLocaleDateString() : t('never')}
                   </td>
@@ -293,26 +292,21 @@ export default function AdminPage() {
         )}
       </Card>
 
-      {/* 6. Popular Warriors + 7. Channel Usage — side by side */}
+      {/* 6. Popular Agents + 7. Channel Usage — side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Popular Warriors */}
+        {/* Popular Agents */}
         <Card className="p-6">
-          <h3 className="text-sm font-medium text-txt uppercase tracking-wider mb-4">{t('popularWarriors')}</h3>
-          {warriors?.warriors?.length > 0 ? (
+          <h3 className="text-sm font-medium text-txt uppercase tracking-wider mb-4">{t('popularAgents')}</h3>
+          {popularAgents?.agents?.length > 0 ? (
             <div className="divide-y divide-border/50">
-              {warriors.warriors.map((w, i) => (
+              {popularAgents.agents.map((w, i) => (
                 <div key={w.template_id} className="flex items-center gap-4 py-3">
                   <span className="text-lg font-bold text-txt-dim w-6 text-right">{i + 1}</span>
-                  <Image
-                    src={`/warriors/${w.template_id}.png`}
-                    alt={w.name}
-                    width={36}
-                    height={36}
-                    className="rounded-full object-cover"
-                  />
+                  <div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center text-accent text-sm font-bold shrink-0">
+                    {(w.name || 'A').charAt(0)}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <span className="text-sm text-txt">{w.name}</span>
-                    <span className="text-xs text-txt-muted ml-2 capitalize">{w.warrior_class}</span>
                   </div>
                   <span className="text-sm text-accent font-medium">{w.deploy_count}</span>
                 </div>

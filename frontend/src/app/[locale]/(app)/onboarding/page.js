@@ -26,11 +26,11 @@ export default function OnboardingPage() {
     if (selected.length === 0) return;
     setLoading(true);
     try {
-      await apiPost('/users/goals', { goals: selected });
+      await apiPost('/subscribers/goals', { goals: selected });
     } catch {
       // Non-blocking — continue even if save fails
     }
-    router.push('/warriors');
+    router.push('/agents');
   };
 
   return (

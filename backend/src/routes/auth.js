@@ -1,11 +1,10 @@
 import crypto from 'node:crypto';
 import bcrypt from 'bcryptjs';
-import { PrismaClient } from '@prisma/client';
 import { OAuth2Client } from 'google-auth-library';
 import env from '../config/env.js';
 import { sendPasswordResetEmail } from '../services/email.js';
-
-const prisma = new PrismaClient();
+import { stripHtml } from '../utils/helpers.js';
+import prisma from '../lib/prisma.js';
 
 // Initialize Google OAuth client (null if not configured)
 const googleClient = env.GOOGLE_CLIENT_ID
@@ -13,10 +12,6 @@ const googleClient = env.GOOGLE_CLIENT_ID
   : null;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function stripHtml(str) {
-  return str.replace(/<[^>]*>/g, '');
-}
 
 async function authRoutes(app) {
   // POST /api/auth/signup
@@ -40,14 +35,14 @@ async function authRoutes(app) {
     }
 
     try {
-      const existing = await prisma.user.findUnique({ where: { email } });
+      const existing = await prisma.subscriber.findUnique({ where: { email } });
       if (existing) {
         return reply.code(409).send({ error: 'Email already registered' });
       }
 
       const passwordHash = await bcrypt.hash(password, 10);
 
-      const user = await prisma.user.create({
+      const subscriber = await prisma.subscriber.create({
         data: {
           email,
           passwordHash,
@@ -56,11 +51,11 @@ async function authRoutes(app) {
         },
       });
 
-      const token = app.jwt.sign({ userId: user.id, email: user.email });
-      console.log(`[AUTH] signup: ${user.id}`);
+      const token = app.jwt.sign({ userId: subscriber.id, email: subscriber.email });
+      console.log(`[AUTH] signup: ${subscriber.id}`);
 
       return reply.code(201).send({
-        user_id: user.id,
+        subscriber_id: subscriber.id,
         token,
       });
     } catch (error) {
@@ -82,25 +77,25 @@ async function authRoutes(app) {
     }
 
     try {
-      const user = await prisma.user.findUnique({ where: { email } });
-      if (!user) {
+      const subscriber = await prisma.subscriber.findUnique({ where: { email } });
+      if (!subscriber) {
         return reply.code(401).send({ error: 'Invalid email or password' });
       }
 
-      if (!user.passwordHash) {
+      if (!subscriber.passwordHash) {
         return reply.code(401).send({ error: 'This account uses Google sign-in. Please use "Continue with Google" to sign in.' });
       }
 
-      const valid = await bcrypt.compare(password, user.passwordHash);
+      const valid = await bcrypt.compare(password, subscriber.passwordHash);
       if (!valid) {
         return reply.code(401).send({ error: 'Invalid email or password' });
       }
 
-      const token = app.jwt.sign({ userId: user.id, email: user.email });
-      console.log(`[AUTH] login: ${user.id}`);
+      const token = app.jwt.sign({ userId: subscriber.id, email: subscriber.email });
+      console.log(`[AUTH] login: ${subscriber.id}`);
 
       return reply.send({
-        user_id: user.id,
+        subscriber_id: subscriber.id,
         token,
       });
     } catch (error) {
@@ -138,27 +133,27 @@ async function authRoutes(app) {
         return reply.code(400).send({ error: 'Google account email must be verified' });
       }
 
-      // 2. Look up user by googleId first, then by email
-      let user = await prisma.user.findUnique({ where: { googleId } });
-      let isNewUser = false;
+      // 2. Look up subscriber by googleId first, then by email
+      let subscriber = await prisma.subscriber.findUnique({ where: { googleId } });
+      let isNewSubscriber = false;
 
-      if (!user) {
-        // No user with this googleId — check if email exists (account linking)
-        user = await prisma.user.findUnique({ where: { email } });
+      if (!subscriber) {
+        // No subscriber with this googleId — check if email exists (account linking)
+        subscriber = await prisma.subscriber.findUnique({ where: { email } });
 
-        if (user) {
-          // Existing email+password user — link Google account
-          user = await prisma.user.update({
-            where: { id: user.id },
+        if (subscriber) {
+          // Existing email+password subscriber — link Google account
+          subscriber = await prisma.subscriber.update({
+            where: { id: subscriber.id },
             data: {
               googleId,
-              authProvider: user.authProvider === 'email' ? 'both' : user.authProvider,
+              authProvider: subscriber.authProvider === 'email' ? 'both' : subscriber.authProvider,
             },
           });
-          console.log(`[AUTH] google-link: ${user.id} (existing email user)`);
+          console.log(`[AUTH] google-link: ${subscriber.id} (existing email subscriber)`);
         } else {
-          // Brand new user — create account via Google
-          user = await prisma.user.create({
+          // Brand new subscriber — create account via Google
+          subscriber = await prisma.subscriber.create({
             data: {
               email,
               googleId,
@@ -167,20 +162,20 @@ async function authRoutes(app) {
               trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             },
           });
-          isNewUser = true;
-          console.log(`[AUTH] google-signup: ${user.id}`);
+          isNewSubscriber = true;
+          console.log(`[AUTH] google-signup: ${subscriber.id}`);
         }
       } else {
-        console.log(`[AUTH] google-login: ${user.id}`);
+        console.log(`[AUTH] google-login: ${subscriber.id}`);
       }
 
       // 3. Sign JWT (same as email auth)
-      const token = app.jwt.sign({ userId: user.id, email: user.email });
+      const token = app.jwt.sign({ userId: subscriber.id, email: subscriber.email });
 
-      return reply.code(isNewUser ? 201 : 200).send({
-        user_id: user.id,
+      return reply.code(isNewSubscriber ? 201 : 200).send({
+        subscriber_id: subscriber.id,
         token,
-        is_new_user: isNewUser,
+        is_new_subscriber: isNewSubscriber,
       });
     } catch (error) {
       console.error('[ERROR] google auth failed:', error.message);
@@ -207,10 +202,10 @@ async function authRoutes(app) {
     const successMsg = { message: 'If that email exists, we sent a reset link.' };
 
     try {
-      const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+      const subscriber = await prisma.subscriber.findUnique({ where: { email: email.toLowerCase() } });
 
-      // No user found, or Google-only user (no password to reset)
-      if (!user || (user.authProvider === 'google' && !user.passwordHash)) {
+      // No subscriber found, or Google-only subscriber (no password to reset)
+      if (!subscriber || (subscriber.authProvider === 'google' && !subscriber.passwordHash)) {
         return reply.send(successMsg);
       }
 
@@ -218,8 +213,8 @@ async function authRoutes(app) {
       const rawToken = crypto.randomBytes(48).toString('hex');
       const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
 
-      await prisma.user.update({
-        where: { id: user.id },
+      await prisma.subscriber.update({
+        where: { id: subscriber.id },
         data: {
           passwordResetToken: hashedToken,
           passwordResetExpiry: new Date(Date.now() + 15 * 60 * 1000), // 15 min
@@ -227,11 +222,11 @@ async function authRoutes(app) {
       });
 
       // Send email (fire-and-forget style — don't fail the request if email fails)
-      const sent = await sendPasswordResetEmail(user.email, rawToken);
+      const sent = await sendPasswordResetEmail(subscriber.email, rawToken);
       if (!sent) {
-        console.error(`[AUTH] reset email failed for: ${user.email}`);
+        console.error(`[AUTH] reset email failed for: ${subscriber.email}`);
       } else {
-        console.log(`[AUTH] reset email sent to: ${user.email}`);
+        console.log(`[AUTH] reset email sent to: ${subscriber.email}`);
       }
 
       return reply.send(successMsg);
@@ -261,31 +256,31 @@ async function authRoutes(app) {
       // Hash the incoming token to match the stored hash
       const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
-      const user = await prisma.user.findFirst({
+      const subscriber = await prisma.subscriber.findFirst({
         where: {
           passwordResetToken: hashedToken,
           passwordResetExpiry: { gt: new Date() },
         },
       });
 
-      if (!user) {
+      if (!subscriber) {
         return reply.code(400).send({ error: 'Invalid or expired reset link. Please request a new one.' });
       }
 
       const passwordHash = await bcrypt.hash(password, 10);
 
-      await prisma.user.update({
-        where: { id: user.id },
+      await prisma.subscriber.update({
+        where: { id: subscriber.id },
         data: {
           passwordHash,
           passwordResetToken: null,
           passwordResetExpiry: null,
-          // If Google-only user sets a password, upgrade to "both"
-          authProvider: user.authProvider === 'google' ? 'both' : user.authProvider,
+          // If Google-only subscriber sets a password, upgrade to "both"
+          authProvider: subscriber.authProvider === 'google' ? 'both' : subscriber.authProvider,
         },
       });
 
-      console.log(`[AUTH] password reset: ${user.id}`);
+      console.log(`[AUTH] password reset: ${subscriber.id}`);
       return reply.send({ message: 'Password reset successfully.' });
     } catch (err) {
       console.error('[ERROR] reset-password failed:', err.message);
@@ -311,27 +306,27 @@ async function authRoutes(app) {
     }
 
     try {
-      const user = await prisma.user.findUnique({ where: { id: request.user.userId } });
-      if (!user) {
-        return reply.code(404).send({ error: 'User not found' });
+      const subscriber = await prisma.subscriber.findUnique({ where: { id: request.user.userId } });
+      if (!subscriber) {
+        return reply.code(404).send({ error: 'Subscriber not found' });
       }
 
-      if (!user.passwordHash) {
+      if (!subscriber.passwordHash) {
         return reply.code(400).send({ error: 'This account uses Google sign-in and has no password to change. Use "Forgot Password" to set one.' });
       }
 
-      const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+      const valid = await bcrypt.compare(currentPassword, subscriber.passwordHash);
       if (!valid) {
         return reply.code(401).send({ error: 'Current password is incorrect' });
       }
 
       const passwordHash = await bcrypt.hash(newPassword, 10);
-      await prisma.user.update({
-        where: { id: user.id },
+      await prisma.subscriber.update({
+        where: { id: subscriber.id },
         data: { passwordHash },
       });
 
-      console.log(`[AUTH] password changed: ${user.id}`);
+      console.log(`[AUTH] password changed: ${subscriber.id}`);
       return reply.send({ message: 'Password updated successfully.' });
     } catch (err) {
       console.error('[ERROR] change-password failed:', err.message);

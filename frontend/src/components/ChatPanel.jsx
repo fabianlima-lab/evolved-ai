@@ -1,16 +1,15 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { apiFetch, apiPost } from '@/lib/api';
 
 /**
  * Two-way chat panel for the dashboard.
  * Loads conversation history, supports sending messages via the web,
- * and polls for new messages (from Telegram or other channels).
+ * and polls for new messages (from WhatsApp or other channels).
  */
-export default function ChatPanel({ warrior }) {
+export default function ChatPanel({ agent }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -21,16 +20,12 @@ export default function ChatPanel({ warrior }) {
   const t = useTranslations('Chat');
   const tCommon = useTranslations('Common');
 
-  const warriorName = warrior?.name || warrior?.template?.name || 'Warrior';
-  const templateId = warrior?.templateId || warrior?.template_id;
-  const portraitSrc = templateId ? `/warriors/${templateId}.png` : '/warriors/default.png';
+  const agentName = agent?.name || 'Assistant';
 
-  // Scroll to bottom
   const scrollToBottom = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
-  // Load chat history
   const loadHistory = useCallback(async () => {
     try {
       const data = await apiFetch('/chat/history?limit=30');
@@ -44,13 +39,11 @@ export default function ChatPanel({ warrior }) {
     }
   }, []);
 
-  // Poll for new messages (every 5s)
   const pollMessages = useCallback(async () => {
     try {
       const data = await apiFetch('/chat/history?limit=30');
       if (data.messages) {
         setMessages((prev) => {
-          // Only update if message count or last message changed
           if (data.messages.length !== prev.length ||
               data.messages[data.messages.length - 1]?.id !== prev[prev.length - 1]?.id) {
             return data.messages;
@@ -63,32 +56,27 @@ export default function ChatPanel({ warrior }) {
     }
   }, []);
 
-  // Initial load
   useEffect(() => {
     loadHistory();
   }, [loadHistory]);
 
-  // Start polling
   useEffect(() => {
     pollRef.current = setInterval(pollMessages, 5000);
     return () => clearInterval(pollRef.current);
   }, [pollMessages]);
 
-  // Scroll to bottom on new messages
   useEffect(() => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
-  // Send message
   const handleSend = async () => {
     const text = input.trim();
     if (!text || sending) return;
 
-    // Optimistic update — add user message immediately
     const tempId = `temp-${Date.now()}`;
     setMessages((prev) => [...prev, {
       id: tempId,
-      direction: 'in',
+      role: 'user',
       content: text,
       channel: 'web',
       createdAt: new Date().toISOString(),
@@ -100,20 +88,18 @@ export default function ChatPanel({ warrior }) {
       const data = await apiPost('/chat/send', { message: text });
 
       if (data.response) {
-        // Add AI response
         setMessages((prev) => [...prev, {
           id: `resp-${Date.now()}`,
-          direction: 'out',
+          role: 'assistant',
           content: data.response,
           channel: 'web',
           createdAt: new Date().toISOString(),
         }]);
       }
     } catch (err) {
-      // Add error message
       setMessages((prev) => [...prev, {
         id: `err-${Date.now()}`,
-        direction: 'out',
+        role: 'assistant',
         content: t('sendError'),
         channel: 'web',
         createdAt: new Date().toISOString(),
@@ -123,7 +109,6 @@ export default function ChatPanel({ warrior }) {
     }
   };
 
-  // Handle Enter key
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -136,15 +121,11 @@ export default function ChatPanel({ warrior }) {
       style={{ height: 'min(520px, 60vh)' }}>
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border shrink-0">
-        <Image
-          src={portraitSrc}
-          alt={warriorName}
-          width={36}
-          height={36}
-          className="rounded-full object-cover"
-        />
+        <div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center text-accent text-sm font-bold">
+          {agentName.charAt(0)}
+        </div>
         <div className="flex-1 min-w-0">
-          <span className="text-sm font-medium text-txt">{warriorName}</span>
+          <span className="text-sm font-medium text-txt">{agentName}</span>
           <span className="text-xs text-success ml-2">● {tCommon('online')}</span>
         </div>
       </div>
@@ -157,19 +138,15 @@ export default function ChatPanel({ warrior }) {
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-4">
-            <Image
-              src={portraitSrc}
-              alt={warriorName}
-              width={56}
-              height={56}
-              className="rounded-full object-cover opacity-60"
-            />
-            <p className="text-sm text-txt-muted">{t('emptyState', { name: warriorName })}</p>
+            <div className="w-14 h-14 rounded-full bg-accent/20 flex items-center justify-center text-accent text-xl font-bold opacity-60">
+              {agentName.charAt(0)}
+            </div>
+            <p className="text-sm text-txt-muted">{t('emptyState', { name: agentName })}</p>
             <p className="text-xs text-txt-dim">{t('emptyHint')}</p>
           </div>
         ) : (
           messages.map((msg) => {
-            const isUser = msg.direction === 'in';
+            const isUser = msg.role === 'user';
             const channelTag = msg.channel && msg.channel !== 'web' ? msg.channel : null;
 
             return (
@@ -187,7 +164,6 @@ export default function ChatPanel({ warrior }) {
                   >
                     {msg.content}
                   </div>
-                  {/* Channel tag + timestamp on hover */}
                   <div className="flex items-center gap-1.5 mt-0.5 px-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     {channelTag && (
                       <span className="text-[10px] text-txt-dim uppercase">{channelTag}</span>
@@ -220,7 +196,7 @@ export default function ChatPanel({ warrior }) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={t('placeholder', { name: warriorName })}
+          placeholder={t('placeholder', { name: agentName })}
           disabled={sending}
           className="flex-1 bg-elevated border border-border rounded-[var(--radius-btn)] px-4 py-2.5 text-sm text-txt placeholder:text-txt-dim focus:outline-none focus:border-accent transition-colors disabled:opacity-50"
         />

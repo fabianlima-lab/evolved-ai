@@ -27,7 +27,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const data = await apiPost('/auth/login', { email, password });
-      localStorage.setItem('cw_token', data.token);
+      localStorage.setItem('eai_token', data.token);
 
       // Smart routing — pick up where the user left off
       const dest = await resolveDestination();
@@ -49,7 +49,7 @@ export default function LoginPage() {
     <Card className="w-full max-w-md p-8">
       <div className="text-center mb-8">
         <Link href="/" className="font-[family-name:var(--font-display)] text-2xl text-txt">
-          {tCommon('swordEmoji')} {tCommon('clawwarriors')}
+          {tCommon('brandName')}
         </Link>
         <div className="flex justify-center gap-1 mt-6">
           <Link href="/signup" className="px-4 py-2 text-sm font-medium text-txt-muted border-b-2 border-transparent hover:text-txt">

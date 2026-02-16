@@ -9,9 +9,9 @@ export default function ChatDemo() {
 
   const MESSAGES = [
     { from: 'user', text: t('userMsg1') },
-    { from: 'bot', name: 'Mia', text: t('botMsg1') },
+    { from: 'bot', name: 'Evolved AI', text: t('botMsg1') },
     { from: 'user', text: t('userMsg2') },
-    { from: 'bot', name: 'Mia', text: t('botMsg2') },
+    { from: 'bot', name: 'Evolved AI', text: t('botMsg2') },
   ];
 
   useEffect(() => {
@@ -27,9 +27,8 @@ export default function ChatDemo() {
         style={{ boxShadow: '0 8px 48px rgba(0,0,0,0.4)' }}>
         {/* Phone header */}
         <div className="px-5 py-4 border-b border-border flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full flex items-center justify-center text-base"
-            style={{ background: 'linear-gradient(135deg, #e8632b, #f0924d)' }}>
-            ⚔️
+          <div className="w-9 h-9 rounded-full flex items-center justify-center text-base bg-accent/20 text-accent font-bold">
+            E
           </div>
           <div>
             <div className="font-semibold text-base text-txt">{t('botName')}</div>
@@ -51,11 +50,11 @@ export default function ChatDemo() {
                 }}
               >
                 <div
-                  className="max-w-[80%] px-3.5 py-2.5 rounded-[14px] text-[15px] leading-relaxed text-txt"
-                  style={{
-                    background: msg.from === 'user' ? 'rgba(232,99,43,0.15)' : 'rgba(255,255,255,0.05)',
-                    border: msg.from === 'user' ? '1px solid rgba(232,99,43,0.25)' : '1px solid var(--color-border)',
-                  }}
+                  className={`max-w-[80%] px-3.5 py-2.5 rounded-[14px] text-[15px] leading-relaxed text-txt ${
+                    msg.from === 'user'
+                      ? 'bg-accent/15 border border-accent/25'
+                      : 'bg-white/5 border border-border'
+                  }`}
                 >
                   {msg.text}
                 </div>

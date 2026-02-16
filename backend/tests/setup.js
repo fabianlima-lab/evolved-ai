@@ -1,5 +1,5 @@
 // Set required env vars BEFORE any imports to prevent env.js process.exit(1)
-process.env.DATABASE_URL = 'postgresql://test@localhost:5432/clawwarriors_test';
+process.env.DATABASE_URL = 'postgresql://test@localhost:5432/evolved_ai_test';
 process.env.JWT_SECRET = 'test-secret-key-for-vitest';
 process.env.NODE_ENV = 'test';
 process.env.APP_URL = 'http://localhost:3000';
@@ -8,10 +8,6 @@ process.env.APP_URL = 'http://localhost:3000';
 process.env.ADMIN_EMAILS = 'admin@test.com';
 
 // Override credentials so real services are never called
-process.env.STRIPE_SECRET_KEY = '';
-process.env.STRIPE_WEBHOOK_SECRET = '';
-process.env.STRIPE_PRICE_PRO = '';
-process.env.STRIPE_PRICE_PRO_TRIBE = '';
 process.env.TELEGRAM_BOT_TOKEN = '';
 process.env.NVIDIA_API_KEY = '';
 process.env.GOOGLE_CLIENT_ID = '';

@@ -15,8 +15,8 @@ describe('Dashboard Routes', () => {
   });
 
   beforeEach(() => {
-    mockPrisma.user.findUnique.mockReset();
-    mockPrisma.warrior.count.mockReset();
+    mockPrisma.subscriber.findUnique.mockReset();
+    mockPrisma.agent.count.mockReset();
     mockPrisma.message.count.mockReset();
     mockPrisma.message.findMany.mockReset();
   });
@@ -28,18 +28,18 @@ describe('Dashboard Routes', () => {
       expect(res.statusCode).toBe(401);
     });
 
-    it('returns dashboard stats for trial user', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({
-        id: 'test-user-id',
+    it('returns dashboard stats for trial subscriber', async () => {
+      mockPrisma.subscriber.findUnique.mockResolvedValue({
+        id: 'test-subscriber-id',
         email: 'test@example.com',
         tier: 'trial',
         trialEndsAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
         goals: 'productivity',
         authProvider: 'email',
-        channel: 'telegram',
-        channel2: null,
+        telegramChatId: '123',
+        whatsappJid: null,
       });
-      mockPrisma.warrior.count.mockResolvedValue(1);
+      mockPrisma.agent.count.mockResolvedValue(1);
       mockPrisma.message.count.mockResolvedValue(10);
 
       const res = await app.inject({
@@ -53,7 +53,7 @@ describe('Dashboard Routes', () => {
       expect(body.email).toBe('test@example.com');
       expect(body.tier).toBe('trial');
       expect(body.trial_expired).toBe(false);
-      expect(body.active_warriors).toBe(1);
+      expect(body.active_agents).toBe(1);
       expect(body.features).toBeDefined();
     });
   });

@@ -13,7 +13,7 @@ export async function generateMetadata({ params }) {
   const messages = await getMessages({ locale });
   const meta = messages.Metadata || {};
   return {
-    title: meta.siteTitle || 'ClawWarriors — Your AI Warrior, Your Rules',
+    title: meta.siteTitle || 'Evolved AI — Your Personal Chief of Staff',
     description: meta.siteDescription || 'Deploy personalized AI agents to Telegram and WhatsApp.',
     manifest: '/manifest.json',
     icons: {

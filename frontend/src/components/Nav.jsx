@@ -4,7 +4,6 @@ import { Link } from '@/i18n/navigation';
 import { usePathname } from '@/i18n/navigation';
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import LocaleSwitcher from '@/components/LocaleSwitcher';
 
 function HamburgerIcon({ open }) {
   return (
@@ -41,7 +40,6 @@ export function PublicNav() {
     return () => window.removeEventListener('scroll', h);
   }, []);
 
-  // Close menu on resize to desktop
   useEffect(() => {
     const h = () => { if (window.innerWidth >= 768) setMenuOpen(false); };
     window.addEventListener('resize', h);
@@ -59,19 +57,16 @@ export function PublicNav() {
     >
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-[family-name:var(--font-display)] text-txt font-bold text-lg">
-          {tc('swordEmoji')} {tc('clawwarriors')}
+          {tc('brandName')}
         </Link>
 
-        {/* Desktop nav links */}
         <div className="hidden md:flex items-center gap-7">
           <a href="#how" className="text-sm text-txt-muted hover:text-txt transition-colors">{t('howItWorks')}</a>
           <a href="#apps" className="text-sm text-txt-muted hover:text-txt transition-colors">{t('apps')}</a>
           <a href="#pricing" className="text-sm text-txt-muted hover:text-txt transition-colors">{t('pricing')}</a>
         </div>
 
-        {/* Desktop right side */}
         <div className="hidden md:flex items-center gap-3">
-          <LocaleSwitcher />
           <Link href="/login" className="text-sm text-txt-muted hover:text-txt transition-colors">{t('signIn')}</Link>
           <Link
             href="/signup"
@@ -81,7 +76,6 @@ export function PublicNav() {
           </Link>
         </div>
 
-        {/* Mobile hamburger */}
         <button
           className="md:hidden flex items-center justify-center w-10 h-10 -mr-2"
           onClick={() => setMenuOpen((o) => !o)}
@@ -91,7 +85,6 @@ export function PublicNav() {
         </button>
       </div>
 
-      {/* Mobile dropdown */}
       <div
         className="md:hidden overflow-hidden transition-all duration-300 ease-in-out"
         style={{
@@ -104,10 +97,7 @@ export function PublicNav() {
           <a href="#apps" onClick={() => setMenuOpen(false)} className="text-sm text-txt-muted hover:text-txt transition-colors py-1">{t('apps')}</a>
           <a href="#pricing" onClick={() => setMenuOpen(false)} className="text-sm text-txt-muted hover:text-txt transition-colors py-1">{t('pricing')}</a>
           <div className="border-t border-border pt-4 flex flex-col gap-3">
-            <div className="flex items-center gap-3">
-              <LocaleSwitcher />
-              <Link href="/login" onClick={() => setMenuOpen(false)} className="text-sm text-txt-muted hover:text-txt transition-colors">{t('signIn')}</Link>
-            </div>
+            <Link href="/login" onClick={() => setMenuOpen(false)} className="text-sm text-txt-muted hover:text-txt transition-colors">{t('signIn')}</Link>
             <Link
               href="/signup"
               onClick={() => setMenuOpen(false)}
@@ -135,7 +125,6 @@ export function AppNav({ userEmail }) {
     { href: '/settings', labelKey: 'settings' },
   ];
 
-  // Close menu on resize to desktop
   useEffect(() => {
     const h = () => { if (window.innerWidth >= 768) setMenuOpen(false); };
     window.addEventListener('resize', h);
@@ -146,10 +135,9 @@ export function AppNav({ userEmail }) {
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-bg/90 border-b border-border">
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-2 font-[family-name:var(--font-display)] text-txt font-bold text-lg">
-          {tc('swordEmoji')} {tc('clawwarriors')}
+          {tc('brandName')}
         </Link>
 
-        {/* Desktop nav links */}
         <div className="hidden md:flex items-center gap-6">
           {APP_LINKS.map((link) => (
             <Link
@@ -166,15 +154,12 @@ export function AppNav({ userEmail }) {
           ))}
         </div>
 
-        {/* Desktop right side */}
         <div className="hidden md:flex items-center gap-3">
-          <LocaleSwitcher />
           <div className="w-9 h-9 rounded-full bg-elevated border border-border flex items-center justify-center text-xs text-txt-muted font-medium">
             {initials}
           </div>
         </div>
 
-        {/* Mobile hamburger */}
         <button
           className="md:hidden flex items-center justify-center w-10 h-10 -mr-2"
           onClick={() => setMenuOpen((o) => !o)}
@@ -184,7 +169,6 @@ export function AppNav({ userEmail }) {
         </button>
       </div>
 
-      {/* Mobile dropdown */}
       <div
         className="md:hidden overflow-hidden transition-all duration-300 ease-in-out"
         style={{
@@ -208,7 +192,6 @@ export function AppNav({ userEmail }) {
             </Link>
           ))}
           <div className="border-t border-border pt-3 mt-1 flex items-center justify-between">
-            <LocaleSwitcher />
             <div className="w-9 h-9 rounded-full bg-elevated border border-border flex items-center justify-center text-xs text-txt-muted font-medium">
               {initials}
             </div>

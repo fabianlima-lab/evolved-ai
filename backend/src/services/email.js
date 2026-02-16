@@ -3,8 +3,8 @@ import env from '../config/env.js';
 
 const resend = env.RESEND_API_KEY ? new Resend(env.RESEND_API_KEY) : null;
 
-const FROM_EMAIL = env.RESEND_FROM_EMAIL || 'ClawWarriors <onboarding@resend.dev>';
-const REPLY_TO = 'support@clawwarriors.com';
+const FROM_EMAIL = env.RESEND_FROM_EMAIL || 'Evolved AI <onboarding@resend.dev>';
+const REPLY_TO = 'support@evolved.ai';
 
 /**
  * Send a password reset email with a link to reset the password.
@@ -21,7 +21,7 @@ export async function sendPasswordResetEmail(to, token) {
   const resetUrl = `${env.APP_URL}/reset-password?token=${token}`;
 
   const textContent = [
-    'Reset Your ClawWarriors Password',
+    'Reset Your Evolved AI Password',
     '',
     'We received a request to reset your password. Visit the link below to set a new one:',
     '',
@@ -30,8 +30,8 @@ export async function sendPasswordResetEmail(to, token) {
     'This link expires in 15 minutes. If you didn\'t request this, you can safely ignore this email.',
     '',
     '---',
-    'ClawWarriors — Your AI Warrior, Your Rules',
-    'https://clawwarriors.com',
+    'Evolved AI — Your AI Agent, Your Rules',
+    'https://evolved.ai',
   ].join('\n');
 
   const htmlContent = `<!DOCTYPE html>
@@ -48,11 +48,11 @@ export async function sendPasswordResetEmail(to, token) {
         </td></tr>
         <tr><td style="padding:16px 32px;">
           <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;line-height:1.6;color:#444444;">
-            We received a request to reset your ClawWarriors password. Click the button below to set a new one.
+            We received a request to reset your Evolved AI password. Click the button below to set a new one.
           </p>
         </td></tr>
         <tr><td style="padding:8px 32px 24px;" align="center">
-          <a href="${resetUrl}" style="display:inline-block;background-color:#e8632b;color:#ffffff;text-decoration:none;padding:12px 32px;border-radius:6px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;font-weight:600;">
+          <a href="${resetUrl}" style="display:inline-block;background-color:#8BC4C6;color:#ffffff;text-decoration:none;padding:12px 32px;border-radius:6px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;font-weight:600;">
             Reset Password
           </a>
         </td></tr>
@@ -66,10 +66,10 @@ export async function sendPasswordResetEmail(to, token) {
         </td></tr>
         <tr><td style="padding:16px 32px 24px;">
           <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:12px;color:#aaaaaa;">
-            ClawWarriors — Your AI Warrior, Your Rules
+            Evolved AI — Your AI Agent, Your Rules
           </p>
           <p style="margin:4px 0 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:12px;">
-            <a href="https://clawwarriors.com" style="color:#aaaaaa;text-decoration:none;">clawwarriors.com</a>
+            <a href="https://evolved.ai" style="color:#aaaaaa;text-decoration:none;">evolved.ai</a>
           </p>
         </td></tr>
       </table>
@@ -83,11 +83,11 @@ export async function sendPasswordResetEmail(to, token) {
       from: FROM_EMAIL,
       to,
       reply_to: REPLY_TO,
-      subject: 'Reset your ClawWarriors password',
+      subject: 'Reset your Evolved AI password',
       html: htmlContent,
       text: textContent,
       headers: {
-        'X-Entity-Ref-ID': `cw-reset-${Date.now()}`,
+        'X-Entity-Ref-ID': `ea-reset-${Date.now()}`,
       },
     });
 

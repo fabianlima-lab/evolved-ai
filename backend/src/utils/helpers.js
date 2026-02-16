@@ -1,22 +1,15 @@
-const VALID_TIERS = ['trial', 'pro', 'pro_tribe'];
+const VALID_TIERS = ['trial', 'active'];
 
 const TIER_FEATURES = {
   trial: {
-    max_active_warriors: 1,
+    max_active_agents: 1,
     max_channels: 1,
     custom_name: false,
     custom_tone: false,
     web_search: true,
   },
-  pro: {
-    max_active_warriors: 1,
-    max_channels: 2,
-    custom_name: true,
-    custom_tone: true,
-    web_search: true,
-  },
-  pro_tribe: {
-    max_active_warriors: 3,
+  active: {
+    max_active_agents: 3,
     max_channels: 2,
     custom_name: true,
     custom_tone: true,
@@ -32,8 +25,12 @@ export function isValidTier(tier) {
   return VALID_TIERS.includes(tier);
 }
 
-export function isTrialExpired(user) {
-  return user.tier === 'trial' && user.trialEndsAt && new Date() > new Date(user.trialEndsAt);
+export function isTrialExpired(subscriber) {
+  return subscriber.tier === 'trial' && subscriber.trialEndsAt && new Date() > new Date(subscriber.trialEndsAt);
+}
+
+export function stripHtml(str) {
+  return String(str).replace(/<[^>]*>/g, '').trim();
 }
 
 export { VALID_TIERS, TIER_FEATURES };

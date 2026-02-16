@@ -30,7 +30,7 @@ function getClient() {
  * Classifies the user's latest message, selects the right model tier,
  * and falls back to the next tier on failure.
  *
- * @param {string} systemPrompt - Warrior system prompt
+ * @param {string} systemPrompt - Agent system prompt
  * @param {Array<{role: string, content: string}>} conversationHistory - Recent messages
  * @param {object} options
  * @param {boolean} [options.webSearch=false] - Enable web search tool (Tier 3 only)

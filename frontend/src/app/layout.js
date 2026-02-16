@@ -1,14 +1,7 @@
-import { Cinzel, DM_Sans } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 import { getLocale } from "next-intl/server";
 import SupportButton from "@/components/SupportButton";
 import "./globals.css";
-
-const cinzel = Cinzel({
-  variable: "--font-cinzel",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  display: "swap",
-});
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -26,7 +19,7 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang={locale}>
-      <body className={`${cinzel.variable} ${dmSans.variable} antialiased`}>
+      <body className={`${dmSans.variable} antialiased`}>
         {children}
         <SupportButton />
       </body>

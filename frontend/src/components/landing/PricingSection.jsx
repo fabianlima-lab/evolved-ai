@@ -11,29 +11,20 @@ export default function PricingSection() {
       nameKey: 'trialName',
       priceKey: 'trialPrice',
       periodKey: 'trialPeriod',
-      features: ['feature_1warrior', 'feature_1channel', 'feature_unlimited', 'feature_search', 'feature_preview'],
+      features: ['feature_1agent', 'feature_whatsapp', 'feature_unlimited', 'feature_search', 'feature_preview'],
       ctaKey: 'trialCta',
       href: '/signup?plan=trial',
       highlight: false,
     },
     {
-      nameKey: 'proName',
-      priceKey: 'proPrice',
-      periodKey: 'proPeriod',
-      badgeKey: 'proBadge',
-      features: ['feature_1warrior', 'feature_2channels', 'feature_unlimited', 'feature_search', 'feature_customName', 'feature_memory'],
-      ctaKey: 'proCta',
-      href: '/signup?plan=pro',
+      nameKey: 'activeName',
+      priceKey: 'activePrice',
+      periodKey: 'activePeriod',
+      badgeKey: 'activeBadge',
+      features: ['feature_1agent', 'feature_whatsapp', 'feature_unlimited', 'feature_search', 'feature_memory', 'feature_priority'],
+      ctaKey: 'activeCta',
+      href: '/signup?plan=active',
       highlight: true,
-    },
-    {
-      nameKey: 'proTribeName',
-      priceKey: 'proTribePrice',
-      periodKey: 'proTribePeriod',
-      features: ['feature_3warriors', 'feature_2channels', 'feature_unlimited', 'feature_search', 'feature_customName', 'feature_priority'],
-      ctaKey: 'proTribeCta',
-      href: '/signup?plan=pro_tribe',
-      highlight: false,
     },
   ];
 
@@ -49,15 +40,15 @@ export default function PricingSection() {
         {t('subtitle')}
       </p>
 
-      <div className="flex gap-5 justify-center flex-wrap max-w-[860px] mx-auto">
+      <div className="flex gap-5 justify-center flex-wrap max-w-[600px] mx-auto">
         {PLANS.map((plan) => (
           <div
             key={plan.nameKey}
-            className="flex-1 min-w-[240px] max-w-[270px] rounded-[var(--radius-card)] p-8 text-left relative"
-            style={{
-              background: plan.highlight ? 'rgba(232,99,43,0.08)' : 'var(--color-card)',
-              border: plan.highlight ? '1px solid rgba(232,99,43,0.3)' : '1px solid var(--color-border)',
-            }}
+            className={`flex-1 min-w-[240px] max-w-[270px] rounded-[var(--radius-card)] p-8 text-left relative ${
+              plan.highlight
+                ? 'bg-accent/8 border border-accent/30'
+                : 'bg-card border border-border'
+            }`}
           >
             {plan.badgeKey && (
               <div

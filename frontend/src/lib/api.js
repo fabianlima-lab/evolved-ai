@@ -1,7 +1,7 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 export async function apiFetch(path, options = {}) {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('cw_token') : null;
+  const token = typeof window !== 'undefined' ? localStorage.getItem('eai_token') : null;
 
   const headers = {
     'Content-Type': 'application/json',

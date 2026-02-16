@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import adminGuard from '../middleware/adminGuard.js';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 
 const VALID_SORT_FIELDS = {
   created_at: 'createdAt',
@@ -32,20 +30,20 @@ async function adminRoutes(app) {
     try {
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-      const [totalUsers, totalMessages, totalWarriors, activeUsers] = await Promise.all([
-        prisma.user.count(),
+      const [totalSubscribers, totalMessages, totalAgents, activeSubscribers] = await Promise.all([
+        prisma.subscriber.count(),
         prisma.message.count(),
-        prisma.warrior.count(),
-        prisma.user.count({
+        prisma.agent.count(),
+        prisma.subscriber.count({
           where: { messages: { some: { createdAt: { gte: sevenDaysAgo } } } },
         }),
       ]);
 
       return reply.send({
-        total_users: totalUsers,
+        total_subscribers: totalSubscribers,
         total_messages: totalMessages,
-        total_warriors: totalWarriors,
-        active_users_7d: activeUsers,
+        total_agents: totalAgents,
+        active_subscribers_7d: activeSubscribers,
       });
     } catch (error) {
       console.error('[ADMIN] overview error:', error.message);
@@ -62,13 +60,13 @@ async function adminRoutes(app) {
       const days = Math.min(parseInt(request.query.days || '30', 10), 90);
       const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-      const users = await prisma.user.findMany({
+      const subscribers = await prisma.subscriber.findMany({
         where: { createdAt: { gte: since } },
         select: { createdAt: true },
         orderBy: { createdAt: 'asc' },
       });
 
-      return reply.send({ days, data: groupByDate(users) });
+      return reply.send({ days, data: groupByDate(subscribers) });
     } catch (error) {
       console.error('[ADMIN] signups error:', error.message);
       return reply.code(500).send({ error: 'Failed to load signups' });
@@ -81,7 +79,7 @@ async function adminRoutes(app) {
     config: { rateLimit: rl },
   }, async (request, reply) => {
     try {
-      const tiers = await prisma.user.groupBy({
+      const tiers = await prisma.subscriber.groupBy({
         by: ['tier'],
         _count: { id: true },
       });
@@ -95,8 +93,8 @@ async function adminRoutes(app) {
     }
   });
 
-  // ── GET /api/admin/users ──
-  app.get('/users', {
+  // ── GET /api/admin/subscribers ──
+  app.get('/subscribers', {
     preHandler: adminPreHandlers,
     config: { rateLimit: rl },
   }, async (request, reply) => {
@@ -108,9 +106,9 @@ async function adminRoutes(app) {
 
       const sortField = VALID_SORT_FIELDS[sortParam] || 'createdAt';
 
-      const [total, users] = await Promise.all([
-        prisma.user.count(),
-        prisma.user.findMany({
+      const [total, subscribers] = await Promise.all([
+        prisma.subscriber.count(),
+        prisma.subscriber.findMany({
           orderBy: { [sortField]: orderParam },
           take: limit,
           skip: offset,
@@ -119,12 +117,11 @@ async function adminRoutes(app) {
             email: true,
             tier: true,
             authProvider: true,
-            channel: true,
-            channel2: true,
+            whatsappJid: true,
             createdAt: true,
             _count: {
               select: {
-                warriors: true,
+                agents: true,
                 messages: true,
               },
             },
@@ -132,41 +129,40 @@ async function adminRoutes(app) {
         }),
       ]);
 
-      // Get last active dates for these users
-      const userIds = users.map(u => u.id);
+      // Get last active dates for these subscribers
+      const subscriberIds = subscribers.map(s => s.id);
       let lastActiveMap = {};
 
-      if (userIds.length > 0) {
+      if (subscriberIds.length > 0) {
         const lastMessages = await prisma.$queryRaw`
-          SELECT user_id, MAX(created_at) as last_active
+          SELECT subscriber_id, MAX(created_at) as last_active
           FROM messages
-          WHERE user_id = ANY(${userIds}::uuid[])
-          GROUP BY user_id
+          WHERE subscriber_id = ANY(${subscriberIds}::uuid[])
+          GROUP BY subscriber_id
         `;
         for (const row of lastMessages) {
-          lastActiveMap[row.user_id] = row.last_active;
+          lastActiveMap[row.subscriber_id] = row.last_active;
         }
       }
 
-      const formatted = users.map(u => {
-        const channels = [u.channel, u.channel2].filter(Boolean);
+      const formatted = subscribers.map(s => {
         return {
-          id: u.id,
-          email: u.email,
-          tier: u.tier,
-          auth_provider: u.authProvider,
-          channels,
-          signup_date: u.createdAt,
-          message_count: u._count.messages,
-          warrior_count: u._count.warriors,
-          last_active: lastActiveMap[u.id] || null,
+          id: s.id,
+          email: s.email,
+          tier: s.tier,
+          auth_provider: s.authProvider,
+          whatsapp_connected: !!s.whatsappJid,
+          signup_date: s.createdAt,
+          message_count: s._count.messages,
+          agent_count: s._count.agents,
+          last_active: lastActiveMap[s.id] || null,
         };
       });
 
-      return reply.send({ total, users: formatted });
+      return reply.send({ total, subscribers: formatted });
     } catch (error) {
-      console.error('[ADMIN] users error:', error.message);
-      return reply.code(500).send({ error: 'Failed to load users' });
+      console.error('[ADMIN] subscribers error:', error.message);
+      return reply.code(500).send({ error: 'Failed to load subscribers' });
     }
   });
 
@@ -192,95 +188,28 @@ async function adminRoutes(app) {
     }
   });
 
-  // ── GET /api/admin/popular-warriors ──
-  app.get('/popular-warriors', {
+  // ── GET /api/admin/popular-agents ──
+  app.get('/popular-agents', {
     preHandler: adminPreHandlers,
     config: { rateLimit: rl },
   }, async (request, reply) => {
     try {
-      const popular = await prisma.warrior.groupBy({
-        by: ['templateId'],
+      const popular = await prisma.agent.groupBy({
+        by: ['assistantName'],
         _count: { id: true },
         orderBy: { _count: { id: 'desc' } },
         take: 15,
       });
 
-      const templateIds = popular.map(p => p.templateId);
-      const templates = await prisma.warriorTemplate.findMany({
-        where: { id: { in: templateIds } },
-        select: { id: true, name: true, warriorClass: true, artFile: true },
-      });
+      const agents = popular.map(p => ({
+        name: p.assistantName || 'Unnamed',
+        deploy_count: p._count.id,
+      }));
 
-      const templateMap = {};
-      for (const t of templates) {
-        templateMap[t.id] = t;
-      }
-
-      const warriors = popular.map(p => {
-        const t = templateMap[p.templateId] || {};
-        return {
-          template_id: p.templateId,
-          name: t.name || p.templateId,
-          warrior_class: t.warriorClass || 'unknown',
-          art_file: t.artFile || `${p.templateId}.png`,
-          deploy_count: p._count.id,
-        };
-      });
-
-      return reply.send({ warriors });
+      return reply.send({ agents });
     } catch (error) {
-      console.error('[ADMIN] popular-warriors error:', error.message);
-      return reply.code(500).send({ error: 'Failed to load popular warriors' });
-    }
-  });
-
-  // ── GET /api/admin/channels ──
-  app.get('/channels', {
-    preHandler: adminPreHandlers,
-    config: { rateLimit: rl },
-  }, async (request, reply) => {
-    try {
-      const [primaryChannels, secondaryChannels, messageChannels] = await Promise.all([
-        prisma.user.groupBy({
-          by: ['channel'],
-          _count: { id: true },
-          where: { channel: { not: null } },
-        }),
-        prisma.user.groupBy({
-          by: ['channel2'],
-          _count: { id: true },
-          where: { channel2: { not: null } },
-        }),
-        prisma.message.groupBy({
-          by: ['channel'],
-          _count: { id: true },
-        }),
-      ]);
-
-      // Merge primary + secondary channel counts
-      const channelCounts = {};
-      for (const c of primaryChannels) {
-        channelCounts[c.channel] = (channelCounts[c.channel] || 0) + c._count.id;
-      }
-      for (const c of secondaryChannels) {
-        channelCounts[c.channel2] = (channelCounts[c.channel2] || 0) + c._count.id;
-      }
-
-      const connectedChannels = Object.entries(channelCounts)
-        .map(([channel, count]) => ({ channel, count }))
-        .sort((a, b) => b.count - a.count);
-
-      const msgChannels = messageChannels
-        .map(c => ({ channel: c.channel, count: c._count.id }))
-        .sort((a, b) => b.count - a.count);
-
-      return reply.send({
-        connected_channels: connectedChannels,
-        message_channels: msgChannels,
-      });
-    } catch (error) {
-      console.error('[ADMIN] channels error:', error.message);
-      return reply.code(500).send({ error: 'Failed to load channels' });
+      console.error('[ADMIN] popular-agents error:', error.message);
+      return reply.code(500).send({ error: 'Failed to load popular agents' });
     }
   });
 }

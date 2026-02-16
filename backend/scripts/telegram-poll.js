@@ -22,7 +22,7 @@ if (!BOT_TOKEN || BOT_TOKEN === 'xxx') {
 let offset = 0;
 
 async function poll() {
-  console.log(`[POLL] Starting Telegram polling for @ClawWarriorsBot`);
+  console.log(`[POLL] Starting Telegram polling for Evolved AI bot`);
   console.log(`[POLL] Forwarding to ${SERVER_URL}/api/webhooks/telegram`);
   console.log(`[POLL] Press Ctrl+C to stop\n`);
 

@@ -7,78 +7,60 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model Subscriber {
   id                    String    @id @default(uuid()) @db.Uuid
   email                 String    @unique @db.VarChar(255)
   passwordHash          String?   @map("password_hash") @db.VarChar(255)
+  name                  String?   @db.VarChar(255)
   googleId              String?   @unique @map("google_id") @db.VarChar(255)
+  googleRefreshToken    String?   @map("google_refresh_token")
   authProvider          String    @default("email") @map("auth_provider") @db.VarChar(20)
   tier                  String    @default("trial") @db.VarChar(20)
   trialEndsAt           DateTime? @map("trial_ends_at")
-  channel               String?   @db.VarChar(20)
-  channelId             String?   @map("channel_id") @db.VarChar(255)
-  channel2              String?   @map("channel_2") @db.VarChar(20)
-  channel2Id            String?   @map("channel_2_id") @db.VarChar(255)
   goals                 String?
-  stripeCustomerId      String?   @map("stripe_customer_id") @db.VarChar(255)
-  stripeSubscriptionId  String?   @map("stripe_subscription_id") @db.VarChar(255)
+  whatsappJid           String?   @unique @map("whatsapp_jid") @db.VarChar(255)
+  kajabiContactId       String?   @unique @map("kajabi_contact_id") @db.VarChar(255)
+  kajabiOfferId         String?   @map("kajabi_offer_id") @db.VarChar(255)
+  onboardingComplete    Boolean   @default(false) @map("onboarding_complete")
+  assistantName         String?   @map("assistant_name") @db.VarChar(100)
   passwordResetToken    String?   @unique @map("password_reset_token") @db.VarChar(255)
   passwordResetExpiry   DateTime? @map("password_reset_expiry")
   createdAt             DateTime  @default(now()) @map("created_at")
   updatedAt             DateTime  @default(now()) @updatedAt @map("updated_at")
 
-  warriors              Warrior[]
+  agents                Agent[]
   messages              Message[]
 
-  @@map("users")
+  @@map("subscribers")
 }
 
-model Warrior {
+model Agent {
   id              String    @id @default(uuid()) @db.Uuid
-  userId          String    @map("user_id") @db.Uuid
-  templateId      String    @map("template_id") @db.VarChar(50)
-  customName      String?   @map("custom_name") @db.VarChar(100)
-  warriorClass    String    @map("warrior_class") @db.VarChar(20)
-  tone            String    @default("casual") @db.VarChar(20)
+  subscriberId    String    @map("subscriber_id") @db.Uuid
+  name            String    @db.VarChar(100)
   systemPrompt    String    @map("system_prompt")
+  soulMd          String?   @map("soul_md")
+  openclawAgentId String?   @map("openclaw_agent_id") @db.VarChar(255)
   isActive        Boolean   @default(true) @map("is_active")
   createdAt       DateTime  @default(now()) @map("created_at")
 
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  template        WarriorTemplate @relation(fields: [templateId], references: [id])
+  subscriber      Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
-  @@map("warriors")
+  @@index([subscriberId])
+  @@map("agents")
 }
 
 model Message {
-  id          String    @id @default(uuid()) @db.Uuid
-  userId      String    @map("user_id") @db.Uuid
-  warriorId   String    @map("warrior_id") @db.VarChar(50)
-  direction   String    @db.VarChar(10)
-  channel     String    @db.VarChar(20)
-  content     String
-  createdAt   DateTime  @default(now()) @map("created_at")
+  id              String    @id @default(uuid()) @db.Uuid
+  subscriberId    String    @map("subscriber_id") @db.Uuid
+  agentId         String    @map("agent_id") @db.VarChar(50)
+  role            String    @db.VarChar(20)
+  channel         String    @db.VarChar(20)
+  content         String
+  createdAt       DateTime  @default(now()) @map("created_at")
 
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscriber      Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
 
-  @@index([userId, createdAt])
+  @@index([subscriberId, createdAt])
   @@map("messages")
-}
-
-model WarriorTemplate {
-  id                  String    @id @db.VarChar(50)
-  name                String    @db.VarChar(100)
-  warriorClass        String    @map("warrior_class") @db.VarChar(20)
-  gender              String    @db.VarChar(10)
-  introQuote          String    @map("intro_quote")
-  firstMessage        String    @map("first_message")
-  baseSystemPrompt    String    @map("base_system_prompt")
-  stats               Json
-  recommendedTier     String    @map("recommended_tier") @db.VarChar(20)
-  artFile             String    @map("art_file") @db.VarChar(255)
-
-  warriors            Warrior[]
-
-  @@map("warrior_templates")
 }

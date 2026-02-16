@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 
-echo "🗡️ Deploying ClawWarriors..."
+echo "✨ Deploying Evolved AI..."
 
-cd /home/deploy/clawwarriors
+cd /home/deploy/evolved-ai
 
 # Pull latest
 git pull origin main

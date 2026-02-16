@@ -12,7 +12,7 @@ export function AuthProvider({ children }) {
   const router = useRouter();
 
   const loadUser = useCallback(async () => {
-    const token = localStorage.getItem('cw_token');
+    const token = localStorage.getItem('eai_token');
     if (!token) {
       setUser(null);
       setLoading(false);
@@ -22,7 +22,7 @@ export function AuthProvider({ children }) {
       const data = await apiFetch('/dashboard/stats');
       setUser(data);
     } catch {
-      localStorage.removeItem('cw_token');
+      localStorage.removeItem('eai_token');
       setUser(null);
     } finally {
       setLoading(false);
@@ -34,12 +34,12 @@ export function AuthProvider({ children }) {
   }, [loadUser]);
 
   const login = (token) => {
-    localStorage.setItem('cw_token', token);
+    localStorage.setItem('eai_token', token);
     loadUser();
   };
 
   const logout = () => {
-    localStorage.removeItem('cw_token');
+    localStorage.removeItem('eai_token');
     setUser(null);
     router.push('/login');
   };
@@ -59,5 +59,5 @@ export function useAuth() {
 
 export function getToken() {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('cw_token');
+  return localStorage.getItem('eai_token');
 }

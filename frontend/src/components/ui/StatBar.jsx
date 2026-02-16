@@ -1,9 +1,6 @@
 'use client';
 
-import { CLASS_HEX } from '@/lib/constants';
-
-export default function StatBar({ label, value, max = 5, warriorClass = 'guardian' }) {
-  const color = CLASS_HEX[warriorClass] || '#4A9EFF';
+export default function StatBar({ label, value, max = 5 }) {
   const pct = (value / max) * 100;
 
   return (
@@ -11,8 +8,8 @@ export default function StatBar({ label, value, max = 5, warriorClass = 'guardia
       <span className="text-xs text-txt-muted w-20 shrink-0">{label}</span>
       <div className="flex-1 h-2 bg-elevated rounded-full overflow-hidden">
         <div
-          className="h-full rounded-full transition-all duration-700 ease-out"
-          style={{ width: `${pct}%`, background: color }}
+          className="h-full rounded-full transition-all duration-700 ease-out bg-accent"
+          style={{ width: `${pct}%` }}
         />
       </div>
       <span className="text-xs text-txt-dim w-4 text-right">{value}</span>

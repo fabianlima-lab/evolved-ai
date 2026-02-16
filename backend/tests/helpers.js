@@ -2,7 +2,7 @@ import { vi } from 'vitest';
 
 // Mock PrismaClient before importing anything that uses it
 const mockPrisma = {
-  user: {
+  subscriber: {
     findUnique: vi.fn(),
     findFirst: vi.fn(),
     findMany: vi.fn(),
@@ -13,7 +13,7 @@ const mockPrisma = {
     delete: vi.fn(),
     groupBy: vi.fn(),
   },
-  warrior: {
+  agent: {
     findUnique: vi.fn(),
     findFirst: vi.fn(),
     findMany: vi.fn(),
@@ -23,11 +23,6 @@ const mockPrisma = {
     count: vi.fn(),
     delete: vi.fn(),
     groupBy: vi.fn(),
-  },
-  warriorTemplate: {
-    findUnique: vi.fn(),
-    findFirst: vi.fn(),
-    findMany: vi.fn(),
   },
   message: {
     findMany: vi.fn(),
@@ -85,13 +80,6 @@ vi.mock('google-auth-library', () => {
   };
 });
 
-// Mock stripe
-vi.mock('stripe', () => {
-  return {
-    default: vi.fn(function () { return null; }),
-  };
-});
-
 export { mockPrisma };
 
 export async function buildTestApp() {
@@ -101,6 +89,6 @@ export async function buildTestApp() {
   return app;
 }
 
-export function getAuthToken(app, userId = 'test-user-id', email = 'test@example.com') {
-  return app.jwt.sign({ userId, email });
+export function getAuthToken(app, subscriberId = 'test-subscriber-id', email = 'test@example.com') {
+  return app.jwt.sign({ subscriberId, email });
 }

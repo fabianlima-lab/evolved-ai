@@ -18,7 +18,7 @@ export default function Footer() {
           {' '}&middot;{' '}
           <Link href="/privacy" className="text-txt-dim hover:text-accent transition-colors">{t('privacy')}</Link>
           {' '}&middot;{' '}
-          <a href="mailto:support@clawwarriors.com" className="text-txt-dim hover:text-accent transition-colors">{t('contact')}</a>
+          <a href="mailto:support@evolved.ai" className="text-txt-dim hover:text-accent transition-colors">{t('contact')}</a>
         </p>
       </div>
     </footer>

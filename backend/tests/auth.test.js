@@ -13,17 +13,17 @@ describe('Auth Routes', () => {
   });
 
   beforeEach(() => {
-    mockPrisma.user.findUnique.mockReset();
-    mockPrisma.user.create.mockReset();
-    mockPrisma.user.update.mockReset();
+    mockPrisma.subscriber.findUnique.mockReset();
+    mockPrisma.subscriber.create.mockReset();
+    mockPrisma.subscriber.update.mockReset();
   });
 
   // ── Signup ──
   describe('POST /api/auth/signup', () => {
-    it('creates a new user and returns token', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
-      mockPrisma.user.create.mockResolvedValue({
-        id: 'new-user-id',
+    it('creates a new subscriber and returns token', async () => {
+      mockPrisma.subscriber.findUnique.mockResolvedValue(null);
+      mockPrisma.subscriber.create.mockResolvedValue({
+        id: 'new-subscriber-id',
         email: 'new@example.com',
       });
 
@@ -35,12 +35,12 @@ describe('Auth Routes', () => {
 
       expect(res.statusCode).toBe(201);
       const body = JSON.parse(res.body);
-      expect(body.user_id).toBe('new-user-id');
+      expect(body.subscriber_id).toBe('new-subscriber-id');
       expect(body.token).toBeDefined();
     });
 
     it('rejects duplicate email with 409', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({ id: 'existing-id' });
+      mockPrisma.subscriber.findUnique.mockResolvedValue({ id: 'existing-id' });
 
       const res = await app.inject({
         method: 'POST',
@@ -95,8 +95,8 @@ describe('Auth Routes', () => {
       const bcrypt = await import('bcryptjs');
       const hash = await bcrypt.hash('password123', 10);
 
-      mockPrisma.user.findUnique.mockResolvedValue({
-        id: 'user-id',
+      mockPrisma.subscriber.findUnique.mockResolvedValue({
+        id: 'subscriber-id',
         email: 'test@example.com',
         passwordHash: hash,
       });
@@ -109,7 +109,7 @@ describe('Auth Routes', () => {
 
       expect(res.statusCode).toBe(200);
       const body = JSON.parse(res.body);
-      expect(body.user_id).toBe('user-id');
+      expect(body.subscriber_id).toBe('subscriber-id');
       expect(body.token).toBeDefined();
     });
 
@@ -117,8 +117,8 @@ describe('Auth Routes', () => {
       const bcrypt = await import('bcryptjs');
       const hash = await bcrypt.hash('correctpassword', 10);
 
-      mockPrisma.user.findUnique.mockResolvedValue({
-        id: 'user-id',
+      mockPrisma.subscriber.findUnique.mockResolvedValue({
+        id: 'subscriber-id',
         email: 'test@example.com',
         passwordHash: hash,
       });
@@ -132,8 +132,8 @@ describe('Auth Routes', () => {
       expect(res.statusCode).toBe(401);
     });
 
-    it('rejects nonexistent user with 401', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+    it('rejects nonexistent subscriber with 401', async () => {
+      mockPrisma.subscriber.findUnique.mockResolvedValue(null);
 
       const res = await app.inject({
         method: 'POST',
@@ -144,9 +144,9 @@ describe('Auth Routes', () => {
       expect(res.statusCode).toBe(401);
     });
 
-    it('tells Google-only users to use Google sign-in', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({
-        id: 'google-user',
+    it('tells Google-only subscribers to use Google sign-in', async () => {
+      mockPrisma.subscriber.findUnique.mockResolvedValue({
+        id: 'google-subscriber',
         email: 'google@example.com',
         passwordHash: null,
         authProvider: 'google',

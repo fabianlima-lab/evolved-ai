@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
     <Card className="w-full max-w-md p-8">
       <div className="text-center mb-8">
         <Link href="/" className="font-[family-name:var(--font-display)] text-2xl text-txt">
-          {tCommon('swordEmoji')} {tCommon('clawwarriors')}
+          {tCommon('brandName')}
         </Link>
         <h2 className="text-lg font-semibold text-txt mt-6">{t('forgotTitle')}</h2>
         <p className="text-sm text-txt-muted mt-1">{t('forgotSubtitle')}</p>

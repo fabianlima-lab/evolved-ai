@@ -35,9 +35,7 @@ export default function DemoPage() {
 
         <div className="h-[500px]">
           <ChatWidget
-            warriorName="Luna"
-            warriorClass="bard"
-            portraitSrc="/warriors/luna_bard.png"
+            agentName="Evolved AI"
             onSend={handleSend}
             messages={[
               { role: 'assistant', content: t('initialMessage') },

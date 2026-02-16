@@ -1,7 +1,7 @@
 {
-  "name": "ClawWarriors",
-  "short_name": "ClawWarriors",
-  "description": "Your AI Warrior, Your Rules",
+  "name": "Evolved AI",
+  "short_name": "Evolved AI",
+  "description": "Your Personal Chief of Staff",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#08090E",

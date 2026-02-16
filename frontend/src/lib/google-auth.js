@@ -7,8 +7,8 @@ import { apiPost, apiFetch } from './api';
 /**
  * Determines where to send a user after Google auth based on their progress:
  * - No goals → /onboarding (step 1)
- * - Goals but no warriors → /warriors (step 2)
- * - Warriors but no channel → /channel (step 3)
+ * - Goals but no agents → /agents (step 2)
+ * - Agents but no channel → /channel (step 3)
  * - Everything done → /dashboard
  */
 export async function resolveDestination() {
@@ -18,11 +18,11 @@ export async function resolveDestination() {
     // No goals set → start of onboarding
     if (!stats.goals) return '/onboarding';
 
-    // Has goals — check for active warriors
-    if (stats.active_warriors === 0) return '/warriors';
+    // Has goals — check for active agents
+    if (stats.active_agents === 0) return '/agents';
 
-    // Has warriors — check for channel
-    if (!stats.channel) return '/channel';
+    // Has agents — check for channel
+    if (!stats.whatsapp_connected) return '/channel';
 
     // Fully onboarded
     return '/dashboard';
@@ -44,9 +44,9 @@ export function useGoogleAuth() {
       const data = await apiPost('/auth/google', {
         credential: credentialResponse.credential,
       });
-      localStorage.setItem('cw_token', data.token);
+      localStorage.setItem('eai_token', data.token);
 
-      if (data.is_new_user) {
+      if (data.is_new_subscriber) {
         router.push('/onboarding');
       } else {
         // Returning user — route to wherever they left off

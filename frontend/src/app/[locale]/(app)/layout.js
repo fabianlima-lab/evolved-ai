@@ -12,7 +12,7 @@ function AuthGuard({ children }) {
 
   useEffect(() => {
     if (loading) return;
-    const token = localStorage.getItem('cw_token');
+    const token = localStorage.getItem('eai_token');
     if (!token) {
       router.push('/login');
     } else {

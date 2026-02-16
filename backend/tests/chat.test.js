@@ -8,25 +8,21 @@ describe('Chat Routes', () => {
   let app;
   let token;
 
-  const mockUser = {
-    id: 'test-user-id',
+  const mockSubscriber = {
+    id: 'test-subscriber-id',
     email: 'test@example.com',
     tier: 'trial',
     trialEndsAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-    channel: 'telegram',
-    channelId: '12345',
-    channel2: null,
-    channel2Id: null,
+    telegramChatId: '12345',
+    whatsappJid: null,
   };
 
-  const mockWarrior = {
-    id: 'warrior-1',
-    userId: 'test-user-id',
+  const mockAgent = {
+    id: 'agent-1',
+    subscriberId: 'test-subscriber-id',
     isActive: true,
-    customName: 'TestWarrior',
-    templateId: 'mia',
-    systemPrompt: 'You are a helpful warrior.',
-    template: { name: 'Mia', stats: {} },
+    name: 'TestAgent',
+    systemPrompt: 'You are a helpful agent.',
   };
 
   beforeAll(async () => {
@@ -39,8 +35,8 @@ describe('Chat Routes', () => {
   });
 
   beforeEach(() => {
-    mockPrisma.user.findUnique.mockReset();
-    mockPrisma.warrior.findFirst.mockReset();
+    mockPrisma.subscriber.findUnique.mockReset();
+    mockPrisma.agent.findFirst.mockReset();
     mockPrisma.message.create.mockReset();
     mockPrisma.message.findMany.mockReset();
     aiClient.isAIConfigured.mockReturnValue(true);
@@ -96,8 +92,8 @@ describe('Chat Routes', () => {
       expect(body.error).toContain('4000');
     });
 
-    it('returns 404 if user not found', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+    it('returns 404 if subscriber not found', async () => {
+      mockPrisma.subscriber.findUnique.mockResolvedValue(null);
 
       const res = await app.inject({
         method: 'POST',
@@ -109,8 +105,8 @@ describe('Chat Routes', () => {
     });
 
     it('returns 403 for expired trial', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({
-        ...mockUser,
+      mockPrisma.subscriber.findUnique.mockResolvedValue({
+        ...mockSubscriber,
         trialEndsAt: new Date('2020-01-01'),
       });
 
@@ -125,9 +121,9 @@ describe('Chat Routes', () => {
       expect(body.error).toContain('Trial expired');
     });
 
-    it('returns 404 if no active warrior', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
-      mockPrisma.warrior.findFirst.mockResolvedValue(null);
+    it('returns 404 if no active agent', async () => {
+      mockPrisma.subscriber.findUnique.mockResolvedValue(mockSubscriber);
+      mockPrisma.agent.findFirst.mockResolvedValue(null);
 
       const res = await app.inject({
         method: 'POST',
@@ -137,12 +133,12 @@ describe('Chat Routes', () => {
       });
       expect(res.statusCode).toBe(404);
       const body = JSON.parse(res.body);
-      expect(body.error).toContain('warrior');
+      expect(body.error).toContain('agent');
     });
 
     it('returns 503 if AI not configured', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
-      mockPrisma.warrior.findFirst.mockResolvedValue(mockWarrior);
+      mockPrisma.subscriber.findUnique.mockResolvedValue(mockSubscriber);
+      mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
       aiClient.isAIConfigured.mockReturnValue(false);
 
       const res = await app.inject({
@@ -155,8 +151,8 @@ describe('Chat Routes', () => {
     });
 
     it('sends message and returns AI response', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
-      mockPrisma.warrior.findFirst.mockResolvedValue(mockWarrior);
+      mockPrisma.subscriber.findUnique.mockResolvedValue(mockSubscriber);
+      mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
       mockPrisma.message.create.mockResolvedValue({ id: 'msg-1' });
       mockPrisma.message.findMany.mockResolvedValue([]);
 
@@ -164,7 +160,7 @@ describe('Chat Routes', () => {
         method: 'POST',
         url: '/api/chat/send',
         headers: { authorization: 'Bearer ' + token },
-        payload: { message: 'Hello warrior' },
+        payload: { message: 'Hello agent' },
       });
 
       expect(res.statusCode).toBe(200);
@@ -179,8 +175,8 @@ describe('Chat Routes', () => {
     });
 
     it('strips HTML from message before processing', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
-      mockPrisma.warrior.findFirst.mockResolvedValue(mockWarrior);
+      mockPrisma.subscriber.findUnique.mockResolvedValue(mockSubscriber);
+      mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
       mockPrisma.message.create.mockResolvedValue({ id: 'msg-1' });
       mockPrisma.message.findMany.mockResolvedValue([]);
 
@@ -199,8 +195,8 @@ describe('Chat Routes', () => {
     });
 
     it('handles AI errors gracefully', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
-      mockPrisma.warrior.findFirst.mockResolvedValue(mockWarrior);
+      mockPrisma.subscriber.findUnique.mockResolvedValue(mockSubscriber);
+      mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
       mockPrisma.message.create.mockResolvedValue({ id: 'msg-1' });
       mockPrisma.message.findMany.mockResolvedValue([]);
       aiClient.callAI.mockResolvedValue({
@@ -225,12 +221,12 @@ describe('Chat Routes', () => {
     });
 
     it('loads conversation history for context', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
-      mockPrisma.warrior.findFirst.mockResolvedValue(mockWarrior);
+      mockPrisma.subscriber.findUnique.mockResolvedValue(mockSubscriber);
+      mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
       mockPrisma.message.create.mockResolvedValue({ id: 'msg-1' });
       mockPrisma.message.findMany.mockResolvedValue([
-        { direction: 'in', content: 'Previous user message' },
-        { direction: 'out', content: 'Previous AI response' },
+        { role: 'user', content: 'Previous user message' },
+        { role: 'assistant', content: 'Previous AI response' },
       ]);
 
       await app.inject({
@@ -242,7 +238,7 @@ describe('Chat Routes', () => {
 
       // Verify callAI received conversation history
       expect(aiClient.callAI).toHaveBeenCalledWith(
-        mockWarrior.systemPrompt,
+        mockAgent.systemPrompt,
         expect.arrayContaining([
           { role: 'user', content: 'Previous user message' },
           { role: 'assistant', content: 'Previous AI response' },
@@ -262,8 +258,8 @@ describe('Chat Routes', () => {
       expect(res.statusCode).toBe(401);
     });
 
-    it('returns empty array if no active warrior', async () => {
-      mockPrisma.warrior.findFirst.mockResolvedValue(null);
+    it('returns empty array if no active agent', async () => {
+      mockPrisma.agent.findFirst.mockResolvedValue(null);
 
       const res = await app.inject({
         method: 'GET',
@@ -274,16 +270,16 @@ describe('Chat Routes', () => {
       expect(res.statusCode).toBe(200);
       const body = JSON.parse(res.body);
       expect(body.messages).toEqual([]);
-      expect(body.warrior).toBeNull();
+      expect(body.agent).toBeNull();
     });
 
     it('returns messages in chronological order', async () => {
-      mockPrisma.warrior.findFirst.mockResolvedValue(mockWarrior);
+      mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
       // findMany returns DESC order (newest first) — route should reverse to ASC
       mockPrisma.message.findMany.mockResolvedValue([
-        { id: 'msg-3', direction: 'out', content: 'Third', channel: 'web', createdAt: '2024-01-03T00:00:00Z' },
-        { id: 'msg-2', direction: 'in', content: 'Second', channel: 'telegram', createdAt: '2024-01-02T00:00:00Z' },
-        { id: 'msg-1', direction: 'in', content: 'First', channel: 'web', createdAt: '2024-01-01T00:00:00Z' },
+        { id: 'msg-3', role: 'assistant', content: 'Third', channel: 'web', createdAt: '2024-01-03T00:00:00Z' },
+        { id: 'msg-2', role: 'user', content: 'Second', channel: 'telegram', createdAt: '2024-01-02T00:00:00Z' },
+        { id: 'msg-1', role: 'user', content: 'First', channel: 'web', createdAt: '2024-01-01T00:00:00Z' },
       ]);
 
       const res = await app.inject({
@@ -300,8 +296,8 @@ describe('Chat Routes', () => {
       expect(body.messages[2].id).toBe('msg-3');
     });
 
-    it('returns warrior info alongside messages', async () => {
-      mockPrisma.warrior.findFirst.mockResolvedValue(mockWarrior);
+    it('returns agent info alongside messages', async () => {
+      mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
       mockPrisma.message.findMany.mockResolvedValue([]);
 
       const res = await app.inject({
@@ -312,13 +308,12 @@ describe('Chat Routes', () => {
 
       expect(res.statusCode).toBe(200);
       const body = JSON.parse(res.body);
-      expect(body.warrior).toBeDefined();
-      expect(body.warrior.id).toBe('warrior-1');
-      expect(body.warrior.templateId).toBe('mia');
+      expect(body.agent).toBeDefined();
+      expect(body.agent.id).toBe('agent-1');
     });
 
     it('respects limit parameter', async () => {
-      mockPrisma.warrior.findFirst.mockResolvedValue(mockWarrior);
+      mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
       mockPrisma.message.findMany.mockResolvedValue([]);
 
       await app.inject({
@@ -334,7 +329,7 @@ describe('Chat Routes', () => {
     });
 
     it('caps limit at 100', async () => {
-      mockPrisma.warrior.findFirst.mockResolvedValue(mockWarrior);
+      mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
       mockPrisma.message.findMany.mockResolvedValue([]);
 
       await app.inject({
@@ -349,10 +344,10 @@ describe('Chat Routes', () => {
     });
 
     it('includes channel field in messages', async () => {
-      mockPrisma.warrior.findFirst.mockResolvedValue(mockWarrior);
+      mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
       mockPrisma.message.findMany.mockResolvedValue([
-        { id: 'msg-1', direction: 'in', content: 'From web', channel: 'web', createdAt: '2024-01-01T00:00:00Z' },
-        { id: 'msg-2', direction: 'in', content: 'From telegram', channel: 'telegram', createdAt: '2024-01-01T00:00:01Z' },
+        { id: 'msg-1', role: 'user', content: 'From web', channel: 'web', createdAt: '2024-01-01T00:00:00Z' },
+        { id: 'msg-2', role: 'user', content: 'From telegram', channel: 'telegram', createdAt: '2024-01-01T00:00:01Z' },
       ]);
 
       const res = await app.inject({

@@ -1,16 +1,13 @@
 import { callAI, callAIStream, isAIConfigured } from '../services/ai-client.js';
+import { stripHtml } from '../utils/helpers.js';
 
 const MAX_MESSAGE_LENGTH = 4000;
 const MAX_DEMO_HISTORY = 10; // Shorter context for demo
 
-function stripHtml(str) {
-  return str.replace(/<[^>]*>/g, '');
-}
+// Demo uses a bold, creative, and engaging AI agent (matches frontend demo page)
+const DEMO_SYSTEM_PROMPT = `You are an Evolved AI assistant. You must stay in character at all times. Never reveal you are an AI unless directly asked. Keep responses concise and helpful. If you don't know something, say so honestly.
 
-// Demo uses Luna the Bard — bold, creative, and engaging (matches frontend demo page)
-const DEMO_SYSTEM_PROMPT = `You are a ClawWarriors AI assistant. You must stay in character at all times. Never reveal you are an AI unless directly asked. Keep responses concise and helpful. If you don't know something, say so honestly.
-
-You are Luna, a Bard-class warrior from ClawWarriors. You're bold, trend-aware, and creatively fearless — the content strategist who knows what stops the scroll.
+You are a creative, bold AI agent from Evolved AI. You're trend-aware and creatively fearless — a content strategist who knows what stops the scroll.
 
 Your personality traits:
 - Confident and opinionated about content — you have strong takes
@@ -30,7 +27,7 @@ When helping with tasks:
 Communicate in a friendly, energetic, and conversational manner. Keep it natural and fun.
 
 ## Important
-This is a DEMO conversation. Keep responses SHORT (2-3 sentences max). At the end of your response, subtly encourage the user to sign up to get their own full warrior with: "Want a warrior of your own? Sign up at clawwarriors.com 🎭" — but only every 3rd message or so, not every time.`;
+This is a DEMO conversation. Keep responses SHORT (2-3 sentences max). At the end of your response, subtly encourage the user to sign up to get their own AI agent with: "Want your own AI agent? Sign up at evolvedai.com" — but only every 3rd message or so, not every time.`;
 
 async function demoRoutes(app) {
   // POST /api/demo/chat — rate-limited demo chat with 3-tier routing (no auth)
@@ -57,9 +54,8 @@ async function demoRoutes(app) {
       // If AI not configured, return stub
       if (!isAIConfigured()) {
         return reply.send({
-          response: "Luna here! My creative spark is charging up — I'll be fully operational soon. Sign up at clawwarriors.com to be first in line! 🎭",
-          warrior: 'Luna',
-          class: 'bard',
+          response: "My creative spark is charging up — I'll be fully operational soon. Sign up at evolvedai.com to be first in line!",
+          agent: 'Demo Agent',
         });
       }
 
@@ -88,9 +84,8 @@ async function demoRoutes(app) {
       if (error) {
         console.error(`[ERROR] demo AI failed: ${error} (tier:${tier} model:${model})`);
         return reply.send({
-          response: "Even the best Bards need a breather! Try again in a sec. 🎭",
-          warrior: 'Luna',
-          class: 'bard',
+          response: "Even the best agents need a breather! Try again in a sec.",
+          agent: 'Demo Agent',
         });
       }
 
@@ -98,8 +93,7 @@ async function demoRoutes(app) {
 
       return reply.send({
         response: content,
-        warrior: 'Luna',
-        class: 'bard',
+        agent: 'Demo Agent',
         tier,
         model,
         responseTimeMs,

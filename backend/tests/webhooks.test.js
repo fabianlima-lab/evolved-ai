@@ -45,7 +45,7 @@ describe('Webhook Routes', () => {
           message: {
             chat: { id: 12345 },
             from: { first_name: 'Test' },
-            text: 'Hello warrior!',
+            text: 'Hello agent!',
           },
         },
       });
@@ -70,7 +70,7 @@ describe('Webhook Routes', () => {
         payload: {
           From: 'whatsapp:+1234567890',
           Body: 'Hello from WhatsApp',
-          ProfileName: 'Test User',
+          ProfileName: 'Test Subscriber',
         },
       });
       expect(res.statusCode).toBe(200);

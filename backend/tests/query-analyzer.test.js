@@ -12,8 +12,8 @@ describe('Query Analyzer', () => {
     });
 
     it('classifies simple questions as Tier 1', () => {
-      expect(classifyQuery('What is ClawWarriors?').tier).toBe(1);
-      expect(classifyQuery('Who are the warriors?').tier).toBe(1);
+      expect(classifyQuery('What is Evolved AI?').tier).toBe(1);
+      expect(classifyQuery('Who are the agents?').tier).toBe(1);
       expect(classifyQuery('Where is the shop?').tier).toBe(1);
     });
 
@@ -24,7 +24,7 @@ describe('Query Analyzer', () => {
     });
 
     it('classifies single word/emoji as Tier 1', () => {
-      expect(classifyQuery('👋').tier).toBe(1);
+      expect(classifyQuery('\uD83D\uDC4B').tier).toBe(1);
       expect(classifyQuery('ok').tier).toBe(1);
       expect(classifyQuery('thanks').tier).toBe(1);
     });
@@ -50,11 +50,11 @@ describe('Query Analyzer', () => {
 
   describe('Tier 2 — Medium complexity', () => {
     it('classifies medium-length messages as Tier 2', () => {
-      expect(classifyQuery('Tell me about the Fire Warrior class and its abilities').tier).toBe(2);
+      expect(classifyQuery('Tell me about the Sales Agent type and its abilities').tier).toBe(2);
     });
 
     it('classifies general conversation (50-200 chars, no complex patterns) as Tier 2', () => {
-      const msg = 'I want to learn more about the different warrior classes available';
+      const msg = 'I want to learn more about the different agent categories available';
       expect(msg.length).toBeGreaterThanOrEqual(50);
       expect(msg.length).toBeLessThanOrEqual(200);
       expect(classifyQuery(msg).tier).toBe(2);
@@ -68,21 +68,21 @@ describe('Query Analyzer', () => {
     });
 
     it('classifies reasoning patterns as Tier 3', () => {
-      expect(classifyQuery('Explain how the warrior synergy works').tier).toBe(3);
-      expect(classifyQuery('Why does this warrior have more power than that one?').tier).toBe(3);
+      expect(classifyQuery('Explain how the agent synergy works').tier).toBe(3);
+      expect(classifyQuery('Why does this agent have more power than that one?').tier).toBe(3);
       expect(classifyQuery('Analyze the team composition for effectiveness').tier).toBe(3);
-      expect(classifyQuery('Compare these two warrior classes for me please').tier).toBe(3);
+      expect(classifyQuery('Compare these two agent types for me please').tier).toBe(3);
     });
 
     it('classifies code patterns as Tier 3', () => {
       expect(classifyQuery('Help me build a script to calculate team DPS').tier).toBe(3);
-      expect(classifyQuery('Can you create a function to track warrior stats?').tier).toBe(3);
-      expect(classifyQuery('I need to debug this warrior configuration issue').tier).toBe(3);
-      expect(classifyQuery('Write some code for a damage calculator').tier).toBe(3);
+      expect(classifyQuery('Can you create a function to track agent stats?').tier).toBe(3);
+      expect(classifyQuery('I need to debug this agent configuration issue').tier).toBe(3);
+      expect(classifyQuery('Write some code for a performance calculator').tier).toBe(3);
     });
 
     it('classifies strategy/analysis patterns as Tier 3', () => {
-      expect(classifyQuery('What is the best strategy for raiding with fire warriors?').tier).toBe(3);
+      expect(classifyQuery('What is the best strategy for scaling with multiple agents?').tier).toBe(3);
       expect(classifyQuery('Give me optimization tips for my team setup please').tier).toBe(3);
       expect(classifyQuery('What is the best practice for team composition?').tier).toBe(3);
     });
@@ -96,21 +96,21 @@ describe('Query Analyzer', () => {
       // "help" would match Tier 1 keyword, but "build"/"script" should win
       expect(classifyQuery('Help me build a script to calculate team DPS').tier).toBe(3);
       // "about" would match Tier 1 keyword, but "compare" should win
-      expect(classifyQuery('Tell me about how to compare and analyze warrior stats').tier).toBe(3);
+      expect(classifyQuery('Tell me about how to compare and analyze agent stats').tier).toBe(3);
     });
   });
 
   describe('Edge cases', () => {
     it('handles special characters', () => {
-      const result = classifyQuery('What about émojis 🔥 and spëcial çhars?');
+      const result = classifyQuery('What about \u00E9mojis \uD83D\uDD25 and sp\u00EBcial \u00E7hars?');
       expect(result.tier).toBeGreaterThanOrEqual(1);
       expect(result.tier).toBeLessThanOrEqual(3);
     });
 
     it('returns a reason for every classification', () => {
       expect(classifyQuery('Hi').reason).toBeTruthy();
-      expect(classifyQuery('Tell me about warriors and their abilities for the game').reason).toBeTruthy();
-      expect(classifyQuery('Explain how synergy works in warrior combinations').reason).toBeTruthy();
+      expect(classifyQuery('Tell me about agents and their abilities for the platform').reason).toBeTruthy();
+      expect(classifyQuery('Explain how synergy works in agent combinations').reason).toBeTruthy();
     });
 
     it('handles very long messages', () => {

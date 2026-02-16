@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
 import { isTrialExpired, getFeaturesByTier } from '../utils/helpers.js';
 import env from '../config/env.js';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 
 async function dashboardRoutes(app) {
   // GET /api/dashboard/stats
@@ -12,12 +10,12 @@ async function dashboardRoutes(app) {
       rateLimit: { max: 60, timeWindow: '1 minute' },
     },
   }, async (request, reply) => {
-    const userId = request.user.userId;
+    const subscriberId = request.user.userId;
 
     try {
-      const user = await prisma.user.findUnique({ where: { id: userId } });
-      const activeWarriors = await prisma.warrior.count({
-        where: { userId, isActive: true },
+      const subscriber = await prisma.subscriber.findUnique({ where: { id: subscriberId } });
+      const activeAgents = await prisma.agent.count({
+        where: { subscriberId, isActive: true },
       });
 
       const today = new Date();
@@ -25,36 +23,35 @@ async function dashboardRoutes(app) {
       const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
       const messagesToday = await prisma.message.count({
-        where: { userId, createdAt: { gte: today } },
+        where: { subscriberId, createdAt: { gte: today } },
       });
 
       const messagesThisMonth = await prisma.message.count({
-        where: { userId, createdAt: { gte: startOfMonth } },
+        where: { subscriberId, createdAt: { gte: startOfMonth } },
       });
 
-      const trialExpired = isTrialExpired(user);
-      const daysRemaining = user.trialEndsAt
+      const trialExpired = isTrialExpired(subscriber);
+      const daysRemaining = subscriber.trialEndsAt
         ? Math.max(0, Math.ceil(
-            (new Date(user.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+            (new Date(subscriber.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
           ))
         : null;
 
-      const features = getFeaturesByTier(user.tier);
+      const features = getFeaturesByTier(subscriber.tier);
 
       return reply.send({
-        email: user.email,
-        goals: user.goals,
-        auth_provider: user.authProvider,
-        tier: user.tier,
-        trial_ends_at: user.trialEndsAt,
+        email: subscriber.email,
+        goals: subscriber.goals,
+        auth_provider: subscriber.authProvider,
+        tier: subscriber.tier,
+        trial_ends_at: subscriber.trialEndsAt,
         trial_expired: trialExpired,
         trial_days_remaining: daysRemaining,
-        active_warriors: activeWarriors,
-        max_warriors: features.max_active_warriors,
+        active_agents: activeAgents,
+        max_agents: features.max_active_agents,
         messages_today: messagesToday,
         messages_this_month: messagesThisMonth,
-        channel: user.channel,
-        channel_2: user.channel2,
+        whatsapp_connected: !!subscriber.whatsappJid,
         features,
         upgrade_url: trialExpired ? `${env.APP_URL}/upgrade` : null,
       });
@@ -71,13 +68,13 @@ async function dashboardRoutes(app) {
       rateLimit: { max: 60, timeWindow: '1 minute' },
     },
   }, async (request, reply) => {
-    const userId = request.user.userId;
+    const subscriberId = request.user.userId;
     const limit = Math.min(parseInt(request.query.limit || '50', 10), 100);
     const offset = parseInt(request.query.offset || '0', 10);
 
     try {
       const messages = await prisma.message.findMany({
-        where: { userId },
+        where: { subscriberId },
         orderBy: { createdAt: 'desc' },
         take: limit,
         skip: offset,

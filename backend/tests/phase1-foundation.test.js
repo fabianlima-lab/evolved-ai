@@ -34,9 +34,9 @@ async function request(method, url, opts = {}) {
   };
 }
 
-// ═══════════════════════════════════════════
+// ===============================================
 // TEST SUITES
-// ═══════════════════════════════════════════
+// ===============================================
 
 async function testHealthCheck() {
   console.log('\n1. Health Check');
@@ -56,24 +56,17 @@ async function testDatabaseConnection() {
   }
 
   try {
-    const count = await prisma.user.count();
-    assert('User table is accessible', count >= 0);
+    const count = await prisma.subscriber.count();
+    assert('Subscriber table is accessible', count >= 0);
   } catch (err) {
-    assert('User table is accessible', false, err.message);
+    assert('Subscriber table is accessible', false, err.message);
   }
 
   try {
-    const count = await prisma.warrior.count();
-    assert('Warrior table is accessible', count >= 0);
+    const count = await prisma.agent.count();
+    assert('Agent table is accessible', count >= 0);
   } catch (err) {
-    assert('Warrior table is accessible', false, err.message);
-  }
-
-  try {
-    const count = await prisma.energy.count();
-    assert('Energy table is accessible', count >= 0);
-  } catch (err) {
-    assert('Energy table is accessible', false, err.message);
+    assert('Agent table is accessible', false, err.message);
   }
 
   try {
@@ -82,85 +75,10 @@ async function testDatabaseConnection() {
   } catch (err) {
     assert('Message table is accessible', false, err.message);
   }
-
-  try {
-    const count = await prisma.elixirPurchase.count();
-    assert('ElixirPurchase table is accessible', count >= 0);
-  } catch (err) {
-    assert('ElixirPurchase table is accessible', false, err.message);
-  }
-}
-
-async function testWarriorTemplates() {
-  console.log('\n3. Warrior Templates');
-  const templates = await prisma.warriorTemplate.findMany();
-  assert('15 templates exist', templates.length === 15, `got ${templates.length}`);
-
-  const classes = [...new Set(templates.map((t) => t.class))].sort();
-  const expectedClasses = ['artificer', 'bard', 'guardian', 'rogue', 'scholar'];
-  assert(
-    '5 classes present',
-    JSON.stringify(classes) === JSON.stringify(expectedClasses),
-    `got ${JSON.stringify(classes)}`
-  );
-
-  for (const cls of expectedClasses) {
-    const count = templates.filter((t) => t.class === cls).length;
-    assert(`${cls} has 3 templates`, count === 3, `got ${count}`);
-  }
-
-  // Validate each template has required fields
-  const requiredFields = [
-    'id', 'class', 'name', 'gender', 'introQuote',
-    'firstMessage', 'baseSystemPrompt', 'stats',
-    'recommendedTier', 'recommendedChannel', 'modelDefault', 'artFile',
-  ];
-
-  let allFieldsPresent = true;
-  let missingDetail = '';
-  for (const t of templates) {
-    for (const field of requiredFields) {
-      if (t[field] === null || t[field] === undefined || t[field] === '') {
-        allFieldsPresent = false;
-        missingDetail = `${t.id} missing ${field}`;
-        break;
-      }
-    }
-    if (!allFieldsPresent) break;
-  }
-  assert('All templates have required fields', allFieldsPresent, missingDetail);
-
-  // Validate stats are valid JSON with numeric values
-  let allStatsValid = true;
-  let statsDetail = '';
-  for (const t of templates) {
-    if (typeof t.stats !== 'object' || t.stats === null) {
-      allStatsValid = false;
-      statsDetail = `${t.id} stats is not an object`;
-      break;
-    }
-    const values = Object.values(t.stats);
-    if (values.length === 0 || !values.every((v) => typeof v === 'number')) {
-      allStatsValid = false;
-      statsDetail = `${t.id} stats values not all numbers`;
-      break;
-    }
-  }
-  assert('All template stats are valid JSON with numbers', allStatsValid, statsDetail);
-
-  // Validate GET /api/warriors/templates returns grouped data
-  const res = await request('GET', '/api/warriors/templates');
-  assert('GET /api/warriors/templates returns 200', res.status === 200);
-  const groupKeys = Object.keys(res.body).sort();
-  assert(
-    'Templates grouped by 5 classes',
-    JSON.stringify(groupKeys) === JSON.stringify(expectedClasses),
-    `got ${JSON.stringify(groupKeys)}`
-  );
 }
 
 async function testSignup() {
-  console.log('\n4. Signup');
+  console.log('\n3. Signup');
   const email = `test-${Date.now()}@phase1.test`;
 
   // Validation tests first (count toward rate limit: 3/min)
@@ -198,20 +116,15 @@ async function testSignup() {
     body: { email, password: 'securepass123' },
   });
   assert('Signup returns 201', res.status === 201, `got ${res.status}`);
-  assert('Signup returns user_id', !!res.body.user_id);
+  assert('Signup returns subscriber_id', !!res.body.subscriber_id);
   assert('Signup returns JWT token', !!res.body.token);
   assert('JWT is well-formed (3 parts)', res.body.token?.split('.').length === 3);
 
-  // Verify user in DB
-  const user = await prisma.user.findUnique({ where: { email } });
-  assert('User exists in database', !!user);
-  assert('Password is hashed (not plaintext)', user.passwordHash !== 'securepass123');
-  assert('Default tier is free', user.tier === 'free');
-
-  // Verify energy record created
-  const energy = await prisma.energy.findUnique({ where: { userId: user.id } });
-  assert('Energy record created', !!energy);
-  assert('Energy starts at 0 used', energy.usedThisMonth === 0);
+  // Verify subscriber in DB
+  const subscriber = await prisma.subscriber.findUnique({ where: { email } });
+  assert('Subscriber exists in database', !!subscriber);
+  assert('Password is hashed (not plaintext)', subscriber.passwordHash !== 'securepass123');
+  assert('Default tier is free', subscriber.tier === 'free');
 
   // Duplicate signup
   const dup = await request('POST', '/api/auth/signup', {
@@ -219,18 +132,18 @@ async function testSignup() {
   });
   assert('Duplicate email returns 409', dup.status === 409);
 
-  return { email, password: 'securepass123', userId: res.body.user_id };
+  return { email, password: 'securepass123', subscriberId: res.body.subscriber_id };
 }
 
 async function testLogin(credentials) {
-  console.log('\n5. Login');
+  console.log('\n4. Login');
 
   // Successful login
   const res = await request('POST', '/api/auth/login', {
     body: { email: credentials.email, password: credentials.password },
   });
   assert('Login returns 200', res.status === 200, `got ${res.status}`);
-  assert('Login returns user_id', res.body.user_id === credentials.userId);
+  assert('Login returns subscriber_id', res.body.subscriber_id === credentials.subscriberId);
   assert('Login returns JWT token', !!res.body.token);
 
   // Wrong password
@@ -239,11 +152,11 @@ async function testLogin(credentials) {
   });
   assert('Wrong password returns 401', wrongPw.status === 401);
 
-  // Non-existent user
-  const noUser = await request('POST', '/api/auth/login', {
+  // Non-existent subscriber
+  const noSubscriber = await request('POST', '/api/auth/login', {
     body: { email: 'nobody@test.com', password: 'whatever123' },
   });
-  assert('Non-existent user returns 401', noUser.status === 401);
+  assert('Non-existent subscriber returns 401', noSubscriber.status === 401);
 
   // Missing fields
   const noFields = await request('POST', '/api/auth/login', {
@@ -255,15 +168,13 @@ async function testLogin(credentials) {
 }
 
 async function testAuthProtection(token) {
-  console.log('\n6. JWT Protection');
+  console.log('\n5. JWT Protection');
 
   const protectedEndpoints = [
-    { method: 'POST', url: '/api/warriors/deploy' },
-    { method: 'GET',  url: '/api/warriors/mine' },
+    { method: 'POST', url: '/api/agents/deploy' },
+    { method: 'GET',  url: '/api/agents/mine' },
     { method: 'GET',  url: '/api/dashboard/stats' },
     { method: 'GET',  url: '/api/dashboard/messages' },
-    { method: 'POST', url: '/api/billing/checkout' },
-    { method: 'GET',  url: '/api/billing/status' },
   ];
 
   // No token — all should return 401
@@ -305,9 +216,9 @@ async function testAuthProtection(token) {
   }
 }
 
-// ═══════════════════════════════════════════
+// ===============================================
 // RUNNER
-// ═══════════════════════════════════════════
+// ===============================================
 
 async function run() {
   console.log('='.repeat(50));
@@ -319,7 +230,6 @@ async function run() {
 
     await testHealthCheck();
     await testDatabaseConnection();
-    await testWarriorTemplates();
     const credentials = await testSignup();
     const token = await testLogin(credentials);
     await testAuthProtection(token);
@@ -331,13 +241,10 @@ async function run() {
   } finally {
     // Cleanup test data
     try {
-      await prisma.warrior.deleteMany({
-        where: { user: { email: { contains: '@phase1.test' } } },
+      await prisma.agent.deleteMany({
+        where: { subscriber: { email: { contains: '@phase1.test' } } },
       });
-      await prisma.energy.deleteMany({
-        where: { user: { email: { contains: '@phase1.test' } } },
-      });
-      await prisma.user.deleteMany({
+      await prisma.subscriber.deleteMany({
         where: { email: { contains: '@phase1.test' } },
       });
     } catch (err) {

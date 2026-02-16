@@ -5,13 +5,12 @@ import rateLimit from '@fastify/rate-limit';
 import env from './config/env.js';
 
 import authRoutes from './routes/auth.js';
-import warriorRoutes from './routes/warriors.js';
-import billingRoutes from './routes/billing.js';
+import agentRoutes from './routes/agents.js';
 import dashboardRoutes from './routes/dashboard.js';
 import demoRoutes from './routes/demo.js';
 import webhookRoutes from './routes/webhooks.js';
 import channelRoutes from './routes/channels.js';
-import userRoutes from './routes/users.js';
+import subscriberRoutes from './routes/subscribers.js';
 import chatRoutes from './routes/chat.js';
 import adminRoutes from './routes/admin.js';
 
@@ -20,19 +19,6 @@ async function build() {
     logger: env.NODE_ENV === 'test' ? false : {
       level: env.NODE_ENV === 'production' ? 'info' : 'debug',
     },
-  });
-
-  // Add raw body support for Stripe webhook signature verification
-  app.addContentTypeParser('application/json', { parseAs: 'buffer' }, (req, body, done) => {
-    try {
-      // Store raw body for Stripe webhook verification
-      req.rawBody = body;
-      const json = JSON.parse(body.toString());
-      done(null, json);
-    } catch (err) {
-      err.statusCode = 400;
-      done(err, undefined);
-    }
   });
 
   // Plugins
@@ -70,13 +56,12 @@ async function build() {
 
   // Routes
   app.register(authRoutes, { prefix: '/api/auth' });
-  app.register(warriorRoutes, { prefix: '/api/warriors' });
-  app.register(billingRoutes, { prefix: '/api/billing' });
+  app.register(agentRoutes, { prefix: '/api/agents' });
   app.register(dashboardRoutes, { prefix: '/api/dashboard' });
   app.register(demoRoutes, { prefix: '/api/demo' });
   app.register(webhookRoutes, { prefix: '/api/webhooks' });
   app.register(channelRoutes, { prefix: '/api/channels' });
-  app.register(userRoutes, { prefix: '/api/users' });
+  app.register(subscriberRoutes, { prefix: '/api/subscribers' });
   app.register(chatRoutes, { prefix: '/api/chat' });
   app.register(adminRoutes, { prefix: '/api/admin' });
 

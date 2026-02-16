@@ -20,17 +20,6 @@ const env = {
   // Auth
   JWT_SECRET: process.env.JWT_SECRET,
 
-  // Stripe
-  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
-  STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
-  STRIPE_PRICE_PRO: process.env.STRIPE_PRICE_PRO,
-  STRIPE_PRICE_PRO_TRIBE: process.env.STRIPE_PRICE_PRO_TRIBE,
-
-  // Twilio
-  TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID,
-  TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN,
-  TWILIO_WHATSAPP_NUMBER: process.env.TWILIO_WHATSAPP_NUMBER,
-
   // Telegram
   TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
 
@@ -45,6 +34,9 @@ const env = {
   // Email (Resend)
   RESEND_API_KEY: process.env.RESEND_API_KEY,
   RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
+
+  // Kajabi webhook integration
+  KAJABI_WEBHOOK_SECRET: process.env.KAJABI_WEBHOOK_SECRET,
 
   // Admin
   ADMIN_EMAILS: (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean),

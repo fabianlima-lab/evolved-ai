@@ -17,7 +17,7 @@ export default function UpgradePage() {
       priceKey: 'proPrice',
       periodKey: 'proPeriod',
       featureKeys: [
-        'feature_1warrior',
+        'feature_1agent',
         'feature_telegram',
         'feature_unlimited',
         'feature_search',
@@ -31,7 +31,7 @@ export default function UpgradePage() {
       priceKey: 'proTribePrice',
       periodKey: 'proTribePeriod',
       featureKeys: [
-        'feature_3warriors',
+        'feature_3agents',
         'feature_allPro',
         'feature_priority',
       ],

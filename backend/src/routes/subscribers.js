@@ -1,20 +1,15 @@
-import { PrismaClient } from '@prisma/client';
+import { stripHtml } from '../utils/helpers.js';
+import prisma from '../lib/prisma.js';
 
-const prisma = new PrismaClient();
-
-function stripHtml(str) {
-  return String(str).replace(/<[^>]*>/g, '').trim();
-}
-
-async function userRoutes(app) {
-  // POST /api/users/goals — save onboarding goals
+async function subscriberRoutes(app) {
+  // POST /api/subscribers/goals — save onboarding goals
   app.post('/goals', {
     preHandler: [app.authenticate],
     config: {
       rateLimit: { max: 30, timeWindow: '1 minute' },
     },
   }, async (request, reply) => {
-    const userId = request.user.userId;
+    const subscriberId = request.user.userId;
     const { goals } = request.body || {};
 
     if (!goals || (typeof goals !== 'string' && !Array.isArray(goals))) {
@@ -26,12 +21,12 @@ async function userRoutes(app) {
       : stripHtml(String(goals)).slice(0, 500);
 
     try {
-      await prisma.user.update({
-        where: { id: userId },
+      await prisma.subscriber.update({
+        where: { id: subscriberId },
         data: { goals: goalsStr },
       });
 
-      console.log(`[USER] goals saved for user:${userId} → ${goalsStr}`);
+      console.log(`[SUBSCRIBER] goals saved for subscriber:${subscriberId} → ${goalsStr}`);
       return reply.send({ success: true, goals: goalsStr });
     } catch (error) {
       console.error('[ERROR] save goals failed:', error.message);
@@ -40,4 +35,4 @@ async function userRoutes(app) {
   });
 }
 
-export default userRoutes;
+export default subscriberRoutes;

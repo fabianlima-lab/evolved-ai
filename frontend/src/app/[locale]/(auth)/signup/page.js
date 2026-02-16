@@ -38,10 +38,10 @@ function SignupForm() {
     setLoading(true);
     try {
       const data = await apiPost('/auth/signup', { email, password });
-      localStorage.setItem('cw_token', data.token);
+      localStorage.setItem('eai_token', data.token);
       // If user clicked a paid plan CTA, store it for post-onboarding checkout
       if (plan === 'pro' || plan === 'pro_tribe') {
-        localStorage.setItem('cw_selected_plan', plan);
+        localStorage.setItem('eai_selected_plan', plan);
       }
       router.push('/onboarding');
     } catch (err) {
@@ -61,7 +61,7 @@ function SignupForm() {
     <Card className="w-full max-w-md p-8">
       <div className="text-center mb-8">
         <Link href="/" className="font-[family-name:var(--font-display)] text-2xl text-txt">
-          {tCommon('swordEmoji')} {tCommon('clawwarriors')}
+          {tCommon('brandName')}
         </Link>
         <div className="flex justify-center gap-1 mt-6">
           <Link href="/signup" className="px-4 py-2 text-sm font-medium text-txt border-b-2 border-accent">

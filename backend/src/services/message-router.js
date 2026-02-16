@@ -1,16 +1,10 @@
-import { PrismaClient } from '@prisma/client';
-import { isTrialExpired, getFeaturesByTier } from '../utils/helpers.js';
+import { isTrialExpired, getFeaturesByTier, stripHtml } from '../utils/helpers.js';
 import { sendTelegramMessage, startTypingLoop } from './telegram.js';
 import { sendWhatsAppMessage } from './whatsapp.js';
 import { callAI, isAIConfigured } from './ai-client.js';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 
 const MAX_MESSAGE_LENGTH = 4000;
-
-function stripHtml(str) {
-  return str.replace(/<[^>]*>/g, '');
-}
 
 // User-friendly error messages by AI error type
 const ERROR_MESSAGES = {
@@ -18,7 +12,7 @@ const ERROR_MESSAGES = {
   timeout: "⏳ I'm thinking extra hard on this one... but I timed out. Could you try again or rephrase?",
   rate_limited: "🛡️ I'm getting a lot of requests right now. Give me a moment and try again.",
   auth_failed: "🔑 There's an issue with my AI connection. The team has been notified — try again later.",
-  server_error: "⚔️ The AI forge is temporarily down. Try again in a few minutes.",
+  server_error: "⚔️ The AI service is temporarily down. Try again in a few minutes.",
   empty_response: "🤔 I drew a blank on that one. Could you rephrase your question?",
   empty_content: "🤔 I drew a blank on that one. Could you rephrase your question?",
   unknown: "⚠️ Something went wrong on my end. Try again in a moment.",
@@ -28,10 +22,10 @@ const ERROR_MESSAGES = {
  * Main message routing function.
  * Called by webhook handlers after parsing channel-specific payload.
  *
- * 6-step pipeline (from V2 architecture Section 5):
- * 1. RECEIVE → Identify user by channel + channel_id
+ * 6-step pipeline:
+ * 1. RECEIVE → Identify subscriber by channel + channel_id
  * 2. VALIDATE → Check tier (trial expiry)
- * 3. LOAD → Get active warrior config + system prompt
+ * 3. LOAD → Get active agent config + system prompt
  * 4. CONTEXT → Load last 20 messages for conversation history
  * 5. CALL → Send to AI via 3-tier intelligent routing
  * 6. RESPOND → Save message to DB, send response to channel
@@ -52,33 +46,32 @@ export async function routeIncomingMessage({ channel, channelId, text, senderNam
   console.log(`[MSG_IN] ${channel}:${channelId} - len:${cleanText.length}`);
 
   try {
-    // ── Step 1: RECEIVE — Identify user ──
-    const user = await findUserByChannel(channel, channelId);
+    // ── Step 1: RECEIVE — Identify subscriber ──
+    const subscriber = await findSubscriberByChannel(channel, channelId);
 
-    if (!user) {
+    if (!subscriber) {
       await sendChannelReply(channel, channelId,
-        "⚔️ I don't recognize you yet, warrior.\n\nTo connect this channel to your ClawWarriors account:\n1. Sign up at clawwarriors.com\n2. Deploy a warrior\n3. Send your 6-digit connection code here\n\nOr sign up at clawwarriors.com to get started!"
+        "👋 I don't recognize you yet.\n\nTo connect this channel to your Evolved AI account:\n1. Sign up at evolved.ai\n2. Deploy an agent\n3. Send your 6-digit connection code here\n\nOr sign up at evolved.ai to get started!"
       );
       return;
     }
 
     // ── Step 2: VALIDATE — Check trial expiry ──
-    if (isTrialExpired(user)) {
+    if (isTrialExpired(subscriber)) {
       await sendChannelReply(channel, channelId,
-        "⚔️ My power has faded — my trial period has ended. Reactivate me by choosing a plan at clawwarriors.com/dashboard"
+        "⏳ Your trial period has ended. Reactivate by choosing a plan at evolved.ai/dashboard"
       );
       return;
     }
 
-    // ── Step 3: LOAD — Get active warrior ──
-    const warrior = await prisma.warrior.findFirst({
-      where: { userId: user.id, isActive: true },
-      include: { template: true },
+    // ── Step 3: LOAD — Get active agent ──
+    const agent = await prisma.agent.findFirst({
+      where: { subscriberId: subscriber.id, isActive: true },
     });
 
-    if (!warrior) {
+    if (!agent) {
       await sendChannelReply(channel, channelId,
-        "🗡️ You don't have an active warrior deployed.\n\nVisit clawwarriors.com to deploy one!"
+        "🤖 You don't have an active agent deployed.\n\nVisit evolved.ai to deploy one!"
       );
       return;
     }
@@ -95,15 +88,15 @@ export async function routeIncomingMessage({ channel, channelId, text, senderNam
       const [, recentMessages] = await Promise.all([
         prisma.message.create({
           data: {
-            userId: user.id,
-            warriorId: warrior.id,
-            direction: 'in',
+            subscriberId: subscriber.id,
+            agentId: agent.id,
+            role: 'user',
             channel,
             content: cleanText,
           },
         }),
         prisma.message.findMany({
-          where: { userId: user.id, warriorId: warrior.id },
+          where: { subscriberId: subscriber.id, agentId: agent.id },
           orderBy: { createdAt: 'desc' },
           take: 20,
         }),
@@ -111,13 +104,13 @@ export async function routeIncomingMessage({ channel, channelId, text, senderNam
 
       // Reverse to chronological order for the AI
       const conversationHistory = recentMessages.reverse().map((m) => ({
-        role: m.direction === 'in' ? 'user' : 'assistant',
+        role: m.role,
         content: m.content,
       }));
 
       // ── Step 5: CALL — Send to AI via 3-tier routing ──
-      const features = getFeaturesByTier(user.tier);
-      const aiResponse = await generateAIResponse(warrior, conversationHistory, {
+      const features = getFeaturesByTier(subscriber.tier);
+      const aiResponse = await generateAIResponse(agent, conversationHistory, {
         webSearch: features.web_search,
         userMessage: cleanText,
       });
@@ -126,9 +119,9 @@ export async function routeIncomingMessage({ channel, channelId, text, senderNam
       await Promise.all([
         prisma.message.create({
           data: {
-            userId: user.id,
-            warriorId: warrior.id,
-            direction: 'out',
+            subscriberId: subscriber.id,
+            agentId: agent.id,
+            role: 'assistant',
             channel,
             content: aiResponse,
           },
@@ -143,25 +136,27 @@ export async function routeIncomingMessage({ channel, channelId, text, senderNam
   } catch (error) {
     console.error(`[ERROR] message routing failed: ${error.message}`);
     await sendChannelReply(channel, channelId,
-      "⚠️ Something went wrong. Your warrior is recovering — try again in a moment."
+      "⚠️ Something went wrong. Your agent is recovering — try again in a moment."
     ).catch(() => {}); // Swallow reply errors
   }
 }
 
 /**
- * Find a user by their channel type and channel ID.
- * Checks both primary (channel/channelId) and secondary (channel2/channel2Id) slots
- * in a single OR query for speed.
+ * Find a subscriber by their channel type and channel ID.
+ * Looks up by whatsappJid for WhatsApp, or by telegramChatId for Telegram.
  */
-async function findUserByChannel(channel, channelId) {
-  return prisma.user.findFirst({
-    where: {
-      OR: [
-        { channel, channelId },
-        { channel2: channel, channel2Id: channelId },
-      ],
-    },
-  });
+async function findSubscriberByChannel(channel, channelId) {
+  if (channel === 'whatsapp') {
+    return prisma.subscriber.findFirst({
+      where: { whatsappJid: channelId },
+    });
+  }
+  if (channel === 'telegram') {
+    return prisma.subscriber.findFirst({
+      where: { telegramChatId: channelId },
+    });
+  }
+  return null;
 }
 
 /**
@@ -181,33 +176,33 @@ async function sendChannelReply(channel, channelId, text) {
  * Generate AI response using 3-tier intelligent model routing.
  * Falls back to a friendly in-character message if AI is unavailable.
  *
- * @param {object} warrior - Warrior record with template included
+ * @param {object} agent - Agent record
  * @param {Array} conversationHistory - Formatted message array
  * @param {object} options - { webSearch: boolean, userMessage: string }
  * @returns {string} Response text
  */
-async function generateAIResponse(warrior, conversationHistory, options = {}) {
-  const name = warrior.customName || warrior.template.name;
+async function generateAIResponse(agent, conversationHistory, options = {}) {
+  const name = agent.name;
 
   // If AI is not configured, return a stub response
   if (!isAIConfigured()) {
-    console.log(`[MSG_OUT] AI not configured, using stub for warrior:${warrior.id}`);
+    console.log(`[MSG_OUT] AI not configured, using stub for agent:${agent.id}`);
     return ERROR_MESSAGES.ai_not_configured;
   }
 
   const { content, error, tier, model, responseTimeMs } = await callAI(
-    warrior.systemPrompt,
+    agent.systemPrompt,
     conversationHistory,
     { webSearch: options.webSearch, userMessage: options.userMessage },
   );
 
   if (error) {
-    console.error(`[ERROR] AI response error for warrior:${warrior.id} - ${error} (tier:${tier} model:${model})`);
+    console.error(`[ERROR] AI response error for agent:${agent.id} - ${error} (tier:${tier} model:${model})`);
     return ERROR_MESSAGES[error] || ERROR_MESSAGES.unknown;
   }
 
-  console.log(`[MSG_OUT] warrior:${warrior.id} tier:${tier} model:${model} time:${responseTimeMs}ms len:${content.length}`);
+  console.log(`[MSG_OUT] agent:${agent.id} tier:${tier} model:${model} time:${responseTimeMs}ms len:${content.length}`);
   return content;
 }
 
-export { findUserByChannel, generateAIResponse };
+export { findSubscriberByChannel, generateAIResponse };

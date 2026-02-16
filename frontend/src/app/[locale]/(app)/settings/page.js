@@ -17,7 +17,6 @@ export default function SettingsPage() {
   const [passwordMsg, setPasswordMsg] = useState('');
   const [passwordErr, setPasswordErr] = useState('');
   const [loading, setLoading] = useState(false);
-  const [portalLoading, setPortalLoading] = useState(false);
 
   useEffect(() => {
     apiFetch('/dashboard/stats')
@@ -59,18 +58,8 @@ export default function SettingsPage() {
     }
   };
 
-  const handleManageSubscription = async () => {
-    setPortalLoading(true);
-    try {
-      const data = await apiPost('/billing/portal', {});
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    } catch {
-      // Stripe portal not configured
-    } finally {
-      setPortalLoading(false);
-    }
+  const handleManageSubscription = () => {
+    window.open('https://evolved.ai/account', '_blank');
   };
 
   return (
@@ -145,7 +134,7 @@ export default function SettingsPage() {
         <p className="text-sm text-txt-muted mb-4">
           {t('subscriptionDesc')}
         </p>
-        <Button variant="ghost" onClick={handleManageSubscription} loading={portalLoading}>
+        <Button variant="ghost" onClick={handleManageSubscription}>
           {t('manageSubscription')}
         </Button>
       </Card>

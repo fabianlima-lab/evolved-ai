@@ -16,23 +16,16 @@
   --color-txt-dim: #5a5660;
   --color-txt-faint: #3a3d50;
 
-  /* Brand Accent */
-  --color-accent: #e8632b;
-  --color-accent-glow: rgba(232, 99, 43, 0.15);
-
-  /* Class Colors */
-  --color-guardian: #4A9EFF;
-  --color-scholar: #B47AFF;
-  --color-bard: #FFB347;
-  --color-artificer: #FF7847;
-  --color-rogue: #47FFB3;
+  /* Brand Accent — Teal */
+  --color-accent: #8BC4C6;
+  --color-accent-glow: rgba(139, 196, 198, 0.15);
 
   /* Semantic */
   --color-danger: #FF4D6A;
   --color-success: #34d399;
 
   /* Fonts */
-  --font-display: 'Cinzel', Georgia, serif;
+  --font-display: 'DM Sans', -apple-system, sans-serif;
   --font-body: 'DM Sans', -apple-system, sans-serif;
   --font-mono: 'DM Mono', monospace;
 
@@ -48,7 +41,7 @@ body {
 }
 
 ::selection {
-  background: rgba(232, 99, 43, 0.3);
+  background: rgba(139, 196, 198, 0.3);
 }
 
 /* Scrollbar styling */
