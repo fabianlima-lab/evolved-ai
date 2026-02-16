@@ -26,34 +26,23 @@ describe('Channel Routes', () => {
       const res = await app.inject({
         method: 'POST',
         url: '/api/channels/connect/request',
-        payload: { channel: 'telegram' },
+        payload: {},
       });
       expect(res.statusCode).toBe(401);
     });
 
-    it('generates a 6-digit code for telegram', async () => {
+    it('generates a 6-digit code', async () => {
       const res = await app.inject({
         method: 'POST',
         url: '/api/channels/connect/request',
         headers: { authorization: 'Bearer ' + token },
-        payload: { channel: 'telegram' },
+        payload: {},
       });
 
       expect(res.statusCode).toBe(200);
       const body = JSON.parse(res.body);
       expect(body.code).toMatch(/^\d{6}$/);
-      expect(body.channel).toBe('telegram');
       expect(body.expires_in).toBe(600);
-    });
-
-    it('rejects invalid channel with 400', async () => {
-      const res = await app.inject({
-        method: 'POST',
-        url: '/api/channels/connect/request',
-        headers: { authorization: 'Bearer ' + token },
-        payload: { channel: 'discord' },
-      });
-      expect(res.statusCode).toBe(400);
     });
   });
 
@@ -67,8 +56,7 @@ describe('Channel Routes', () => {
     it('returns connected channels', async () => {
       mockPrisma.subscriber.findUnique.mockResolvedValue({
         id: 'test-subscriber-id',
-        telegramChatId: '123456',
-        whatsappJid: null,
+        whatsappJid: '+1234567890',
       });
 
       const res = await app.inject({
@@ -79,24 +67,23 @@ describe('Channel Routes', () => {
 
       expect(res.statusCode).toBe(200);
       const body = JSON.parse(res.body);
-      expect(body.channels).toHaveLength(1);
-      expect(body.channels[0].channel).toBe('telegram');
+      expect(body.whatsapp_connected).toBe(true);
+      expect(body.whatsapp_jid).toBe('+1234567890');
     });
   });
 
   // ── Disconnect ──
-  describe('DELETE /api/channels/:channel', () => {
+  describe('DELETE /api/channels/whatsapp', () => {
     it('disconnects a connected channel', async () => {
       mockPrisma.subscriber.findUnique.mockResolvedValue({
         id: 'test-subscriber-id',
-        telegramChatId: '123456',
-        whatsappJid: null,
+        whatsappJid: '+1234567890',
       });
       mockPrisma.subscriber.update.mockResolvedValue({});
 
       const res = await app.inject({
         method: 'DELETE',
-        url: '/api/channels/telegram',
+        url: '/api/channels/whatsapp',
         headers: { authorization: 'Bearer ' + token },
       });
 
@@ -108,13 +95,12 @@ describe('Channel Routes', () => {
     it('returns 404 for non-connected channel', async () => {
       mockPrisma.subscriber.findUnique.mockResolvedValue({
         id: 'test-subscriber-id',
-        telegramChatId: null,
         whatsappJid: null,
       });
 
       const res = await app.inject({
         method: 'DELETE',
-        url: '/api/channels/telegram',
+        url: '/api/channels/whatsapp',
         headers: { authorization: 'Bearer ' + token },
       });
 

@@ -65,7 +65,6 @@ describe('Admin Routes', () => {
         '/api/admin/subscribers',
         '/api/admin/messages',
         '/api/admin/popular-agents',
-        '/api/admin/channels',
       ];
       for (const url of endpoints) {
         const res = await app.inject({
@@ -285,8 +284,8 @@ describe('Admin Routes', () => {
   describe('GET /api/admin/popular-agents', () => {
     it('returns ranked agents', async () => {
       mockPrisma.agent.groupBy.mockResolvedValue([
-        { name: 'Sales Bot', _count: { id: 15 } },
-        { name: 'Support Bot', _count: { id: 10 } },
+        { assistantName: 'Sales Bot', _count: { id: 15 } },
+        { assistantName: 'Support Bot', _count: { id: 10 } },
       ]);
 
       const res = await app.inject({
@@ -303,33 +302,4 @@ describe('Admin Routes', () => {
     });
   });
 
-  // ── GET /api/admin/channels ──
-  describe('GET /api/admin/channels', () => {
-    it('returns channel usage breakdown', async () => {
-      mockPrisma.subscriber.groupBy
-        .mockResolvedValueOnce([  // primary
-          { channel: 'telegram', _count: { id: 50 } },
-        ])
-        .mockResolvedValueOnce([  // secondary
-          { channel2: 'whatsapp', _count: { id: 5 } },
-        ]);
-      mockPrisma.message.groupBy.mockResolvedValue([
-        { channel: 'telegram', _count: { id: 3000 } },
-        { channel: 'web', _count: { id: 800 } },
-      ]);
-
-      const res = await app.inject({
-        method: 'GET',
-        url: '/api/admin/channels',
-        headers: { authorization: 'Bearer ' + adminToken },
-      });
-
-      expect(res.statusCode).toBe(200);
-      const body = JSON.parse(res.body);
-      expect(body.connected_channels).toBeDefined();
-      expect(body.message_channels).toBeDefined();
-      expect(body.connected_channels.find(c => c.channel === 'telegram').count).toBe(50);
-      expect(body.message_channels.find(c => c.channel === 'web').count).toBe(800);
-    });
-  });
 });

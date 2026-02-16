@@ -12,47 +12,6 @@ describe('Webhook Routes', () => {
     await app.close();
   });
 
-  describe('POST /api/webhooks/telegram', () => {
-    it('always returns 200', async () => {
-      const res = await app.inject({
-        method: 'POST',
-        url: '/api/webhooks/telegram',
-        payload: {},
-      });
-      expect(res.statusCode).toBe(200);
-    });
-
-    it('handles /start command', async () => {
-      const res = await app.inject({
-        method: 'POST',
-        url: '/api/webhooks/telegram',
-        payload: {
-          message: {
-            chat: { id: 12345 },
-            from: { first_name: 'Test' },
-            text: '/start',
-          },
-        },
-      });
-      expect(res.statusCode).toBe(200);
-    });
-
-    it('handles regular text messages', async () => {
-      const res = await app.inject({
-        method: 'POST',
-        url: '/api/webhooks/telegram',
-        payload: {
-          message: {
-            chat: { id: 12345 },
-            from: { first_name: 'Test' },
-            text: 'Hello agent!',
-          },
-        },
-      });
-      expect(res.statusCode).toBe(200);
-    });
-  });
-
   describe('POST /api/webhooks/whatsapp', () => {
     it('always returns 200', async () => {
       const res = await app.inject({

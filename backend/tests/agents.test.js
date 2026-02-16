@@ -81,7 +81,7 @@ describe('Agent Routes', () => {
         method: 'POST',
         url: '/api/agents/deploy',
         headers: { authorization: 'Bearer ' + token },
-        payload: { name: 'My Agent' },
+        payload: { name: 'My Agent', systemPrompt: 'test' },
       });
       expect(res.statusCode).toBe(403);
     });
