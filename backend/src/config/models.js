@@ -1,23 +1,41 @@
 /**
- * Model configuration — Single model per locked decision.
+ * Model configuration — Primary + Fallback
  *
- * Uses meta/llama-3.1-8b-instruct for ALL queries.
- * No tier routing. One model, consistent personality.
+ * Primary:  meta/llama-3.1-8b-instruct via NVIDIA NIMs
+ * Fallback: llama-3.3-70b-versatile via Groq (free, faster, smarter)
  *
- * NVIDIA NIMs (OpenAI-compatible API).
+ * Both are OpenAI-compatible APIs.
  */
 
-export const MODEL_CONFIG = {
+export const PRIMARY_CONFIG = {
+  provider: 'nvidia',
   model: 'meta/llama-3.1-8b-instruct',
+  baseURL: 'https://integrate.api.nvidia.com/v1',
   temperature: 0.7,
-  maxTokens: 600,   // Enough for conversational response + action tags
+  maxTokens: 600,
   timeoutMs: 30000,
 };
 
-export const NVIDIA_BASE_URL = 'https://integrate.api.nvidia.com/v1';
-
-// Legacy exports for backward compatibility during transition
-export const MODEL_TIERS = {
-  1: { ...MODEL_CONFIG, name: 'Default' },
+export const FALLBACK_CONFIG = {
+  provider: 'groq',
+  model: 'llama-3.3-70b-versatile',
+  baseURL: 'https://api.groq.com/openai/v1',
+  temperature: 0.7,
+  maxTokens: 600,
+  timeoutMs: 30000,
 };
-export const FALLBACK_CHAIN = { 1: null };
+
+// Legacy exports for backward compatibility
+export const MODEL_CONFIG = PRIMARY_CONFIG;
+export const NVIDIA_BASE_URL = PRIMARY_CONFIG.baseURL;
+export const GROQ_BASE_URL = FALLBACK_CONFIG.baseURL;
+
+export const MODEL_TIERS = {
+  1: { ...PRIMARY_CONFIG, name: 'Primary (NVIDIA)' },
+  2: { ...FALLBACK_CONFIG, name: 'Fallback (Groq)' },
+};
+
+export const FALLBACK_CHAIN = {
+  1: 2,    // NVIDIA fails → try Groq
+  2: null, // Groq fails → no more fallbacks
+};

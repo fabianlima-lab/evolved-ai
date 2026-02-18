@@ -29,8 +29,9 @@ const env = {
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI,
 
-  // AI Models (3-tier routing via NVIDIA NIMs)
+  // AI Models — Primary: NVIDIA NIMs, Fallback: Groq
   NVIDIA_API_KEY: process.env.NVIDIA_API_KEY,
+  GROQ_API_KEY: process.env.GROQ_API_KEY,
   MODEL_ROUTING_ENABLED: process.env.MODEL_ROUTING_ENABLED !== 'false', // default: true
   LOG_ROUTING_DECISIONS: process.env.LOG_ROUTING_DECISIONS !== 'false', // default: true
 
