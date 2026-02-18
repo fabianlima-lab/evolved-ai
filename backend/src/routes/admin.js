@@ -195,14 +195,14 @@ async function adminRoutes(app) {
   }, async (request, reply) => {
     try {
       const popular = await prisma.agent.groupBy({
-        by: ['assistantName'],
+        by: ['name'],
         _count: { id: true },
         orderBy: { _count: { id: 'desc' } },
         take: 15,
       });
 
       const agents = popular.map(p => ({
-        name: p.assistantName || 'Unnamed',
+        name: p.name || 'Unnamed',
         deploy_count: p._count.id,
       }));
 

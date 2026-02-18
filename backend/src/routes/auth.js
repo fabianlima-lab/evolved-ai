@@ -11,6 +11,24 @@ const googleClient = env.GOOGLE_CLIENT_ID
   ? new OAuth2Client(env.GOOGLE_CLIENT_ID)
   : null;
 
+// OAuth2 client for authorization code flow (needs client secret)
+const googleOAuth2 = (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET)
+  ? new OAuth2Client(env.GOOGLE_CLIENT_ID, env.GOOGLE_CLIENT_SECRET, env.GOOGLE_REDIRECT_URI)
+  : null;
+
+// Scopes required for Evolved AI Google API integration
+const GOOGLE_SCOPES = [
+  'openid',
+  'email',
+  'profile',
+  'https://www.googleapis.com/auth/gmail.modify',
+  'https://www.googleapis.com/auth/calendar.events',
+  'https://www.googleapis.com/auth/contacts.readonly',
+  'https://www.googleapis.com/auth/drive.file',           // Create/access files created by the app
+  'https://www.googleapis.com/auth/documents',             // Google Docs read/write
+  'https://www.googleapis.com/auth/spreadsheets',          // Google Sheets read/write
+];
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 async function authRoutes(app) {
@@ -37,6 +55,25 @@ async function authRoutes(app) {
     try {
       const existing = await prisma.subscriber.findUnique({ where: { email } });
       if (existing) {
+        // If this is a Kajabi-provisioned subscriber with no password yet,
+        // allow them to "claim" the account by setting their password
+        if (existing.kajabiContactId && !existing.passwordHash) {
+          const passwordHash = await bcrypt.hash(password, 10);
+          const subscriber = await prisma.subscriber.update({
+            where: { id: existing.id },
+            data: {
+              passwordHash,
+              authProvider: 'email',
+            },
+          });
+          const token = app.jwt.sign({ userId: subscriber.id, email: subscriber.email });
+          console.log(`[AUTH] signup-claimed-kajabi: ${subscriber.id}`);
+          return reply.code(200).send({
+            subscriber_id: subscriber.id,
+            token,
+            claimed_kajabi: true,
+          });
+        }
         return reply.code(409).send({ error: 'Email already registered' });
       }
 
@@ -47,7 +84,7 @@ async function authRoutes(app) {
           email,
           passwordHash,
           tier: 'trial',
-          trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+          trialEndsAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
         },
       });
 
@@ -159,7 +196,7 @@ async function authRoutes(app) {
               googleId,
               authProvider: 'google',
               tier: 'trial',
-              trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+              trialEndsAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
             },
           });
           isNewSubscriber = true;
@@ -181,6 +218,110 @@ async function authRoutes(app) {
       console.error('[ERROR] google auth failed:', error.message);
       if (error.message?.includes('Token used too late') || error.message?.includes('Invalid token')) {
         return reply.code(401).send({ error: 'Google authentication failed. Please try again.' });
+      }
+      return reply.code(500).send({ error: 'Something went wrong. Try again in a moment.' });
+    }
+  });
+
+  // ─────────────────────────────────────────────
+  // GET /api/auth/google/url
+  // Returns the Google OAuth consent URL with expanded scopes.
+  // The frontend redirects the user to this URL during onboarding.
+  // ─────────────────────────────────────────────
+  app.get('/google/url', {
+    preHandler: [app.authenticate],
+    config: {
+      rateLimit: { max: 10, timeWindow: '1 minute' },
+    },
+  }, async (request, reply) => {
+    if (!googleOAuth2) {
+      return reply.code(503).send({ error: 'Google OAuth is not fully configured (missing client secret or redirect URI)' });
+    }
+
+    const subscriberId = request.user.userId;
+
+    // Generate consent URL with required scopes
+    const url = googleOAuth2.generateAuthUrl({
+      access_type: 'offline',       // Get refresh token
+      prompt: 'consent',             // Force consent to always get refresh token
+      scope: GOOGLE_SCOPES,
+      state: subscriberId,           // Pass subscriber ID through OAuth flow
+      include_granted_scopes: true,
+    });
+
+    return reply.send({ url });
+  });
+
+  // ─────────────────────────────────────────────
+  // POST /api/auth/google/callback
+  // Exchanges an authorization code for access + refresh tokens.
+  // Called by the frontend after Google redirects back.
+  // Stores tokens and granted scopes on the subscriber.
+  // ─────────────────────────────────────────────
+  app.post('/google/callback', {
+    preHandler: [app.authenticate],
+    config: {
+      rateLimit: { max: 10, timeWindow: '1 minute' },
+    },
+  }, async (request, reply) => {
+    const { code } = request.body || {};
+    const subscriberId = request.user.userId;
+
+    if (!code) {
+      return reply.code(400).send({ error: 'Authorization code is required' });
+    }
+
+    if (!googleOAuth2) {
+      return reply.code(503).send({ error: 'Google OAuth is not fully configured' });
+    }
+
+    try {
+      // Exchange authorization code for tokens
+      const { tokens } = await googleOAuth2.getToken(code);
+
+      if (!tokens.access_token) {
+        return reply.code(400).send({ error: 'Failed to obtain access token from Google' });
+      }
+
+      // Verify the ID token to get user info
+      googleOAuth2.setCredentials(tokens);
+      const tokenInfo = await googleOAuth2.verifyIdToken({
+        idToken: tokens.id_token,
+        audience: env.GOOGLE_CLIENT_ID,
+      });
+      const googlePayload = tokenInfo.getPayload();
+      const { sub: googleId, email } = googlePayload;
+
+      // Build update data
+      const updateData = {
+        googleId,
+        googleAccessToken: tokens.access_token,
+        googleRefreshToken: tokens.refresh_token || undefined, // Only update if provided
+        googleScopes: tokens.scope || GOOGLE_SCOPES.join(' '),
+        authProvider: 'google',
+      };
+
+      if (tokens.expiry_date) {
+        updateData.googleAccessTokenExpiry = new Date(tokens.expiry_date);
+      }
+
+      // Update subscriber with tokens
+      const subscriber = await prisma.subscriber.update({
+        where: { id: subscriberId },
+        data: updateData,
+      });
+
+      console.log(`[AUTH] google-oauth-scopes: ${subscriber.id} (scopes: ${updateData.googleScopes})`);
+
+      return reply.send({
+        success: true,
+        scopes: updateData.googleScopes,
+        email,
+      });
+    } catch (error) {
+      console.error('[ERROR] google callback failed:', error.message);
+      if (error.message?.includes('invalid_grant')) {
+        return reply.code(400).send({ error: 'Authorization code expired or already used. Please try again.' });
       }
       return reply.code(500).send({ error: 'Something went wrong. Try again in a moment.' });
     }
@@ -330,6 +471,38 @@ async function authRoutes(app) {
       return reply.send({ message: 'Password updated successfully.' });
     } catch (err) {
       console.error('[ERROR] change-password failed:', err.message);
+      return reply.code(500).send({ error: 'Something went wrong. Try again in a moment.' });
+    }
+  });
+
+  // ─────────────────────────────────────────────
+  // POST /api/auth/google/disconnect
+  // Removes Google API tokens (Calendar/Gmail access).
+  // Does NOT remove the Google login link (googleId stays).
+  // ─────────────────────────────────────────────
+  app.post('/google/disconnect', {
+    preHandler: [app.authenticate],
+    config: {
+      rateLimit: { max: 5, timeWindow: '1 minute' },
+    },
+  }, async (request, reply) => {
+    const subscriberId = request.user.userId;
+
+    try {
+      await prisma.subscriber.update({
+        where: { id: subscriberId },
+        data: {
+          googleAccessToken: null,
+          googleRefreshToken: null,
+          googleAccessTokenExpiry: null,
+          googleScopes: null,
+        },
+      });
+
+      console.log(`[AUTH] google-disconnect: ${subscriberId}`);
+      return reply.send({ success: true });
+    } catch (err) {
+      console.error('[ERROR] google disconnect failed:', err.message);
       return reply.code(500).send({ error: 'Something went wrong. Try again in a moment.' });
     }
   });

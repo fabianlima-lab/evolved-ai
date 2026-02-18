@@ -1,5 +1,11 @@
-import { isTrialExpired, getFeaturesByTier, stripHtml } from '../utils/helpers.js';
+import { isTrialExpired, stripHtml } from '../utils/helpers.js';
+import { compileSoulMd } from '../prompts/soul.js';
 import { callAI, isAIConfigured } from '../services/ai-client.js';
+import { buildLiveContext } from '../services/context-builder.js';
+import { parseReminderFromText } from '../utils/reminder-parser.js';
+import { createReminder } from '../services/reminders.js';
+import { parseActions, stripActionTags, hasActions } from '../utils/action-parser.js';
+import { executeAllActions } from '../services/action-executor.js';
 import prisma from '../lib/prisma.js';
 
 const MAX_MESSAGE_LENGTH = 4000;
@@ -93,12 +99,49 @@ async function chatRoutes(app) {
         content: m.content,
       }));
 
-      // Call AI with 3-tier routing
-      const features = getFeaturesByTier(subscriber.tier);
+      // Build live context (calendar, email, reminders) — fresh every message
+      let liveContext = '';
+      try {
+        liveContext = await buildLiveContext(subscriber);
+      } catch (err) {
+        console.error(`[CHAT] Live context build failed: ${err.message}`);
+      }
+
+      // Compile SOUL.md FRESH from template + subscriber profile + live context
+      // This ensures template updates are immediately reflected
+      const FALLBACK_PROMPT = 'You are a helpful personal assistant. Be concise, friendly, and proactive.';
+      let systemPrompt;
+      try {
+        systemPrompt = compileSoulMd({
+          assistantName: agent.name,
+          profileData: subscriber.profileData,
+          subscriber,
+          liveContext,
+        });
+      } catch (err) {
+        console.error('[CHAT] SOUL.md compilation failed, using DB fallback:', err.message);
+        systemPrompt = agent.soulMd || agent.systemPrompt || FALLBACK_PROMPT;
+      }
+
+      // Check for reminder intent in user message (background)
+      try {
+        const tz = subscriber.profileData?.timezone || 'America/New_York';
+        const parsed = parseReminderFromText(cleanMessage, tz);
+        if (parsed) {
+          await createReminder(subscriberId, {
+            title: parsed.title,
+            dueAt: parsed.dueAt,
+            agentId: agent.id,
+          });
+        }
+      } catch (err) {
+        console.error(`[CHAT] Reminder parse/create failed: ${err.message}`);
+      }
+
       const { content, error, tier, model, responseTimeMs } = await callAI(
-        agent.systemPrompt,
+        systemPrompt,
         conversationHistory,
-        { webSearch: features.web_search, userMessage: cleanMessage },
+        { userMessage: cleanMessage },
       );
 
       if (error) {
@@ -124,6 +167,30 @@ async function chatRoutes(app) {
         });
       }
 
+      // Execute any action tags in the AI response
+      let finalContent = content;
+      if (hasActions(content)) {
+        const actions = parseActions(content);
+        console.log(`[CHAT:ACTION] Found ${actions.length} action(s):`, actions.map((a) => a.action));
+
+        const { results } = await executeAllActions(actions, subscriber, { agentId: agent.id });
+
+        // Strip action tags from user-facing message
+        finalContent = stripActionTags(content);
+
+        // Append error messages from failed actions
+        const errors = results.filter((r) => !r.success && r.result);
+        if (errors.length > 0) {
+          finalContent += '\n\n' + errors.map((e) => e.result).join('\n');
+        }
+
+        // Append info results (search results, links, etc.)
+        const infoResults = results.filter((r) => r.success && r.result);
+        if (infoResults.length > 0) {
+          finalContent += '\n\n' + infoResults.map((r) => r.result).join('\n');
+        }
+      }
+
       // Save AI response
       await prisma.message.create({
         data: {
@@ -131,14 +198,14 @@ async function chatRoutes(app) {
           agentId: agent.id,
           role: 'assistant',
           channel: 'web',
-          content,
+          content: finalContent,
         },
       });
 
       console.log(`[CHAT:WEB] agent:${agent.id} tier:${tier} model:${model} time:${responseTimeMs}ms`);
 
       return reply.send({
-        response: content,
+        response: finalContent,
         tier,
         model,
         responseTimeMs,

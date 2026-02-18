@@ -1,83 +1,88 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
+import { KAJABI_CHECKOUT_URL } from '@/lib/constants';
 
 export default function HeroSection() {
-  const [visible, setVisible] = useState(false);
-  const t = useTranslations('Hero');
-
-  useEffect(() => { setTimeout(() => setVisible(true), 100); }, []);
+  const t = useTranslations('Landing');
 
   return (
-    <section id="hero" className="min-h-[90vh] flex flex-col items-center justify-center text-center px-6 py-20 relative overflow-hidden">
-      {/* Radial glow */}
+    <section className="min-h-screen flex items-center justify-center relative pt-32 pb-20 lg:pt-36 lg:pb-24 px-6 lg:px-12 overflow-hidden" style={{ background: 'var(--color-brand-cream)' }}>
+      {/* Subtle radial gradients */}
       <div
-        className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(232,99,43,0.08) 0%, transparent 70%)' }}
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `
+            radial-gradient(ellipse at 20% 50%, rgba(139, 196, 198, 0.1) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 20%, rgba(206, 236, 228, 0.12) 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 80%, rgba(225, 199, 166, 0.08) 0%, transparent 50%)
+          `,
+        }}
       />
 
-      <div
-        className="relative transition-all duration-700"
-        style={{
-          opacity: visible ? 1 : 0,
-          transform: visible ? 'translateY(0)' : 'translateY(30px)',
-          transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        }}
-      >
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 bg-accent-glow border border-[rgba(232,99,43,0.2)] rounded-full px-4 py-1.5 mb-8">
-          <span className="text-xs font-semibold text-accent tracking-[1.5px] uppercase">
-            {t('badge')}
-          </span>
-        </div>
+      <div className="max-w-[800px] text-center relative z-[2]">
+        {/* Eyebrow */}
+        <p
+          className="text-[0.7rem] uppercase tracking-[0.3em] text-brand-teal font-semibold mb-8"
+          style={{ opacity: 0, animation: 'fadeUp 1s ease 0.2s forwards' }}
+        >
+          {t('heroEyebrow')}
+        </p>
 
         {/* Headline */}
-        <h1 className="font-[family-name:var(--font-display)] text-[clamp(40px,6vw,72px)] font-extrabold text-txt leading-[1.1] max-w-[800px] mx-auto mb-6">
-          {t('headlineTop')}<br />
-          <span className="text-accent">{t('headlineAccent')}</span>
+        <h1
+          className="font-[family-name:var(--font-display)] text-brand-charcoal font-light leading-[1.15] mb-6"
+          style={{ fontSize: 'clamp(2.8rem, 6vw, 4.5rem)', opacity: 0, animation: 'fadeUp 1s ease 0.4s forwards' }}
+        >
+          {t('heroHeadline')}<br />
+          {t('heroHeadline2')}<br />
+          <em className="italic text-brand-teal font-normal">{t('heroHeadlineEm')}</em>
         </h1>
 
-        {/* Subtitle */}
-        <p className="text-[clamp(18px,2vw,22px)] text-txt-muted max-w-[580px] mx-auto mb-4 leading-relaxed">
-          {t('subtitle')}
-        </p>
-        <p className="text-[17px] text-txt-dim max-w-[480px] mx-auto mb-10 leading-normal">
-          {t('subtitleSecondary')}
+        {/* Subheadline */}
+        <p
+          className="text-[1.05rem] leading-[1.8] text-brand-brown font-light max-w-[580px] mx-auto mb-10"
+          style={{ opacity: 0, animation: 'fadeUp 1s ease 0.6s forwards' }}
+        >
+          {t('heroSub')}
         </p>
 
-        {/* CTAs */}
-        <div className="flex gap-4 justify-center flex-wrap">
-          <Link
-            href="/signup"
-            className="bg-accent text-white border-none rounded-[var(--radius-btn)] px-8 py-3.5 text-base font-bold hover:opacity-90 transition-all"
-            style={{ boxShadow: '0 4px 24px rgba(232,99,43,0.3)' }}
+        {/* CTAs — hash scroll handled by page-level interceptor */}
+        <div
+          className="flex gap-4 justify-center flex-wrap"
+          style={{ opacity: 0, animation: 'fadeUp 1s ease 0.8s forwards' }}
+        >
+          <a
+            href={KAJABI_CHECKOUT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-brand-deep-green text-brand-cream px-10 py-4 text-[0.72rem] uppercase tracking-[0.2em] font-semibold border-none cursor-pointer transition-all duration-400 no-underline inline-block hover:bg-brand-teal hover:text-brand-deep-green hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(139,196,198,0.3)]"
           >
-            {t('ctaPrimary')}
-          </Link>
-          <Link
-            href="/demo"
-            className="bg-transparent text-txt-muted border border-border rounded-[var(--radius-btn)] px-8 py-3.5 text-base font-medium hover:bg-elevated transition-all"
+            {t('heroCta')}
+          </a>
+          <button
+            onClick={() => {
+              const el = document.getElementById('how');
+              if (el) {
+                const top = el.getBoundingClientRect().top + window.scrollY - 80;
+                window.scrollTo(0, top);
+                window.history.replaceState(null, '', '#how');
+              }
+            }}
+            className="bg-transparent text-brand-charcoal px-10 py-4 text-[0.72rem] uppercase tracking-[0.2em] font-semibold border-[1.5px] border-brand-charcoal cursor-pointer transition-all duration-400 hover:bg-brand-deep-green hover:text-brand-cream hover:-translate-y-0.5"
           >
-            {t('ctaSecondary')}
-          </Link>
+            {t('heroSecondaryCta')}
+          </button>
         </div>
 
-        {/* Trust bar */}
-        <div className="flex items-center justify-center gap-6 mt-12 flex-wrap">
-          {[
-            { icon: '💬', textKey: 'trustChat' },
-            { icon: '♾️', textKey: 'trustUnlimited' },
-            { icon: '🧠', textKey: 'trustMemory' },
-            { icon: '🔒', textKey: 'trustFree' },
-          ].map((item) => (
-            <div key={item.textKey} className="flex items-center gap-1.5 text-txt-dim text-[15px]">
-              <span>{item.icon}</span>
-              <span>{t(item.textKey)}</span>
-            </div>
-          ))}
-        </div>
+        {/* Note */}
+        <p
+          className="mt-6 text-[0.78rem] text-brand-text-light italic"
+          style={{ opacity: 0, animation: 'fadeUp 1s ease 1s forwards' }}
+        >
+          {t('heroNote')}<br />
+          <span className="inline-flex items-center gap-1">🔒 {t('heroNoteSecurity')}</span>
+        </p>
       </div>
     </section>
   );

@@ -3,8 +3,8 @@ import prisma from '../src/lib/prisma.js';
 /**
  * Evolved AI — Database Seed
  *
- * Seeds a demo agent for the public demo chat feature.
- * In production, agents are provisioned per-subscriber via OpenClaw.
+ * Resets the database for a clean start.
+ * Agents are provisioned per-subscriber during onboarding.
  */
 
 const EVOLVED_AI_SYSTEM_PROMPT = `You are an Evolved AI assistant — a personal chief of staff created by Evolved AI (evolved.ai), founded by Dr. Bethany Weinheimer.
@@ -35,7 +35,7 @@ async function main() {
   await prisma.subscriber.deleteMany();
 
   console.log('[SEED] Cleaned existing data');
-  console.log('[SEED] Evolved AI seed complete — agents are provisioned per-subscriber via OpenClaw');
+  console.log('[SEED] Evolved AI seed complete — agents are provisioned per-subscriber during onboarding');
 }
 
 main()

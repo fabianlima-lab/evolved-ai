@@ -66,7 +66,7 @@ export default function LoginPage() {
           <GoogleLogin
             onSuccess={handleCredentialResponse}
             onError={() => setError(t('googleFailed'))}
-            theme="filled_black"
+            theme="outline"
             size="large"
             width="400"
             text="continue_with"

@@ -14,7 +14,7 @@ export async function generateMetadata({ params }) {
   const meta = messages.Metadata || {};
   return {
     title: meta.siteTitle || 'Evolved AI — Your Personal Chief of Staff',
-    description: meta.siteDescription || 'Deploy personalized AI agents to Telegram and WhatsApp.',
+    description: meta.siteDescription || 'AI-powered personal assistant on WhatsApp. Manages your inbox, calendar, tasks, and more.',
     manifest: '/manifest.json',
     icons: {
       icon: [{ url: '/icon.png?v=2', type: 'image/png', sizes: '64x64' }],

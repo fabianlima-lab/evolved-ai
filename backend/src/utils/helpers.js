@@ -1,19 +1,27 @@
-const VALID_TIERS = ['trial', 'active'];
+const VALID_TIERS = ['trial', 'active', 'cancelled'];
 
+// Single plan: $49/month, all features. Trial gets FULL access per instructions.
 const TIER_FEATURES = {
   trial: {
     max_active_agents: 1,
     max_channels: 1,
-    custom_name: false,
-    custom_tone: false,
-    web_search: true,
-  },
-  active: {
-    max_active_agents: 3,
-    max_channels: 2,
     custom_name: true,
     custom_tone: true,
     web_search: true,
+  },
+  active: {
+    max_active_agents: 1,
+    max_channels: 1,
+    custom_name: true,
+    custom_tone: true,
+    web_search: true,
+  },
+  cancelled: {
+    max_active_agents: 0,
+    max_channels: 0,
+    custom_name: false,
+    custom_tone: false,
+    web_search: false,
   },
 };
 

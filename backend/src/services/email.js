@@ -1,20 +1,29 @@
-import { Resend } from 'resend';
+import { createTransport } from 'nodemailer';
 import env from '../config/env.js';
 
-const resend = env.RESEND_API_KEY ? new Resend(env.RESEND_API_KEY) : null;
+const transporter =
+  env.SMTP_USER && env.SMTP_PASS
+    ? createTransport({
+        service: 'gmail',
+        auth: {
+          user: env.SMTP_USER,
+          pass: env.SMTP_PASS,
+        },
+      })
+    : null;
 
-const FROM_EMAIL = env.RESEND_FROM_EMAIL || 'Evolved AI <onboarding@resend.dev>';
-const REPLY_TO = 'support@evolved.ai';
+const FROM_EMAIL = env.SMTP_FROM || env.SMTP_USER || 'noreply@evolved.ai';
+const REPLY_TO = env.SMTP_USER || 'support@evolved.ai';
 
 /**
  * Send a password reset email with a link to reset the password.
- * Optimised for deliverability: plain-text alt, reply-to, minimal HTML.
+ * Uses Gmail SMTP via Nodemailer.
  * @param {string} to — recipient email
  * @param {string} token — raw (unhashed) reset token
  */
 export async function sendPasswordResetEmail(to, token) {
-  if (!resend) {
-    console.error('[EMAIL] Resend not configured (missing RESEND_API_KEY)');
+  if (!transporter) {
+    console.error('[EMAIL] SMTP not configured (missing SMTP_USER / SMTP_PASS)');
     return false;
   }
 
@@ -79,24 +88,16 @@ export async function sendPasswordResetEmail(to, token) {
 </html>`;
 
   try {
-    const { data, error } = await resend.emails.send({
+    const info = await transporter.sendMail({
       from: FROM_EMAIL,
       to,
-      reply_to: REPLY_TO,
+      replyTo: REPLY_TO,
       subject: 'Reset your Evolved AI password',
       html: htmlContent,
       text: textContent,
-      headers: {
-        'X-Entity-Ref-ID': `ea-reset-${Date.now()}`,
-      },
     });
 
-    if (error) {
-      console.error('[EMAIL] send failed:', error);
-      return false;
-    }
-
-    console.log(`[EMAIL] reset email sent to: ${to} (id: ${data?.id})`);
+    console.log(`[EMAIL] reset email sent to: ${to} (id: ${info.messageId})`);
     return true;
   } catch (err) {
     console.error('[EMAIL] send error:', err.message);
@@ -105,5 +106,5 @@ export async function sendPasswordResetEmail(to, token) {
 }
 
 export function isEmailConfigured() {
-  return !!resend;
+  return !!transporter;
 }

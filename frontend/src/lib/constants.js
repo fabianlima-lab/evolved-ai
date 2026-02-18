@@ -7,16 +7,10 @@ export const TIER_FEATURES = {
   active: {
     label: 'Active',
     price: '$49/mo',
-    maxAgents: 3,
-    channels: 2,
+    maxAgents: 1,
+    channels: 1,
   },
 };
 
-export const GOAL_OPTIONS = [
-  { id: 'productivity', labelKey: 'productivity', icon: '📋' },
-  { id: 'learning', labelKey: 'learning', icon: '📚' },
-  { id: 'content', labelKey: 'content', icon: '✍️' },
-  { id: 'wellness', labelKey: 'wellness', icon: '🧘' },
-  { id: 'business', labelKey: 'business', icon: '💼' },
-  { id: 'general', labelKey: 'general', icon: '✨' },
-];
+// Kajabi checkout URL — subscribers are redirected here to upgrade
+export const KAJABI_CHECKOUT_URL = process.env.NEXT_PUBLIC_KAJABI_CHECKOUT_URL || 'https://app-evolved-vets.mykajabi.com/offers/XwnkKFyM';

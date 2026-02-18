@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
-import { buildTestApp, mockPrisma } from './helpers.js';
+import { buildTestApp, mockPrisma, getAuthToken } from './helpers.js';
 
 describe('Auth Routes', () => {
   let app;
@@ -174,6 +174,65 @@ describe('Auth Routes', () => {
       });
 
       expect(res.statusCode).toBe(400);
+    });
+  });
+
+  // ── Google OAuth Expanded Scopes ──
+  describe('GET /api/auth/google/url', () => {
+    it('requires authentication', async () => {
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/auth/google/url',
+      });
+      expect(res.statusCode).toBe(401);
+    });
+
+    it('returns 503 when Google OAuth not fully configured', async () => {
+      const token = getAuthToken(app);
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/auth/google/url',
+        headers: { authorization: 'Bearer ' + token },
+      });
+      // In test env, GOOGLE_CLIENT_SECRET is not set, so returns 503
+      expect(res.statusCode).toBe(503);
+      const body = JSON.parse(res.body);
+      expect(body.error).toContain('not fully configured');
+    });
+  });
+
+  describe('POST /api/auth/google/callback', () => {
+    it('requires authentication', async () => {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/auth/google/callback',
+        payload: { code: 'some-code' },
+      });
+      expect(res.statusCode).toBe(401);
+    });
+
+    it('rejects missing authorization code with 400', async () => {
+      const token = getAuthToken(app);
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/auth/google/callback',
+        headers: { authorization: 'Bearer ' + token },
+        payload: {},
+      });
+      expect(res.statusCode).toBe(400);
+      const body = JSON.parse(res.body);
+      expect(body.error).toContain('Authorization code is required');
+    });
+
+    it('returns 503 when Google OAuth not fully configured', async () => {
+      const token = getAuthToken(app);
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/auth/google/callback',
+        headers: { authorization: 'Bearer ' + token },
+        payload: { code: 'valid-code-123' },
+      });
+      expect(res.statusCode).toBe(503);
     });
   });
 });

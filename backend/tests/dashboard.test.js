@@ -36,8 +36,8 @@ describe('Dashboard Routes', () => {
         trialEndsAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
         goals: 'productivity',
         authProvider: 'email',
-        telegramChatId: '123',
         whatsappJid: null,
+        onboardingStep: 'complete',
       });
       mockPrisma.agent.count.mockResolvedValue(1);
       mockPrisma.message.count.mockResolvedValue(10);

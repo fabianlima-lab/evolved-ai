@@ -8,8 +8,8 @@ process.env.APP_URL = 'http://localhost:3000';
 process.env.ADMIN_EMAILS = 'admin@test.com';
 
 // Override credentials so real services are never called
-process.env.TELEGRAM_BOT_TOKEN = '';
+process.env.WHATSAPP_AUTH_DIR = '/tmp/baileys_test_auth';
 process.env.NVIDIA_API_KEY = '';
 process.env.GOOGLE_CLIENT_ID = '';
-process.env.RESEND_API_KEY = '';
-process.env.RESEND_FROM_EMAIL = '';
+process.env.SMTP_USER = '';
+process.env.SMTP_PASS = '';

@@ -6,42 +6,34 @@ import prisma from '../lib/prisma.js';
 // Regex to match a 6-digit connection code
 const CONNECTION_CODE_RE = /^\d{6}$/;
 
+/**
+ * Fastify plugin — registers webhook routes.
+ * The Twilio POST /whatsapp route is gone; incoming messages now arrive
+ * via the Baileys socket listener which calls handleIncomingWhatsApp().
+ */
 async function webhookRoutes(app) {
-  // ─────────────────────────────────────────────
-  // POST /api/webhooks/whatsapp
-  // WhatsApp messages arrive here
-  // Always returns 200 to prevent retries
-  // ─────────────────────────────────────────────
-  app.post('/whatsapp', async (request, reply) => {
-    try {
-      const { From, Body, ProfileName } = request.body || {};
+  // (placeholder — Kajabi webhooks are in their own file)
+}
 
-      if (From && Body) {
-        // Strip "whatsapp:" prefix for storage, keep raw phone
-        const whatsappJid = From.replace('whatsapp:', '');
-        const text = Body.trim();
+/**
+ * Called by the Baileys message listener for every incoming WhatsApp message.
+ * Decides whether it's a connection code or a normal chat message.
+ */
+export function handleIncomingWhatsApp(whatsappJid, text, senderName) {
+  if (CONNECTION_CODE_RE.test(text)) {
+    handleConnectionCode(whatsappJid, text).catch((err) => {
+      console.error('[ERROR] connection code handling:', err.message);
+    });
+    return;
+  }
 
-        // Handle connection code (6-digit number)
-        if (CONNECTION_CODE_RE.test(text)) {
-          await handleConnectionCode(whatsappJid, text);
-          return reply.code(200).send();
-        }
-
-        // Fire-and-forget
-        routeIncomingMessage({
-          whatsappJid,
-          text,
-          senderName: ProfileName || 'Unknown',
-        }).catch((err) => {
-          console.error('[ERROR] whatsapp message routing:', err.message);
-        });
-      }
-    } catch (error) {
-      console.error('[ERROR] whatsapp webhook:', error.message);
-    }
-
-    // Always return 200
-    return reply.code(200).send();
+  routeIncomingMessage({
+    channel: 'whatsapp',
+    channelId: whatsappJid,
+    text,
+    senderName,
+  }).catch((err) => {
+    console.error('[ERROR] whatsapp message routing:', err.message);
   });
 }
 
@@ -100,18 +92,24 @@ async function handleConnectionCode(whatsappJid, code) {
     console.log(`[CHANNEL] connected via bot: whatsapp:${whatsappJid} → subscriber:${pending.subscriberId}`);
 
     // Check if they have an active agent
-    const agent = await prisma.agent.findFirst({
-      where: { subscriberId: pending.subscriberId, isActive: true },
-    });
+    const [agent, subscriber] = await Promise.all([
+      prisma.agent.findFirst({
+        where: { subscriberId: pending.subscriberId, isActive: true },
+      }),
+      prisma.subscriber.findUnique({
+        where: { id: pending.subscriberId },
+        select: { assistantName: true },
+      }),
+    ]);
 
     if (agent) {
-      const name = agent.assistantName;
+      const name = subscriber?.assistantName || agent.name;
       await sendWhatsAppMessage(whatsappJid,
-        `Channel connected! Your agent ${name} is ready. Send a message to start chatting.`
+        `Channel connected! Your assistant ${name} is ready. Send a message to start chatting.`
       );
     } else {
       await sendWhatsAppMessage(whatsappJid,
-        "Channel connected! Now deploy an agent from your dashboard to start chatting."
+        "Channel connected! Complete your onboarding at evolved.ai to get started."
       );
     }
   } catch (error) {

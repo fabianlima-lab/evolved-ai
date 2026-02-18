@@ -1,33 +1,58 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Background & Surfaces */
-  --color-bg: #0a0a0f;
-  --color-card: #12121a;
-  --color-card-end: #0e0e16;
-  --color-card-hover: #1a1a25;
-  --color-border: #1e1e2a;
-  --color-elevated: #1a1d2b;
+  /* Background & Surfaces — Warm Cream */
+  --color-bg: #FAF8F5;
+  --color-card: #FFFFFF;
+  --color-card-end: #FDFCFA;
+  --color-card-hover: #F5F2EE;
+  --color-border: #E8E3DC;
+  --color-elevated: #F3F0EB;
 
-  /* Text */
-  --color-txt: #e8e4df;
-  --color-txt-body: #c0bdb6;
-  --color-txt-muted: #8a8690;
-  --color-txt-dim: #5a5660;
-  --color-txt-faint: #3a3d50;
+  /* Text — Deep Warm Charcoal */
+  --color-txt: #1A1A1A;
+  --color-txt-body: #3D3935;
+  --color-txt-muted: #7A756E;
+  --color-txt-dim: #A8A29E;
+  --color-txt-faint: #D1CDC7;
 
-  /* Brand Accent — Teal */
-  --color-accent: #8BC4C6;
-  --color-accent-glow: rgba(139, 196, 198, 0.15);
+  /* Brand Accent — Rich Teal */
+  --color-accent: #2A7C7B;
+  --color-accent-hover: #1F6362;
+  --color-accent-glow: rgba(42, 124, 123, 0.1);
+
+  /* Secondary — Soft Sage / Mint */
+  --color-mint: #B8D8D0;
+  --color-mint-glow: rgba(184, 216, 208, 0.25);
 
   /* Semantic */
-  --color-danger: #FF4D6A;
-  --color-success: #34d399;
+  --color-danger: #C94152;
+  --color-success: #2D8B6F;
+
+  /* Brand Guidelines — Landing Page Colors */
+  --color-brand-teal: #8BC4C6;
+  --color-brand-teal-light: #a3d3d5;
+  --color-brand-teal-dark: #6aabae;
+  --color-brand-teal-hover: #79B3B5;
+  --color-brand-cream: #F7F4EE;
+  --color-brand-warm-cream: #E2DBC9;
+  --color-brand-deep-green: #162B1D;
+  --color-brand-deep-green-dark: #0f1f14;
+  --color-brand-beige: #E1C7A6;
+  --color-brand-sand: #E1C7A6;
+  --color-brand-brown: #5E4C3E;
+  --color-brand-mint: #CEECE4;
+  --color-brand-mint-bg: #F0F7F5;
+  --color-brand-alert: #D4816B;
+  --color-brand-charcoal: #222222;
+  --color-brand-text-light: #8a7e72;
+  --color-brand-white: #FFFFFF;
 
   /* Fonts */
-  --font-display: 'DM Sans', -apple-system, sans-serif;
-  --font-body: 'DM Sans', -apple-system, sans-serif;
-  --font-mono: 'DM Mono', monospace;
+  --font-display: var(--font-cormorant), 'Georgia', serif;
+  --font-body: var(--font-montserrat), -apple-system, sans-serif;
+  --font-inter: var(--font-inter-loaded), -apple-system, sans-serif;
+  --font-mono: 'SF Mono', 'Monaco', monospace;
 
   /* Radius */
   --radius-card: 16px;
@@ -41,7 +66,8 @@ body {
 }
 
 ::selection {
-  background: rgba(139, 196, 198, 0.3);
+  background: rgba(42, 124, 123, 0.2);
+  color: #1A1A1A;
 }
 
 /* Scrollbar styling */
@@ -55,13 +81,36 @@ body {
   background: var(--color-border);
   border-radius: 3px;
 }
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-txt-dim);
+}
+
+/* Note: scroll-behavior: smooth removed from html —
+   it conflicts with Next.js client-side routing.
+   Smooth scrolling handled in JS (LandingNav scrollTo). */
 
 /* Animations */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 @keyframes fadeSlideUp {
   from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
   to { opacity: 1; transform: translateY(0); }
 }
 @keyframes pulse-dot {
   0%, 100% { opacity: 0.3; }
   50% { opacity: 1; }
+}
+
+/* Landing page body lock for mobile menu */
+body.menu-open { overflow: hidden; }
+
+/* Offset anchor scroll targets for fixed nav */
+section[id] {
+  scroll-margin-top: 80px;
 }

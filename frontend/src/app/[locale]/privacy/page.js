@@ -2,21 +2,30 @@
 
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
-import { PublicNav } from '@/components/Nav';
 import PageShell from '@/components/ui/PageShell';
 
 export default function PrivacyPage() {
   const t = useTranslations('Privacy');
+  const tc = useTranslations('Common');
 
   return (
     <PageShell>
-      <PublicNav />
+      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-bg/90 border-b border-border">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 font-[family-name:var(--font-display)] text-txt font-bold text-lg">
+            {tc('brandName')}
+          </Link>
+          <Link href="/login" className="text-sm text-txt-muted hover:text-txt transition-colors">
+            {tc('signIn')}
+          </Link>
+        </div>
+      </nav>
       <main className="pt-16 max-w-3xl mx-auto px-6 py-16">
         <h1 className="font-[family-name:var(--font-display)] text-4xl text-txt mb-8">
           {t('title')}
         </h1>
 
-        <div className="prose prose-invert max-w-none space-y-8 text-txt-body text-sm leading-relaxed">
+        <div className="prose max-w-none space-y-8 text-txt-body text-sm leading-relaxed">
           <section>
             <h2 className="text-lg text-txt font-medium mb-3">{t('section1_title')}</h2>
             <p>

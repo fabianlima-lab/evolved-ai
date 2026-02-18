@@ -1,7 +1,12 @@
-import { isTrialExpired, getFeaturesByTier, stripHtml } from '../utils/helpers.js';
-import { sendTelegramMessage, startTypingLoop } from './telegram.js';
+import { isTrialExpired, stripHtml } from '../utils/helpers.js';
+import { compileSoulMd } from '../prompts/soul.js';
 import { sendWhatsAppMessage } from './whatsapp.js';
 import { callAI, isAIConfigured } from './ai-client.js';
+import { buildLiveContext } from './context-builder.js';
+import { parseReminderFromText } from '../utils/reminder-parser.js';
+import { createReminder } from './reminders.js';
+import { parseActions, stripActionTags, hasActions } from '../utils/action-parser.js';
+import { executeAllActions } from './action-executor.js';
 import prisma from '../lib/prisma.js';
 
 const MAX_MESSAGE_LENGTH = 4000;
@@ -22,19 +27,14 @@ const ERROR_MESSAGES = {
  * Main message routing function.
  * Called by webhook handlers after parsing channel-specific payload.
  *
- * 6-step pipeline:
+ * 7-step pipeline:
  * 1. RECEIVE → Identify subscriber by channel + channel_id
  * 2. VALIDATE → Check tier (trial expiry)
  * 3. LOAD → Get active agent config + system prompt
  * 4. CONTEXT → Load last 20 messages for conversation history
- * 5. CALL → Send to AI via 3-tier intelligent routing
- * 6. RESPOND → Save message to DB, send response to channel
- *
- * @param {object} params
- * @param {string} params.channel - 'telegram' | 'whatsapp'
- * @param {string} params.channelId - chat ID or phone number
- * @param {string} params.text - incoming message text
- * @param {string} [params.senderName] - display name from channel
+ * 5. CALL → Send to AI with SOUL.md + live context
+ * 6. EXECUTE → Parse and run any [ACTION:...] tags in AI response
+ * 7. RESPOND → Save message to DB, send response to channel
  */
 export async function routeIncomingMessage({ channel, channelId, text, senderName }) {
   if (!text || text.trim().length === 0) {
@@ -76,84 +76,87 @@ export async function routeIncomingMessage({ channel, channelId, text, senderNam
       return;
     }
 
-    // Start continuous typing indicator (Telegram only)
-    // This re-sends every 4s so users see "typing..." during the full AI call
-    let stopTyping = null;
-    if (channel === 'telegram') {
-      stopTyping = startTypingLoop(channelId);
+    // ── Step 4: CONTEXT — Save incoming THEN load history ──
+    await prisma.message.create({
+      data: {
+        subscriberId: subscriber.id,
+        agentId: agent.id,
+        role: 'user',
+        channel,
+        content: cleanText,
+      },
+    });
+
+    const recentMessages = await prisma.message.findMany({
+      where: { subscriberId: subscriber.id, agentId: agent.id },
+      orderBy: { createdAt: 'desc' },
+      take: 20,
+    });
+
+    const conversationHistory = recentMessages.reverse().map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
+
+    // ── Step 5: CALL — Send to AI (compile SOUL.md fresh from template) ──
+    let aiResponse = await generateAIResponse(agent, subscriber, conversationHistory, {
+      userMessage: cleanText,
+    });
+
+    // ── Step 6: EXECUTE — Parse and run any action tags ──
+    if (hasActions(aiResponse)) {
+      const actions = parseActions(aiResponse);
+      console.log(`[ACTION] Found ${actions.length} action(s) in response:`, actions.map((a) => a.action));
+
+      const { results } = await executeAllActions(actions, subscriber, { agentId: agent.id });
+
+      // Strip action tags from the user-facing message
+      let cleanResponse = stripActionTags(aiResponse);
+
+      // Append any error messages from failed actions
+      const errors = results.filter((r) => !r.success && r.result);
+      if (errors.length > 0) {
+        cleanResponse += '\n\n' + errors.map((e) => e.result).join('\n');
+      }
+
+      // Append any info results (like search results, free slots)
+      const infoResults = results.filter((r) => r.success && r.result);
+      if (infoResults.length > 0) {
+        cleanResponse += '\n\n' + infoResults.map((r) => r.result).join('\n');
+      }
+
+      aiResponse = cleanResponse;
     }
 
-    try {
-      // ── Step 4: CONTEXT — Save incoming + load history (PARALLEL) ──
-      const [, recentMessages] = await Promise.all([
-        prisma.message.create({
-          data: {
-            subscriberId: subscriber.id,
-            agentId: agent.id,
-            role: 'user',
-            channel,
-            content: cleanText,
-          },
-        }),
-        prisma.message.findMany({
-          where: { subscriberId: subscriber.id, agentId: agent.id },
-          orderBy: { createdAt: 'desc' },
-          take: 20,
-        }),
-      ]);
-
-      // Reverse to chronological order for the AI
-      const conversationHistory = recentMessages.reverse().map((m) => ({
-        role: m.role,
-        content: m.content,
-      }));
-
-      // ── Step 5: CALL — Send to AI via 3-tier routing ──
-      const features = getFeaturesByTier(subscriber.tier);
-      const aiResponse = await generateAIResponse(agent, conversationHistory, {
-        webSearch: features.web_search,
-        userMessage: cleanText,
-      });
-
-      // ── Step 6: RESPOND — Save + send (PARALLEL) ──
-      await Promise.all([
-        prisma.message.create({
-          data: {
-            subscriberId: subscriber.id,
-            agentId: agent.id,
-            role: 'assistant',
-            channel,
-            content: aiResponse,
-          },
-        }),
-        sendChannelReply(channel, channelId, aiResponse),
-      ]);
-    } finally {
-      // Always stop the typing loop
-      if (stopTyping) stopTyping();
-    }
+    // ── Step 7: RESPOND — Save + send (PARALLEL) ──
+    await Promise.all([
+      prisma.message.create({
+        data: {
+          subscriberId: subscriber.id,
+          agentId: agent.id,
+          role: 'assistant',
+          channel,
+          content: aiResponse,
+        },
+      }),
+      sendChannelReply(channel, channelId, aiResponse),
+    ]);
 
   } catch (error) {
     console.error(`[ERROR] message routing failed: ${error.message}`);
     await sendChannelReply(channel, channelId,
       "⚠️ Something went wrong. Your agent is recovering — try again in a moment."
-    ).catch(() => {}); // Swallow reply errors
+    ).catch(() => {});
   }
 }
 
 /**
  * Find a subscriber by their channel type and channel ID.
- * Looks up by whatsappJid for WhatsApp, or by telegramChatId for Telegram.
  */
 async function findSubscriberByChannel(channel, channelId) {
   if (channel === 'whatsapp') {
     return prisma.subscriber.findFirst({
       where: { whatsappJid: channelId },
-    });
-  }
-  if (channel === 'telegram') {
-    return prisma.subscriber.findFirst({
-      where: { telegramChatId: channelId },
     });
   }
   return null;
@@ -163,9 +166,6 @@ async function findSubscriberByChannel(channel, channelId) {
  * Send a reply via the appropriate channel.
  */
 async function sendChannelReply(channel, channelId, text) {
-  if (channel === 'telegram') {
-    return sendTelegramMessage(channelId, text);
-  }
   if (channel === 'whatsapp') {
     return sendWhatsAppMessage(channelId, text);
   }
@@ -173,27 +173,60 @@ async function sendChannelReply(channel, channelId, text) {
 }
 
 /**
- * Generate AI response using 3-tier intelligent model routing.
+ * Generate AI response using SOUL.md compiled fresh from template + profile.
  * Falls back to a friendly in-character message if AI is unavailable.
- *
- * @param {object} agent - Agent record
- * @param {Array} conversationHistory - Formatted message array
- * @param {object} options - { webSearch: boolean, userMessage: string }
- * @returns {string} Response text
  */
-async function generateAIResponse(agent, conversationHistory, options = {}) {
-  const name = agent.name;
-
-  // If AI is not configured, return a stub response
+async function generateAIResponse(agent, subscriber, conversationHistory, options = {}) {
   if (!isAIConfigured()) {
     console.log(`[MSG_OUT] AI not configured, using stub for agent:${agent.id}`);
     return ERROR_MESSAGES.ai_not_configured;
   }
 
+  const FALLBACK_PROMPT = 'You are a helpful personal assistant. Be concise, friendly, and proactive.';
+
+  // Build live context (calendar, email, reminders) — fresh every message
+  let liveContext = '';
+  try {
+    liveContext = await buildLiveContext(subscriber);
+  } catch (err) {
+    console.error(`[MSG] Live context build failed: ${err.message}`);
+  }
+
+  // Compile SOUL.md FRESH on every call
+  let systemPrompt;
+  try {
+    systemPrompt = compileSoulMd({
+      assistantName: agent.name,
+      profileData: subscriber.profileData,
+      subscriber,
+      liveContext,
+    });
+  } catch (err) {
+    console.error('[MSG] SOUL.md compilation failed, using DB fallback:', err.message);
+    systemPrompt = agent.soulMd || agent.systemPrompt || FALLBACK_PROMPT;
+  }
+
+  // Reminder parser still runs as backup for simple "remind me" messages
+  if (options.userMessage) {
+    try {
+      const tz = subscriber.profileData?.timezone || 'America/New_York';
+      const parsed = parseReminderFromText(options.userMessage, tz);
+      if (parsed) {
+        await createReminder(subscriber.id, {
+          title: parsed.title,
+          dueAt: parsed.dueAt,
+          agentId: agent.id,
+        });
+      }
+    } catch (err) {
+      console.error(`[MSG] Reminder parse/create failed: ${err.message}`);
+    }
+  }
+
   const { content, error, tier, model, responseTimeMs } = await callAI(
-    agent.systemPrompt,
+    systemPrompt,
     conversationHistory,
-    { webSearch: options.webSearch, userMessage: options.userMessage },
+    { userMessage: options.userMessage },
   );
 
   if (error) {

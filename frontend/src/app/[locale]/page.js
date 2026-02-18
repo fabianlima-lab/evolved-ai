@@ -1,39 +1,48 @@
-import { PublicNav } from '@/components/Nav';
-import PageShell from '@/components/ui/PageShell';
+'use client';
+
+import LandingNav from '@/components/landing/LandingNav';
 import HeroSection from '@/components/landing/HeroSection';
-
-import ChatDemo from '@/components/landing/ChatDemo';
-import AppIntegrations from '@/components/landing/AppIntegrations';
-import AgentValueProps from '@/components/landing/AgentValueProps';
-import TrustSection from '@/components/landing/TrustSection';
-import HowItWorks from '@/components/landing/HowItWorks';
-import Testimonials from '@/components/landing/Testimonials';
-import ComparisonBar from '@/components/landing/ComparisonBar';
+import ChatPreview from '@/components/landing/ChatPreview';
+import TrustBar from '@/components/landing/TrustBar';
+import ProblemSection from '@/components/landing/ProblemSection';
+import FeaturesGrid from '@/components/landing/FeaturesGrid';
+import HowItWorksSection from '@/components/landing/HowItWorksSection';
+import ComparisonTable from '@/components/landing/ComparisonTable';
 import PricingSection from '@/components/landing/PricingSection';
-import FAQ from '@/components/landing/FAQ';
-import FinalCta from '@/components/landing/FinalCta';
+import EcosystemSection from '@/components/landing/EcosystemSection';
+import TestimonialsSection from '@/components/landing/TestimonialsSection';
+import FAQSection from '@/components/landing/FAQSection';
+import FinalCTA from '@/components/landing/FinalCTA';
 import Footer from '@/components/landing/Footer';
-import StickyCtaBar from '@/components/landing/StickyCtaBar';
 
-export default function Home() {
+/**
+ * Public Landing Page — evolved.ai
+ *
+ * Marketing page for unauthenticated visitors. All CTAs link to
+ * the external Kajabi checkout (KAJABI_CHECKOUT_URL). Matches the
+ * reference design from evolved-vets-ai-landing-page-2.html.
+ *
+ * Hash anchor smooth-scrolling is handled by an inline <script>
+ * in layout.js that runs before React hydration, preventing
+ * Next.js App Router from intercepting hash link clicks.
+ */
+export default function LandingPage() {
   return (
-    <PageShell>
-      <PublicNav />
-      <main className="pt-16">
-        <HeroSection />
-        <ChatDemo />
-        <AppIntegrations />
-        <AgentValueProps />
-        <TrustSection />
-        <HowItWorks />
-        <Testimonials />
-        <ComparisonBar />
-        <PricingSection />
-        <FAQ />
-        <FinalCta />
-      </main>
+    <div className="font-[family-name:var(--font-body)]" style={{ background: 'var(--color-brand-cream)', color: 'var(--color-brand-charcoal)', overflowX: 'clip' }}>
+      <LandingNav />
+      <HeroSection />
+      <ChatPreview />
+      <TrustBar />
+      <ProblemSection />
+      <FeaturesGrid />
+      <HowItWorksSection />
+      <ComparisonTable />
+      <PricingSection />
+      <EcosystemSection />
+      <TestimonialsSection />
+      <FAQSection />
+      <FinalCTA />
       <Footer />
-      <StickyCtaBar />
-    </PageShell>
+    </div>
   );
 }

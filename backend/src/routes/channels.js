@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import prisma from '../lib/prisma.js';
+import env from '../config/env.js';
 
 // In-memory store for connection codes (short-lived, <10min)
 // Maps code → { subscriberId, expiresAt }
@@ -43,6 +44,7 @@ async function channelRoutes(app) {
       return reply.send({
         code,
         expires_in: 600, // 10 minutes in seconds
+        whatsapp_number: env.WHATSAPP_BOT_NUMBER || null,
         instructions: `Send this code to the Evolved AI WhatsApp number: ${code}`,
       });
     } catch (error) {

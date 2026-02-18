@@ -10,8 +10,7 @@ export default function SkillsPage() {
     {
       categoryKey: 'messaging',
       items: [
-        { nameKey: 'telegram', status: 'active', icon: '📱' },
-        { nameKey: 'whatsapp', status: 'coming_soon', icon: '💬' },
+        { nameKey: 'whatsapp', status: 'active', icon: '💬' },
       ],
     },
     {

@@ -55,8 +55,11 @@ function BarChart({ data, color = 'bg-accent', label }) {
 function TierBadge({ tier }) {
   const colors = {
     trial: 'bg-txt-muted/20 text-txt-muted',
+    active: 'bg-accent/20 text-accent',
+    cancelled: 'bg-danger/10 text-danger',
+    // Legacy tiers (backwards compat)
     pro: 'bg-accent/20 text-accent',
-    pro_tribe: 'bg-guardian/20 text-guardian',
+    pro_tribe: 'bg-mint/60 text-accent',
   };
   return (
     <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap ${colors[tier] || colors.trial}`}>
@@ -200,7 +203,7 @@ export default function AdminPage() {
             <div className="space-y-3">
               {tiers.tiers.map(ti => {
                 const pct = (ti.count / tierTotal) * 100;
-                const colors = { trial: 'bg-txt-muted', pro: 'bg-accent', pro_tribe: 'bg-guardian' };
+                const colors = { trial: 'bg-txt-muted', active: 'bg-accent', cancelled: 'bg-danger', pro: 'bg-accent', pro_tribe: 'bg-mint' };
                 return (
                   <div key={ti.tier} className="flex items-center gap-3">
                     <span className="text-xs text-txt-muted w-24 capitalize">{ti.tier.replace('_', ' ')}</span>
@@ -286,7 +289,7 @@ export default function AdminPage() {
       <Card className="p-6">
         <h3 className="text-sm font-medium text-txt uppercase tracking-wider mb-4">{t('messageVolume')}</h3>
         {msgVolume?.data?.length > 0 ? (
-          <BarChart data={msgVolume.data} color="bg-guardian" label />
+          <BarChart data={msgVolume.data} color="bg-mint" label />
         ) : (
           <p className="text-sm text-txt-dim">{t('noData')}</p>
         )}

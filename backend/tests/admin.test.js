@@ -170,8 +170,7 @@ describe('Admin Routes', () => {
           email: 'alice@test.com',
           tier: 'active',
           authProvider: 'email',
-          whatsappJid: null,
-          telegramChatId: '123',
+          whatsappJid: '+1234567890',
           createdAt: '2026-01-01T00:00:00Z',
           _count: { agents: 1, messages: 50 },
         },
@@ -181,7 +180,6 @@ describe('Admin Routes', () => {
           tier: 'trial',
           authProvider: 'google',
           whatsappJid: null,
-          telegramChatId: null,
           createdAt: '2026-02-01T00:00:00Z',
           _count: { agents: 0, messages: 0 },
         },
@@ -284,8 +282,8 @@ describe('Admin Routes', () => {
   describe('GET /api/admin/popular-agents', () => {
     it('returns ranked agents', async () => {
       mockPrisma.agent.groupBy.mockResolvedValue([
-        { assistantName: 'Sales Bot', _count: { id: 15 } },
-        { assistantName: 'Support Bot', _count: { id: 10 } },
+        { name: 'Sales Bot', _count: { id: 15 } },
+        { name: 'Support Bot', _count: { id: 10 } },
       ]);
 
       const res = await app.inject({

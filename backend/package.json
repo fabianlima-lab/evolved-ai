@@ -25,12 +25,15 @@
     "@fastify/jwt": "^10.0.0",
     "@fastify/rate-limit": "^10.3.0",
     "@prisma/client": "^6.19.2",
+    "@whiskeysockets/baileys": "^7.0.0-rc.9",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.4",
     "fastify": "^5.7.4",
     "google-auth-library": "^10.5.0",
+    "googleapis": "^171.4.0",
+    "nodemailer": "^8.0.1",
     "openai": "^6.21.0",
-    "resend": "^6.9.2"
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "nodemon": "^3.1.11",

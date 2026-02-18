@@ -9,14 +9,13 @@ import Button from '@/components/ui/Button';
 import TrialBanner from '@/components/TrialBanner';
 import ChatPanel from '@/components/ChatPanel';
 import { apiFetch } from '@/lib/api';
+import { KAJABI_CHECKOUT_URL } from '@/lib/constants';
 
 export default function DashboardPage() {
   const t = useTranslations('Dashboard');
-  const tCommon = useTranslations('Common');
   const [stats, setStats] = useState(null);
   const [agents, setAgents] = useState([]);
   const [messages, setMessages] = useState([]);
-  const [showResetDialog, setShowResetDialog] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -50,6 +49,30 @@ export default function DashboardPage() {
 
   const maxAgents = stats.max_agents || 1;
   const hasMultiple = agents.length > 1;
+
+  // ── Paywall: trial expired or cancelled ──
+  if (stats.trial_expired || stats.tier === 'cancelled') {
+    return (
+      <div className="max-w-lg mx-auto px-6 py-24 text-center space-y-6">
+        <div className="text-5xl">⏳</div>
+        <h1 className="font-[family-name:var(--font-display)] text-3xl text-txt">
+          {stats.tier === 'cancelled' ? t('subscriptionEnded') : t('trialEnded')}
+        </h1>
+        <p className="text-txt-muted text-base leading-relaxed max-w-sm mx-auto">
+          {stats.tier === 'cancelled' ? t('subscriptionEndedDesc') : t('trialEndedDesc')}
+        </p>
+        <Button
+          onClick={() => window.open(KAJABI_CHECKOUT_URL, '_blank')}
+          className="px-8 py-3 text-base"
+        >
+          {t('upgradeNow')}
+        </Button>
+        <p className="text-txt-dim text-xs">
+          {t('upgradeNote')}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-12 space-y-8">
@@ -88,7 +111,7 @@ export default function DashboardPage() {
             {agents.length < maxAgents && (
               <Card
                 className="p-6 border-dashed cursor-pointer hover:border-accent transition-colors"
-                onClick={() => router.push('/agents')}
+                onClick={() => router.push('/onboarding')}
               >
                 <div className="flex flex-col items-center justify-center h-full gap-3 text-txt-muted">
                   <span className="text-4xl">+</span>
@@ -156,11 +179,11 @@ export default function DashboardPage() {
         <Card className="p-6">
           <h3 className="text-sm font-medium text-txt uppercase tracking-wider mb-4">{t('quickActions')}</h3>
           <div className="space-y-3">
-            <Button variant="ghost" className="w-full text-left text-sm" onClick={() => router.push('/agents')}>
+            <Button variant="ghost" className="w-full text-left text-sm" onClick={() => router.push('/settings')}>
               {t('manageAssistant')}
             </Button>
             {stats.tier === 'trial' && (
-              <Button variant="ghost" className="w-full text-left text-sm" onClick={() => router.push('/upgrade')}>
+              <Button variant="ghost" className="w-full text-left text-sm" onClick={() => window.open(KAJABI_CHECKOUT_URL, '_blank')}>
                 {t('upgradePlan')}
               </Button>
             )}
@@ -168,42 +191,14 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <Card className="p-6">
-        <div className="flex items-center justify-between">
+      {stats.whatsapp_connected && (
+        <Card className="p-6">
           <div className="flex items-center gap-3">
             <span className="w-3 h-3 rounded-full bg-success animate-pulse" />
-            <div>
-              <span className="text-sm text-txt font-medium">{t('gatewayOnline')}</span>
-              <span className="text-xs text-txt-dim ml-3">
-                {t('lastHeartbeat')} {new Date().toLocaleTimeString()}
-              </span>
-            </div>
+            <span className="text-sm text-txt font-medium">{t('whatsapp')}</span>
+            <span className="text-xs text-success ml-auto">{t('active')}</span>
           </div>
-          <Button
-            variant="ghost"
-            className="text-xs border-danger/30 text-danger hover:bg-danger/10"
-            onClick={() => setShowResetDialog(true)}
-          >
-            {t('resetGateway')}
-          </Button>
-        </div>
-      </Card>
-
-      {showResetDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg/80 backdrop-blur-sm">
-          <Card className="p-8 max-w-md mx-4">
-            <h3 className="font-[family-name:var(--font-display)] text-xl text-txt">{t('resetTitle')}</h3>
-            <p className="text-sm text-txt-muted mt-3">{t('resetDesc')}</p>
-            <div className="flex gap-3 mt-6">
-              <Button variant="ghost" onClick={() => setShowResetDialog(false)} className="flex-1">
-                {tCommon('cancel')}
-              </Button>
-              <Button variant="danger" onClick={() => { apiFetch('/gateway/reset', { method: 'POST' }).catch(() => {}); setShowResetDialog(false); }} className="flex-1">
-                {t('confirmReset')}
-              </Button>
-            </div>
-          </Card>
-        </div>
+        </Card>
       )}
     </div>
   );

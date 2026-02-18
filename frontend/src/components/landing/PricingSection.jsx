@@ -1,92 +1,102 @@
 'use client';
 
-import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
+import { KAJABI_CHECKOUT_URL } from '@/lib/constants';
 
 export default function PricingSection() {
-  const t = useTranslations('Pricing');
+  const t = useTranslations('Landing');
 
-  const PLANS = [
-    {
-      nameKey: 'trialName',
-      priceKey: 'trialPrice',
-      periodKey: 'trialPeriod',
-      features: ['feature_1agent', 'feature_whatsapp', 'feature_unlimited', 'feature_search', 'feature_preview'],
-      ctaKey: 'trialCta',
-      href: '/signup?plan=trial',
-      highlight: false,
-    },
-    {
-      nameKey: 'activeName',
-      priceKey: 'activePrice',
-      periodKey: 'activePeriod',
-      badgeKey: 'activeBadge',
-      features: ['feature_1agent', 'feature_whatsapp', 'feature_unlimited', 'feature_search', 'feature_memory', 'feature_priority'],
-      ctaKey: 'activeCta',
-      href: '/signup?plan=active',
-      highlight: true,
-    },
-  ];
+  const features = Array.from({ length: 16 }, (_, i) => t(`pricingFeat${i + 1}`));
 
   return (
-    <section id="pricing" className="py-20 px-6 text-center">
-      <span className="text-xs font-semibold text-accent tracking-[2px] uppercase">
-        {t('label')}
-      </span>
-      <h2 className="font-[family-name:var(--font-display)] text-[clamp(32px,4vw,48px)] font-bold text-txt mt-3 mb-2">
-        {t('title')}
-      </h2>
-      <p className="text-[17px] text-txt-muted mb-12">
-        {t('subtitle')}
-      </p>
-
-      <div className="flex gap-5 justify-center flex-wrap max-w-[600px] mx-auto">
-        {PLANS.map((plan) => (
-          <div
-            key={plan.nameKey}
-            className={`flex-1 min-w-[240px] max-w-[270px] rounded-[var(--radius-card)] p-8 text-left relative ${
-              plan.highlight
-                ? 'bg-accent/8 border border-accent/30'
-                : 'bg-card border border-border'
-            }`}
+    <section id="pricing" className="py-24 px-6 lg:px-12 bg-brand-mint">
+      <div className="max-w-[620px] mx-auto">
+        {/* Header */}
+        <div className="text-center mb-14">
+          <p className="text-[0.68rem] uppercase tracking-[0.3em] text-brand-teal font-semibold mb-6">
+            {t('pricingEyebrow')}
+          </p>
+          <h2
+            className="font-[family-name:var(--font-display)] font-light leading-[1.25] text-brand-charcoal"
+            style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}
           >
-            {plan.badgeKey && (
-              <div
-                className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-accent rounded-full px-3.5 py-0.5 text-xs font-bold text-white"
-              >
-                {t(plan.badgeKey)}
-              </div>
-            )}
+            {t('pricingTitle')} <em className="italic text-brand-teal">{t('pricingTitleEm')}</em>
+          </h2>
+        </div>
 
-            <h3 className="text-xl font-bold text-txt mb-1">{t(plan.nameKey)}</h3>
-            <div className="flex items-baseline gap-1 mb-5">
-              <span className="font-[family-name:var(--font-display)] text-4xl font-extrabold text-txt">{t(plan.priceKey)}</span>
-              <span className="text-[15px] text-txt-muted">{t(plan.periodKey)}</span>
-            </div>
-
-            {plan.features.map((f) => (
-              <div key={f} className="flex items-center gap-2 py-1.5 text-[15px] text-txt-muted">
-                <span className="text-success text-xs">&#10003;</span> {t(f)}
-              </div>
-            ))}
-
-            <Link
-              href={plan.href}
-              className={`block w-full text-center mt-5 py-2.5 rounded-[var(--radius-btn)] text-[15px] font-semibold transition-all ${
-                plan.highlight
-                  ? 'bg-accent text-white hover:opacity-90'
-                  : 'border border-border text-txt-muted hover:bg-elevated'
-              }`}
-            >
-              {t(plan.ctaKey)}
-            </Link>
+        {/* Pricing Card */}
+        <div className="bg-white px-12 py-14 text-center relative border-2 border-brand-teal transition-all duration-400 hover:-translate-y-1 hover:shadow-[0_16px_48px_rgba(0,0,0,0.06)]">
+          {/* Badge */}
+          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-brand-teal text-brand-deep-green text-[0.6rem] uppercase tracking-[0.2em] font-bold px-6 py-1.5">
+            {t('pricingBadge')}
           </div>
-        ))}
-      </div>
 
-      <p className="text-[13px] text-txt-dim mt-8">
-        {t('trustLine')}
-      </p>
+          {/* Name & Tagline */}
+          <div className="font-[family-name:var(--font-display)] text-[1.8rem] font-medium text-brand-charcoal mb-1">
+            {t('pricingName')}
+          </div>
+          <div className="text-[0.78rem] text-brand-text-light font-light italic mb-6">
+            {t('pricingTagline')}
+          </div>
+
+          {/* Price */}
+          <div className="mb-1">
+            <strong className="font-[family-name:var(--font-display)] text-[3.5rem] text-brand-charcoal font-normal">
+              {t('pricingPrice')}
+            </strong>
+            <span className="text-[0.85rem] text-brand-text-light font-normal">
+              {t('pricingPeriod')}
+            </span>
+          </div>
+          <div className="text-[0.75rem] text-brand-teal-dark font-medium mb-8">
+            {t('pricingAnnual')}
+          </div>
+
+          {/* Divider */}
+          <div className="w-10 h-px bg-brand-sand mx-auto mb-8" />
+
+          {/* Features - 2 columns */}
+          <ul className="text-left list-none mb-10 columns-1 sm:columns-2 gap-8">
+            {features.map((feat, i) => (
+              <li
+                key={i}
+                className="text-[0.82rem] text-brand-brown py-2 pl-6 relative font-light leading-[1.5] break-inside-avoid"
+              >
+                <span className="absolute left-0 top-[0.65rem] text-[0.6rem] text-brand-teal">✦</span>
+                {feat}
+              </li>
+            ))}
+          </ul>
+
+          {/* CTA Button */}
+          <a
+            href={KAJABI_CHECKOUT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full py-4 text-[0.72rem] uppercase tracking-[0.2em] font-semibold bg-brand-teal text-brand-deep-green hover:bg-brand-deep-green hover:text-brand-cream hover:shadow-[0_8px_30px_rgba(22,43,29,0.2)] transition-all duration-300 no-underline text-center mb-4"
+          >
+            {t('pricingCta')}
+          </a>
+
+          {/* Note */}
+          <div className="text-[0.75rem] text-brand-text-light italic">
+            {t('pricingNote')}
+          </div>
+        </div>
+
+        {/* Add-on card */}
+        <div className="mt-8 px-8 py-6 text-center border border-brand-teal/20" style={{ background: 'rgba(139, 196, 198, 0.08)' }}>
+          <div className="font-[family-name:var(--font-display)] text-[1.1rem] font-medium text-brand-charcoal mb-1">
+            {t('pricingAddonTitle')}
+          </div>
+          <div className="text-[0.78rem] text-brand-brown font-light leading-[1.6]">
+            {t('pricingAddonDesc')}
+          </div>
+          <div className="text-[0.8rem] text-brand-teal-dark font-semibold mt-2">
+            {t('pricingAddonPrice')}
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

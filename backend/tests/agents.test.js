@@ -15,6 +15,7 @@ describe('Agent Routes', () => {
   });
 
   beforeEach(() => {
+    mockPrisma.agent.findUnique.mockReset();
     mockPrisma.agent.findFirst.mockReset();
     mockPrisma.agent.findMany.mockReset();
     mockPrisma.agent.create.mockReset();
@@ -37,13 +38,14 @@ describe('Agent Routes', () => {
       expect(res.statusCode).toBe(401);
     });
 
-    it('deploys an agent with valid data', async () => {
+    it('creates a new agent when none exists and populates soulMd', async () => {
       mockPrisma.subscriber.findUnique.mockResolvedValue({
         id: 'test-subscriber-id',
         tier: 'trial',
         trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        profileData: null,
       });
-      mockPrisma.agent.count.mockResolvedValue(0);
+      mockPrisma.agent.findUnique.mockResolvedValue(null);
       mockPrisma.agent.create.mockResolvedValue({
         id: 'new-agent-id',
       });
@@ -58,6 +60,92 @@ describe('Agent Routes', () => {
       expect(res.statusCode).toBe(201);
       const body = JSON.parse(res.body);
       expect(body.agent_id).toBe('new-agent-id');
+
+      // Verify soulMd was passed to prisma.agent.create
+      const createCall = mockPrisma.agent.create.mock.calls[0][0];
+      expect(createCall.data.soulMd).toBeDefined();
+      expect(createCall.data.soulMd).toContain('Your name is My Agent');
+      expect(createCall.data.soulMd).toContain('SOUL.md');
+    });
+
+    it('compiles soulMd with subscriber profile data', async () => {
+      mockPrisma.subscriber.findUnique.mockResolvedValue({
+        id: 'test-subscriber-id',
+        tier: 'active',
+        name: 'Sarah',
+        profileData: { role: 'CEO', priorities: ['Strategy'] },
+      });
+      mockPrisma.agent.findUnique.mockResolvedValue(null);
+      mockPrisma.agent.create.mockResolvedValue({ id: 'new-agent-id' });
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/agents/deploy',
+        headers: { authorization: 'Bearer ' + token },
+        payload: { name: 'Luna', systemPrompt: 'test prompt' },
+      });
+
+      expect(res.statusCode).toBe(201);
+
+      const createCall = mockPrisma.agent.create.mock.calls[0][0];
+      expect(createCall.data.soulMd).toContain('Your name is Luna');
+      expect(createCall.data.soulMd).toContain('CEO');
+      expect(createCall.data.soulMd).toContain('Strategy');
+    });
+
+    it('compiles vets variant when specified', async () => {
+      mockPrisma.subscriber.findUnique.mockResolvedValue({
+        id: 'test-subscriber-id',
+        tier: 'active',
+        profileData: null,
+      });
+      mockPrisma.agent.findUnique.mockResolvedValue(null);
+      mockPrisma.agent.create.mockResolvedValue({ id: 'new-agent-id' });
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/agents/deploy',
+        headers: { authorization: 'Bearer ' + token },
+        payload: { name: 'Rex', systemPrompt: 'test', variant: 'vets' },
+      });
+
+      expect(res.statusCode).toBe(201);
+
+      const createCall = mockPrisma.agent.create.mock.calls[0][0];
+      expect(createCall.data.soulMd).toContain('veterinary');
+      expect(createCall.data.soulMd).toContain('Your name is Rex');
+    });
+
+    it('updates existing agent when one already exists (upsert) with soulMd', async () => {
+      mockPrisma.subscriber.findUnique.mockResolvedValue({
+        id: 'test-subscriber-id',
+        tier: 'active',
+        profileData: null,
+      });
+      mockPrisma.agent.findUnique.mockResolvedValue({
+        id: 'existing-agent-id',
+        subscriberId: 'test-subscriber-id',
+      });
+      mockPrisma.agent.update.mockResolvedValue({
+        id: 'existing-agent-id',
+      });
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/agents/deploy',
+        headers: { authorization: 'Bearer ' + token },
+        payload: { name: 'Updated Agent', systemPrompt: 'New prompt' },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const body = JSON.parse(res.body);
+      expect(body.agent_id).toBe('existing-agent-id');
+      expect(body.name).toBe('Updated Agent');
+
+      // Verify soulMd was included in the update
+      const updateCall = mockPrisma.agent.update.mock.calls[0][0];
+      expect(updateCall.data.soulMd).toBeDefined();
+      expect(updateCall.data.soulMd).toContain('Your name is Updated Agent');
     });
 
     it('rejects missing name with 400', async () => {

@@ -13,8 +13,7 @@ describe('Chat Routes', () => {
     email: 'test@example.com',
     tier: 'trial',
     trialEndsAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-    telegramChatId: '12345',
-    whatsappJid: null,
+    whatsappJid: '+1234567890',
   };
 
   const mockAgent = {
@@ -278,7 +277,7 @@ describe('Chat Routes', () => {
       // findMany returns DESC order (newest first) — route should reverse to ASC
       mockPrisma.message.findMany.mockResolvedValue([
         { id: 'msg-3', role: 'assistant', content: 'Third', channel: 'web', createdAt: '2024-01-03T00:00:00Z' },
-        { id: 'msg-2', role: 'user', content: 'Second', channel: 'telegram', createdAt: '2024-01-02T00:00:00Z' },
+        { id: 'msg-2', role: 'user', content: 'Second', channel: 'whatsapp', createdAt: '2024-01-02T00:00:00Z' },
         { id: 'msg-1', role: 'user', content: 'First', channel: 'web', createdAt: '2024-01-01T00:00:00Z' },
       ]);
 
@@ -347,7 +346,7 @@ describe('Chat Routes', () => {
       mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
       mockPrisma.message.findMany.mockResolvedValue([
         { id: 'msg-1', role: 'user', content: 'From web', channel: 'web', createdAt: '2024-01-01T00:00:00Z' },
-        { id: 'msg-2', role: 'user', content: 'From telegram', channel: 'telegram', createdAt: '2024-01-01T00:00:01Z' },
+        { id: 'msg-2', role: 'user', content: 'From whatsapp', channel: 'whatsapp', createdAt: '2024-01-01T00:00:01Z' },
       ]);
 
       const res = await app.inject({
@@ -358,7 +357,7 @@ describe('Chat Routes', () => {
 
       expect(res.statusCode).toBe(200);
       const body = JSON.parse(res.body);
-      expect(body.messages[0].channel).toBe('msg-1' === body.messages[0].id ? 'web' : 'telegram');
+      expect(body.messages[0].channel).toBe('msg-1' === body.messages[0].id ? 'web' : 'whatsapp');
     });
   });
 });

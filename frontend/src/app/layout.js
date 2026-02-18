@@ -1,17 +1,30 @@
-import { DM_Sans } from "next/font/google";
+import { Montserrat, Cormorant_Garamond, Inter } from "next/font/google";
 import { getLocale } from "next-intl/server";
-import SupportButton from "@/components/SupportButton";
 import "./globals.css";
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+});
+
+const cormorant = Cormorant_Garamond({
+  variable: "--font-cormorant",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const inter = Inter({
+  variable: "--font-inter-loaded",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
 export const viewport = {
-  themeColor: "#08090E",
+  themeColor: "#FAF8F5",
 };
 
 export default async function RootLayout({ children }) {
@@ -19,9 +32,8 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang={locale}>
-      <body className={`${dmSans.variable} antialiased`}>
+      <body className={`${montserrat.variable} ${cormorant.variable} ${inter.variable} antialiased`}>
         {children}
-        <SupportButton />
       </body>
     </html>
   );

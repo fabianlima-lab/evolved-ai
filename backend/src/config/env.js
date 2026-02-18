@@ -20,20 +20,24 @@ const env = {
   // Auth
   JWT_SECRET: process.env.JWT_SECRET,
 
-  // Telegram
-  TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
+  // WhatsApp (Baileys — local WhatsApp Web connection)
+  WHATSAPP_AUTH_DIR: process.env.WHATSAPP_AUTH_DIR || './baileys_auth',
+  WHATSAPP_BOT_NUMBER: process.env.WHATSAPP_BOT_NUMBER || '',
 
-  // Google OAuth
+  // Google OAuth (ID token verification + authorization code flow)
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+  GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI,
 
   // AI Models (3-tier routing via NVIDIA NIMs)
   NVIDIA_API_KEY: process.env.NVIDIA_API_KEY,
   MODEL_ROUTING_ENABLED: process.env.MODEL_ROUTING_ENABLED !== 'false', // default: true
   LOG_ROUTING_DECISIONS: process.env.LOG_ROUTING_DECISIONS !== 'false', // default: true
 
-  // Email (Resend)
-  RESEND_API_KEY: process.env.RESEND_API_KEY,
-  RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
+  // Email (Gmail SMTP via Nodemailer)
+  SMTP_USER: process.env.SMTP_USER,
+  SMTP_PASS: process.env.SMTP_PASS,
+  SMTP_FROM: process.env.SMTP_FROM,
 
   // Kajabi webhook integration
   KAJABI_WEBHOOK_SECRET: process.env.KAJABI_WEBHOOK_SECRET,

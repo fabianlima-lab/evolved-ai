@@ -6,23 +6,20 @@ import { apiPost, apiFetch } from './api';
 
 /**
  * Determines where to send a user after Google auth based on their progress:
- * - No goals → /onboarding (step 1)
- * - Goals but no agents → /agents (step 2)
- * - Agents but no channel → /channel (step 3)
+ * - Onboarding not complete → /onboarding
  * - Everything done → /dashboard
  */
 export async function resolveDestination() {
   try {
     const stats = await apiFetch('/dashboard/stats');
 
-    // No goals set → start of onboarding
-    if (!stats.goals) return '/onboarding';
+    // If onboarding is not complete, send them back
+    if (stats.onboarding_step && stats.onboarding_step !== 'complete') {
+      return '/onboarding';
+    }
 
-    // Has goals — check for active agents
-    if (stats.active_agents === 0) return '/agents';
-
-    // Has agents — check for channel
-    if (!stats.whatsapp_connected) return '/channel';
+    // No agent deployed yet → onboarding
+    if (stats.active_agents === 0) return '/onboarding';
 
     // Fully onboarded
     return '/dashboard';

@@ -1,5 +1,4 @@
 import { isTrialExpired, getFeaturesByTier } from '../utils/helpers.js';
-import env from '../config/env.js';
 import prisma from '../lib/prisma.js';
 
 async function dashboardRoutes(app) {
@@ -52,8 +51,10 @@ async function dashboardRoutes(app) {
         messages_today: messagesToday,
         messages_this_month: messagesThisMonth,
         whatsapp_connected: !!subscriber.whatsappJid,
+        google_connected: !!(subscriber.googleAccessToken && subscriber.googleRefreshToken),
+        google_scopes: subscriber.googleScopes || null,
+        onboarding_step: subscriber.onboardingStep || 'pending',
         features,
-        upgrade_url: trialExpired ? `${env.APP_URL}/upgrade` : null,
       });
     } catch (error) {
       console.error('[ERROR] dashboard stats failed:', error.message);

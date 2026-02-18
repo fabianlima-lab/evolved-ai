@@ -1,26 +1,27 @@
 import { isTrialExpired, getFeaturesByTier, stripHtml } from '../utils/helpers.js';
+import { compileSoulMd } from '../prompts/soul.js';
 import prisma from '../lib/prisma.js';
 
 async function agentRoutes(app) {
   // POST /api/agents/deploy
+  // Single-agent model: upserts the subscriber's one agent
+  // Auto-compiles SOUL.md personality from template + subscriber profile
   app.post('/deploy', {
     preHandler: [app.authenticate],
     config: {
       rateLimit: { max: 30, timeWindow: '1 minute' },
     },
   }, async (request, reply) => {
-    const { name, systemPrompt } = request.body || {};
+    const { name, systemPrompt: providedPrompt } = request.body || {};
     const subscriberId = request.user.userId;
 
     if (!name) {
       return reply.code(400).send({ error: 'name is required' });
     }
 
-    if (!systemPrompt) {
-      return reply.code(400).send({ error: 'systemPrompt is required' });
-    }
-
     const cleanName = stripHtml(String(name)).slice(0, 100);
+
+    const FALLBACK_PROMPT = 'You are a helpful personal assistant. Be concise, friendly, and proactive.';
 
     try {
       const subscriber = await prisma.subscriber.findUnique({ where: { id: subscriberId } });
@@ -30,17 +31,44 @@ async function agentRoutes(app) {
         return reply.code(403).send({ error: 'Trial expired. Upgrade to continue.' });
       }
 
+      // Check if subscriber's tier allows agents
       const features = getFeaturesByTier(subscriber.tier);
+      if (features.max_active_agents < 1) {
+        return reply.code(403).send({ error: 'Your subscription does not include an active assistant.' });
+      }
 
-      // Check active agent limit
-      const activeCount = await prisma.agent.count({
-        where: { subscriberId, isActive: true },
+      // Compile SOUL.md from production template + subscriber profile data
+      let soulMd;
+      try {
+        soulMd = compileSoulMd({
+          assistantName: cleanName,
+          profileData: subscriber.profileData,
+          subscriber,
+        });
+      } catch (err) {
+        console.error('[AGENT] SOUL.md compilation failed, using fallback:', err.message);
+        soulMd = FALLBACK_PROMPT;
+      }
+
+      // Use provided prompt, or compiled SOUL.md, or hardcoded fallback
+      const systemPrompt = providedPrompt || soulMd || FALLBACK_PROMPT;
+
+      // Upsert: update existing agent or create new one (1:1 model)
+      const existingAgent = await prisma.agent.findUnique({
+        where: { subscriberId },
       });
-      if (activeCount >= features.max_active_agents) {
-        // Deactivate oldest agents if at limit
-        await prisma.agent.updateMany({
-          where: { subscriberId, isActive: true },
-          data: { isActive: false },
+
+      if (existingAgent) {
+        const updated = await prisma.agent.update({
+          where: { id: existingAgent.id },
+          data: { name: cleanName, systemPrompt, soulMd: soulMd || FALLBACK_PROMPT, isActive: true },
+        });
+
+        console.log(`[AGENT] updated: ${updated.id} (${cleanName}) for subscriber:${subscriberId}`);
+
+        return reply.send({
+          agent_id: updated.id,
+          name: cleanName,
         });
       }
 
@@ -49,6 +77,7 @@ async function agentRoutes(app) {
           subscriberId,
           name: cleanName,
           systemPrompt,
+          soulMd: soulMd || FALLBACK_PROMPT,
         },
       });
 

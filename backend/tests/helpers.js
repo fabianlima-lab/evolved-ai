@@ -42,13 +42,14 @@ vi.mock('@prisma/client', () => {
   };
 });
 
-// Mock external services
-vi.mock('../src/services/telegram.js', () => ({
-  sendTelegramMessage: vi.fn().mockResolvedValue(true),
-  setTelegramWebhook: vi.fn().mockResolvedValue(true),
-  sendTypingAction: vi.fn().mockResolvedValue(true),
+// Mock Baileys (prevent real WhatsApp socket in tests)
+vi.mock('../src/services/baileys.js', () => ({
+  initBaileys: vi.fn().mockResolvedValue(undefined),
+  sendWhatsAppMessage: vi.fn().mockResolvedValue(true),
+  getBaileysStatus: vi.fn().mockReturnValue({ status: 'disconnected', qr: null }),
 }));
 
+// Mock whatsapp.js (thin re-export of baileys.js)
 vi.mock('../src/services/whatsapp.js', () => ({
   sendWhatsAppMessage: vi.fn().mockResolvedValue(true),
 }));
@@ -90,5 +91,5 @@ export async function buildTestApp() {
 }
 
 export function getAuthToken(app, subscriberId = 'test-subscriber-id', email = 'test@example.com') {
-  return app.jwt.sign({ subscriberId, email });
+  return app.jwt.sign({ userId: subscriberId, email });
 }
