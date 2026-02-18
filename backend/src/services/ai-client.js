@@ -24,24 +24,24 @@ const clients = {};
 function getClient(provider) {
   if (clients[provider]) return clients[provider];
 
-  if (provider === 'nvidia') {
-    if (!env.NVIDIA_API_KEY || env.NVIDIA_API_KEY === 'nvapi-xxx') return null;
-    clients.nvidia = new OpenAI({
-      baseURL: PRIMARY_CONFIG.baseURL,
-      apiKey: env.NVIDIA_API_KEY,
-      timeout: PRIMARY_CONFIG.timeoutMs,
-    });
-    return clients.nvidia;
-  }
-
   if (provider === 'groq') {
     if (!env.GROQ_API_KEY || env.GROQ_API_KEY === 'gsk-xxx') return null;
     clients.groq = new OpenAI({
-      baseURL: FALLBACK_CONFIG.baseURL,
+      baseURL: 'https://api.groq.com/openai/v1',
       apiKey: env.GROQ_API_KEY,
-      timeout: FALLBACK_CONFIG.timeoutMs,
+      timeout: 30000,
     });
     return clients.groq;
+  }
+
+  if (provider === 'nvidia') {
+    if (!env.NVIDIA_API_KEY || env.NVIDIA_API_KEY === 'nvapi-xxx') return null;
+    clients.nvidia = new OpenAI({
+      baseURL: 'https://integrate.api.nvidia.com/v1',
+      apiKey: env.NVIDIA_API_KEY,
+      timeout: 30000,
+    });
+    return clients.nvidia;
   }
 
   return null;
