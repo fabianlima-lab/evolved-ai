@@ -2,12 +2,17 @@ import { isTrialExpired, stripHtml } from '../utils/helpers.js';
 import { compileSoulMd } from '../prompts/soul.js';
 import { sendWhatsAppMessage } from './whatsapp.js';
 import { callAI, isAIConfigured } from './ai-client.js';
+import { callOpenClawWithContext, isOpenClawConfigured } from './openclaw-bridge.js';
 import { buildLiveContext } from './context-builder.js';
 import { parseReminderFromText } from '../utils/reminder-parser.js';
 import { createReminder } from './reminders.js';
 import { parseActions, stripActionTags, hasActions } from '../utils/action-parser.js';
 import { executeAllActions } from './action-executor.js';
 import prisma from '../lib/prisma.js';
+
+// Track OpenClaw availability (checked once at first message)
+let openclawChecked = false;
+let openclawEnabled = false;
 
 const MAX_MESSAGE_LENGTH = 4000;
 
@@ -21,6 +26,8 @@ const ERROR_MESSAGES = {
   empty_response: "🤔 I drew a blank on that one. Could you rephrase your question?",
   empty_content: "🤔 I drew a blank on that one. Could you rephrase your question?",
   unknown: "⚠️ Something went wrong on my end. Try again in a moment.",
+  openclaw_error: "⚠️ Something went wrong on my end. Try again in a moment.",
+  openclaw_tool_error: "⚠️ Something went wrong on my end. Try again in a moment.",
 };
 
 /**
@@ -173,13 +180,22 @@ async function sendChannelReply(channel, channelId, text) {
 }
 
 /**
- * Generate AI response using SOUL.md compiled fresh from template + profile.
- * Falls back to a friendly in-character message if AI is unavailable.
+ * Generate AI response using OpenClaw (primary) or direct AI call (fallback).
+ *
+ * Pipeline:
+ *   1. Try OpenClaw agent (Luna) — Groq/Llama 3.3 70B via OpenClaw CLI
+ *   2. If OpenClaw fails → fallback to direct callAI() (Groq/NVIDIA)
+ *   3. If both fail → friendly error message
+ *
+ * OpenClaw handles: SOUL.md personality, session memory, model routing
+ * Our code handles: Live context (calendar/email), action tags, tool execution
  */
 async function generateAIResponse(agent, subscriber, conversationHistory, options = {}) {
-  if (!isAIConfigured()) {
-    console.log(`[MSG_OUT] AI not configured, using stub for agent:${agent.id}`);
-    return ERROR_MESSAGES.ai_not_configured;
+  // Check OpenClaw availability once
+  if (!openclawChecked) {
+    openclawChecked = true;
+    openclawEnabled = await isOpenClawConfigured();
+    console.log(`[MSG] OpenClaw engine: ${openclawEnabled ? '✅ enabled' : '❌ disabled (using direct AI)'}`);
   }
 
   const FALLBACK_PROMPT = 'You are a helpful personal assistant. Be concise, friendly, and proactive.';
@@ -192,7 +208,7 @@ async function generateAIResponse(agent, subscriber, conversationHistory, option
     console.error(`[MSG] Live context build failed: ${err.message}`);
   }
 
-  // Compile SOUL.md FRESH on every call
+  // Compile SOUL.md FRESH on every call (used by both paths)
   let systemPrompt;
   try {
     systemPrompt = compileSoulMd({
@@ -223,6 +239,34 @@ async function generateAIResponse(agent, subscriber, conversationHistory, option
     }
   }
 
+  // ── Try OpenClaw first (if available) ──
+  if (openclawEnabled) {
+    console.log(`[MSG] Trying OpenClaw for agent:${agent.id}`);
+    const ocResult = await callOpenClawWithContext(
+      systemPrompt,
+      conversationHistory,
+      {
+        userMessage: options.userMessage,
+        subscriberPhone: subscriber.whatsappJid?.replace('@s.whatsapp.net', ''),
+        sessionId: `sub-${subscriber.id}`,
+      },
+    );
+
+    if (ocResult.content) {
+      console.log(`[MSG_OUT] agent:${agent.id} engine:openclaw model:${ocResult.model} time:${ocResult.responseTimeMs}ms len:${ocResult.content.length}`);
+      return ocResult.content;
+    }
+
+    // OpenClaw failed — log and fall through to direct AI
+    console.warn(`[MSG] OpenClaw failed: ${ocResult.error}${ocResult.rawError ? ` (${ocResult.rawError})` : ''} — falling back to direct AI`);
+  }
+
+  // ── Fallback: Direct AI call (Groq → NVIDIA) ──
+  if (!isAIConfigured()) {
+    console.log(`[MSG_OUT] AI not configured, using stub for agent:${agent.id}`);
+    return ERROR_MESSAGES.ai_not_configured;
+  }
+
   const { content, error, tier, model, responseTimeMs } = await callAI(
     systemPrompt,
     conversationHistory,
@@ -234,7 +278,7 @@ async function generateAIResponse(agent, subscriber, conversationHistory, option
     return ERROR_MESSAGES[error] || ERROR_MESSAGES.unknown;
   }
 
-  console.log(`[MSG_OUT] agent:${agent.id} tier:${tier} model:${model} time:${responseTimeMs}ms len:${content.length}`);
+  console.log(`[MSG_OUT] agent:${agent.id} engine:direct tier:${tier} model:${model} time:${responseTimeMs}ms len:${content.length}`);
   return content;
 }
 

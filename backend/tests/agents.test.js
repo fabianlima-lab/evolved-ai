@@ -64,8 +64,8 @@ describe('Agent Routes', () => {
       // Verify soulMd was passed to prisma.agent.create
       const createCall = mockPrisma.agent.create.mock.calls[0][0];
       expect(createCall.data.soulMd).toBeDefined();
-      expect(createCall.data.soulMd).toContain('Your name is My Agent');
-      expect(createCall.data.soulMd).toContain('SOUL.md');
+      expect(createCall.data.soulMd).toContain('My Agent');
+      expect(createCall.data.soulMd).toContain('Chief of Staff');
     });
 
     it('compiles soulMd with subscriber profile data', async () => {
@@ -88,7 +88,8 @@ describe('Agent Routes', () => {
       expect(res.statusCode).toBe(201);
 
       const createCall = mockPrisma.agent.create.mock.calls[0][0];
-      expect(createCall.data.soulMd).toContain('Your name is Luna');
+      expect(createCall.data.soulMd).toContain('Luna');
+      expect(createCall.data.soulMd).toContain('Chief of Staff');
       expect(createCall.data.soulMd).toContain('CEO');
       expect(createCall.data.soulMd).toContain('Strategy');
     });
@@ -112,8 +113,9 @@ describe('Agent Routes', () => {
       expect(res.statusCode).toBe(201);
 
       const createCall = mockPrisma.agent.create.mock.calls[0][0];
-      expect(createCall.data.soulMd).toContain('veterinary');
-      expect(createCall.data.soulMd).toContain('Your name is Rex');
+      // New SOUL.md is a single template (no variants) — just check agent name
+      expect(createCall.data.soulMd).toContain('Rex');
+      expect(createCall.data.soulMd).toContain('Chief of Staff');
     });
 
     it('updates existing agent when one already exists (upsert) with soulMd', async () => {
@@ -145,7 +147,8 @@ describe('Agent Routes', () => {
       // Verify soulMd was included in the update
       const updateCall = mockPrisma.agent.update.mock.calls[0][0];
       expect(updateCall.data.soulMd).toBeDefined();
-      expect(updateCall.data.soulMd).toContain('Your name is Updated Agent');
+      expect(updateCall.data.soulMd).toContain('Updated Agent');
+      expect(updateCall.data.soulMd).toContain('Chief of Staff');
     });
 
     it('rejects missing name with 400', async () => {

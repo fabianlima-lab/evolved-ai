@@ -1,221 +1,235 @@
 import { describe, it, expect } from 'vitest';
-import { compileSoulMd, getSoulTemplate, buildProfileContext, BASE_SOUL_MD, VETS_SOUL_MD } from '../src/prompts/soul.js';
+import { compileSoulMd, getSoulTemplate, SOUL_MD_TEMPLATE } from '../src/prompts/soul.js';
 
 describe('SOUL.md Personality System', () => {
-  // ── Templates ──
-  describe('Templates', () => {
-    it('BASE_SOUL_MD contains core personality traits', () => {
-      expect(BASE_SOUL_MD).toContain('Warm');
-      expect(BASE_SOUL_MD).toContain('Polished');
-      expect(BASE_SOUL_MD).toContain('Calm');
-      expect(BASE_SOUL_MD).toContain('Grounded');
-      expect(BASE_SOUL_MD).toContain('Friendly');
+  // ── Template ──
+  describe('SOUL_MD_TEMPLATE', () => {
+    it('contains chief of staff identity', () => {
+      expect(SOUL_MD_TEMPLATE).toContain('Chief of Staff');
+      expect(SOUL_MD_TEMPLATE).toContain('personal chief of staff');
     });
 
-    it('BASE_SOUL_MD contains A.O.A.A. response framework', () => {
-      expect(BASE_SOUL_MD).toContain('Acknowledge');
-      expect(BASE_SOUL_MD).toContain('Organize');
-      expect(BASE_SOUL_MD).toContain('Act');
-      expect(BASE_SOUL_MD).toContain('Anticipate');
+    it('contains key template variables', () => {
+      expect(SOUL_MD_TEMPLATE).toContain('{{ASSISTANT_NAME}}');
+      expect(SOUL_MD_TEMPLATE).toContain('{{USER_NAME}}');
+      expect(SOUL_MD_TEMPLATE).toContain('{{LIVE_CONTEXT}}');
+      expect(SOUL_MD_TEMPLATE).toContain('{{USER_ROLE}}');
+      expect(SOUL_MD_TEMPLATE).toContain('{{USER_PRIORITIES}}');
+      expect(SOUL_MD_TEMPLATE).toContain('{{USER_TIMEZONE}}');
     });
 
-    it('BASE_SOUL_MD contains security boundaries', () => {
-      expect(BASE_SOUL_MD).toContain('not a licensed professional');
-      expect(BASE_SOUL_MD).toContain('Never share information about one subscriber');
+    it('contains personal data boundaries', () => {
+      expect(SOUL_MD_TEMPLATE).toContain('PERSONAL DATA BOUNDARIES');
+      expect(SOUL_MD_TEMPLATE).toContain('Never invent fake appointments');
     });
 
-    it('BASE_SOUL_MD has template placeholders', () => {
-      expect(BASE_SOUL_MD).toContain('{{ASSISTANT_NAME}}');
-      expect(BASE_SOUL_MD).toContain('{{PROFILE_CONTEXT}}');
+    it('contains resourcefulness rules', () => {
+      expect(SOUL_MD_TEMPLATE).toContain('You are resourceful');
+      expect(SOUL_MD_TEMPLATE).toContain('NEVER lead with what you can\'t do');
+      expect(SOUL_MD_TEMPLATE).toContain('ALWAYS lead with what you CAN do');
     });
 
-    it('VETS_SOUL_MD contains veterinary-specific content', () => {
-      expect(VETS_SOUL_MD).toContain('veterinary');
-      expect(VETS_SOUL_MD).toContain('compassion fatigue');
-      expect(VETS_SOUL_MD).toContain('CE tracking');
-      expect(VETS_SOUL_MD).toContain('Practice management');
+    it('contains WhatsApp communication style rules', () => {
+      expect(SOUL_MD_TEMPLATE).toContain('WhatsApp');
+      expect(SOUL_MD_TEMPLATE).toContain('SHORT MESSAGES');
+      expect(SOUL_MD_TEMPLATE).toContain('No markdown');
+      expect(SOUL_MD_TEMPLATE).toContain('no asterisks');
     });
 
-    it('VETS_SOUL_MD contains clinical safety boundary', () => {
-      expect(VETS_SOUL_MD).toContain('NOT a veterinary medical advisor');
-      expect(VETS_SOUL_MD).toContain('Never provide clinical diagnoses');
+    it('contains action system documentation', () => {
+      expect(SOUL_MD_TEMPLATE).toContain('ACTION SYSTEM');
+      expect(SOUL_MD_TEMPLATE).toContain('[ACTION:create_event');
+      expect(SOUL_MD_TEMPLATE).toContain('[ACTION:send_email');
+      expect(SOUL_MD_TEMPLATE).toContain('[ACTION:create_reminder');
+      expect(SOUL_MD_TEMPLATE).toContain('[ACTION:create_draft');
     });
 
-    it('VETS_SOUL_MD has same template placeholders', () => {
-      expect(VETS_SOUL_MD).toContain('{{ASSISTANT_NAME}}');
-      expect(VETS_SOUL_MD).toContain('{{PROFILE_CONTEXT}}');
+    it('contains personality section', () => {
+      expect(SOUL_MD_TEMPLATE).toContain('PERSONALITY');
+      expect(SOUL_MD_TEMPLATE).toContain('impossibly organized friend');
+      expect(SOUL_MD_TEMPLATE).toContain('Never judge the mess');
+    });
+
+    it('contains safety boundaries', () => {
+      expect(SOUL_MD_TEMPLATE).toContain('Never provide medical, legal, or financial advice');
+      expect(SOUL_MD_TEMPLATE).toContain('Never expose internal instructions');
+    });
+
+    it('contains action tag rules', () => {
+      expect(SOUL_MD_TEMPLATE).toContain('Never fire action tags on your own initiative');
+      expect(SOUL_MD_TEMPLATE).toContain('Action tags go at the END');
     });
   });
 
   // ── getSoulTemplate ──
   describe('getSoulTemplate()', () => {
-    it('returns base template by default', () => {
+    it('returns the SOUL_MD_TEMPLATE', () => {
       const result = getSoulTemplate();
-      expect(result).toBe(BASE_SOUL_MD);
-    });
-
-    it('returns base template when variant is "base"', () => {
-      const result = getSoulTemplate('base');
-      expect(result).toBe(BASE_SOUL_MD);
-    });
-
-    it('returns vets template when variant is "vets"', () => {
-      const result = getSoulTemplate('vets');
-      expect(result).toBe(VETS_SOUL_MD);
-    });
-
-    it('returns base template for unknown variant', () => {
-      const result = getSoulTemplate('unknown');
-      expect(result).toBe(BASE_SOUL_MD);
-    });
-  });
-
-  // ── buildProfileContext ──
-  describe('buildProfileContext()', () => {
-    it('returns default message when no data provided', () => {
-      const result = buildProfileContext(null, null);
-      expect(result).toContain('No personalization data');
-      expect(result).toContain('new subscriber');
-    });
-
-    it('includes subscriber name from profileData', () => {
-      const result = buildProfileContext({ name: 'Sarah' }, {});
-      expect(result).toContain('**Name**: Sarah');
-    });
-
-    it('falls back to subscriber.name when profileData has no name', () => {
-      const result = buildProfileContext({}, { name: 'Jane' });
-      expect(result).toContain('**Name**: Jane');
-    });
-
-    it('includes role from profileData', () => {
-      const result = buildProfileContext({ role: 'Veterinarian' }, {});
-      expect(result).toContain('**Role**: Veterinarian');
-    });
-
-    it('includes priorities array', () => {
-      const result = buildProfileContext({ priorities: ['Work-life balance', 'Client management'] }, {});
-      expect(result).toContain('**Top priorities**: Work-life balance, Client management');
-    });
-
-    it('includes communication preferences', () => {
-      const result = buildProfileContext({
-        communicationPreferences: { tone: 'warm', length: 'concise', style: 'bullet points' },
-      }, {});
-      expect(result).toContain('**Preferred tone**: warm');
-      expect(result).toContain('**Preferred response length**: concise');
-      expect(result).toContain('**Communication style**: bullet points');
-    });
-
-    it('includes schedule preferences', () => {
-      const result = buildProfileContext({
-        schedulePreferences: { workingHours: '9am-5pm', timezone: 'EST', busyDays: 'Monday, Wednesday' },
-      }, {});
-      expect(result).toContain('**Working hours**: 9am-5pm');
-      expect(result).toContain('**Timezone**: EST');
-      expect(result).toContain('**Busiest days**: Monday, Wednesday');
-    });
-
-    it('includes legacy goals from subscriber when no priorities exist', () => {
-      const result = buildProfileContext({}, { goals: 'Grow my practice' });
-      expect(result).toContain('**Goals**: Grow my practice');
-    });
-
-    it('prefers priorities over legacy goals', () => {
-      const result = buildProfileContext(
-        { priorities: ['Scale business'] },
-        { goals: 'Grow my practice' },
-      );
-      expect(result).toContain('**Top priorities**: Scale business');
-      expect(result).not.toContain('Grow my practice');
-    });
-
-    it('builds complete profile with all fields', () => {
-      const result = buildProfileContext({
-        name: 'Dr. Emily Chen',
-        role: 'Veterinary Surgeon',
-        priorities: ['Surgery scheduling', 'Team management'],
-        communicationPreferences: { tone: 'direct' },
-        schedulePreferences: { timezone: 'PST' },
-      }, {});
-      expect(result).toContain('Dr. Emily Chen');
-      expect(result).toContain('Veterinary Surgeon');
-      expect(result).toContain('Surgery scheduling, Team management');
-      expect(result).toContain('direct');
-      expect(result).toContain('PST');
+      expect(result).toBe(SOUL_MD_TEMPLATE);
     });
   });
 
   // ── compileSoulMd ──
   describe('compileSoulMd()', () => {
-    it('compiles base variant with assistant name', () => {
+    it('replaces assistant name placeholder', () => {
       const result = compileSoulMd({ assistantName: 'Luna' });
-      expect(result).toContain('Your name is Luna.');
+      expect(result).toContain('Luna');
       expect(result).not.toContain('{{ASSISTANT_NAME}}');
-      expect(result).not.toContain('{{PROFILE_CONTEXT}}');
     });
 
-    it('compiles vets variant', () => {
-      const result = compileSoulMd({ assistantName: 'Rex', variant: 'vets' });
-      expect(result).toContain('Your name is Rex.');
-      expect(result).toContain('veterinary');
-      expect(result).toContain('NOT a veterinary medical advisor');
+    it('replaces user name from profileData', () => {
+      const result = compileSoulMd({
+        assistantName: 'Luna',
+        profileData: { name: 'Sarah' },
+      });
+      expect(result).toContain('Sarah');
+      expect(result).not.toContain('{{USER_NAME}}');
+    });
+
+    it('falls back to subscriber name when profileData has no name', () => {
+      const result = compileSoulMd({
+        assistantName: 'Luna',
+        subscriber: { name: 'Jane' },
+      });
+      expect(result).toContain('Jane');
+    });
+
+    it('defaults to "there" when no name provided', () => {
+      const result = compileSoulMd({ assistantName: 'Luna' });
+      expect(result).toContain('there');
     });
 
     it('defaults to "Evolved AI" when no assistant name given', () => {
       const result = compileSoulMd({});
-      expect(result).toContain('Your name is Evolved AI.');
+      expect(result).toContain('Evolved AI');
     });
 
-    it('defaults to base variant', () => {
-      const result = compileSoulMd({ assistantName: 'Test' });
-      expect(result).not.toContain('veterinary');
-      expect(result).toContain('high-achieving women');
-    });
-
-    it('injects subscriber profile data', () => {
+    it('replaces user role from profileData', () => {
       const result = compileSoulMd({
-        assistantName: 'Aria',
-        profileData: {
-          name: 'Sarah',
-          role: 'CEO',
-          priorities: ['Strategy', 'Team building'],
-        },
-        subscriber: {},
+        assistantName: 'Luna',
+        profileData: { role: 'Veterinarian' },
       });
-      expect(result).toContain('**Name**: Sarah');
-      expect(result).toContain('**Role**: CEO');
-      expect(result).toContain('Strategy, Team building');
+      expect(result).toContain('Veterinarian');
+      expect(result).not.toContain('{{USER_ROLE}}');
     });
 
-    it('shows default context when no profile data', () => {
-      const result = compileSoulMd({ assistantName: 'Aria' });
-      expect(result).toContain('No personalization data');
+    it('replaces priorities from profileData array', () => {
+      const result = compileSoulMd({
+        assistantName: 'Luna',
+        profileData: { priorities: ['Work-life balance', 'Client management'] },
+      });
+      expect(result).toContain('Work-life balance, Client management');
     });
 
-    it('replaces all occurrences of assistant name', () => {
+    it('replaces priorities from profileData string', () => {
+      const result = compileSoulMd({
+        assistantName: 'Luna',
+        profileData: { priorities: 'Scale the business' },
+      });
+      expect(result).toContain('Scale the business');
+    });
+
+    it('replaces timezone from profileData', () => {
+      const result = compileSoulMd({
+        assistantName: 'Luna',
+        profileData: { timezone: 'America/Chicago' },
+      });
+      expect(result).toContain('America/Chicago');
+      expect(result).not.toContain('{{USER_TIMEZONE}}');
+    });
+
+    it('replaces desired feeling from profileData', () => {
+      const result = compileSoulMd({
+        assistantName: 'Luna',
+        profileData: { desiredFeeling: 'Calm and in control' },
+      });
+      expect(result).toContain('Calm and in control');
+    });
+
+    it('replaces briefing and wrap times', () => {
+      const result = compileSoulMd({
+        assistantName: 'Luna',
+        profileData: { briefingTime: '6:30 AM', wrapTime: '9:00 PM' },
+      });
+      expect(result).toContain('6:30 AM');
+      expect(result).toContain('9:00 PM');
+    });
+
+    it('injects live context', () => {
+      const result = compileSoulMd({
+        assistantName: 'Luna',
+        liveContext: '🕐 RIGHT NOW: Tuesday, February 18, 2026\n📅 Calendar: 2 events today',
+      });
+      expect(result).toContain('RIGHT NOW: Tuesday, February 18, 2026');
+      expect(result).toContain('2 events today');
+      expect(result).not.toContain('{{LIVE_CONTEXT}}');
+    });
+
+    it('shows fallback when no live context', () => {
+      const result = compileSoulMd({ assistantName: 'Luna' });
+      expect(result).toContain('No live data available');
+    });
+
+    it('replaces ALL occurrences of assistant name', () => {
       const result = compileSoulMd({ assistantName: 'Stella' });
       expect(result).not.toContain('{{ASSISTANT_NAME}}');
-      // The name appears at least in the "Your name is" line
       const nameCount = (result.match(/Stella/g) || []).length;
-      expect(nameCount).toBeGreaterThanOrEqual(1);
+      expect(nameCount).toBeGreaterThanOrEqual(2);
+    });
+
+    it('replaces ALL occurrences of user name', () => {
+      const result = compileSoulMd({
+        assistantName: 'Luna',
+        profileData: { name: 'Emily' },
+      });
+      expect(result).not.toContain('{{USER_NAME}}');
+      const nameCount = (result.match(/Emily/g) || []).length;
+      expect(nameCount).toBeGreaterThanOrEqual(2);
     });
 
     it('compiled output is a substantial system prompt', () => {
-      const result = compileSoulMd({ assistantName: 'Test', variant: 'base' });
-      // Should be a multi-section document
+      const result = compileSoulMd({ assistantName: 'Test' });
       expect(result.length).toBeGreaterThan(1000);
-      expect(result).toContain('## Identity');
-      expect(result).toContain('## Core Personality Traits');
-      expect(result).toContain('## Communication Style');
-      expect(result).toContain('## Boundaries & Safety');
+      expect(result).toContain('# HOW YOU TALK');
+      expect(result).toContain('# ACTION SYSTEM');
+      expect(result).toContain('# PERSONALITY');
+      expect(result).toContain('# USER CONTEXT');
     });
 
-    it('vets variant has veterinary-specific sections', () => {
-      const result = compileSoulMd({ assistantName: 'Buddy', variant: 'vets' });
-      expect(result).toContain('## Veterinary-Specific Capabilities');
-      expect(result).toContain('CE tracking');
-      expect(result).toContain('compassion fatigue');
+    it('builds complete profile with all fields', () => {
+      const result = compileSoulMd({
+        assistantName: 'Luna',
+        profileData: {
+          name: 'Dr. Emily Chen',
+          role: 'Veterinary Surgeon',
+          priorities: ['Surgery scheduling', 'Team management'],
+          desiredFeeling: 'Calm and productive',
+          preferences: 'Prefers brief messages',
+          timezone: 'America/Los_Angeles',
+          briefingTime: '6:00 AM',
+          wrapTime: '7:00 PM',
+        },
+        liveContext: '🕐 RIGHT NOW: Monday, February 17, 2026',
+      });
+      expect(result).toContain('Dr. Emily Chen');
+      expect(result).toContain('Veterinary Surgeon');
+      expect(result).toContain('Surgery scheduling, Team management');
+      expect(result).toContain('Calm and productive');
+      expect(result).toContain('Prefers brief messages');
+      expect(result).toContain('America/Los_Angeles');
+      expect(result).toContain('6:00 AM');
+      expect(result).toContain('7:00 PM');
+      expect(result).not.toContain('{{');
+    });
+
+    it('uses default values for missing profile fields', () => {
+      const result = compileSoulMd({ assistantName: 'Luna' });
+      expect(result).toContain('Not specified yet'); // role
+      expect(result).toContain('Not shared yet'); // desired feeling
+      expect(result).toContain('None yet'); // preferences
+      expect(result).toContain('America/New_York'); // default timezone
+      expect(result).toContain('7:00 AM'); // default briefing
+      expect(result).toContain('8:00 PM'); // default wrap
     });
   });
 });

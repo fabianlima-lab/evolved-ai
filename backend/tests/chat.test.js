@@ -235,9 +235,9 @@ describe('Chat Routes', () => {
         payload: { message: 'Follow up' },
       });
 
-      // Verify callAI received conversation history
+      // Verify callAI received compiled SOUL.md + conversation history
       expect(aiClient.callAI).toHaveBeenCalledWith(
-        mockAgent.systemPrompt,
+        expect.stringContaining('Chief of Staff'),
         expect.arrayContaining([
           { role: 'user', content: 'Previous user message' },
           { role: 'assistant', content: 'Previous AI response' },
