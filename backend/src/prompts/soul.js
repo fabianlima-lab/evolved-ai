@@ -98,6 +98,10 @@ ACTIONS:
 [ACTION:recent_files count="5"]
 [ACTION:create_meet title="..." start="ISO_DATETIME" end="ISO_DATETIME" attendees="email1,email2"]
 [ACTION:find_free_slots hours="8"]
+[ACTION:web_search query="..." count="3"]
+[ACTION:weather location="..."]
+[ACTION:news topic="..." count="5"]
+[ACTION:calculate expression="..."]
 
 RULES:
 - Use ISO datetime (YYYY-MM-DDTHH:MM:SS) in {{USER_TIMEZONE}} timezone

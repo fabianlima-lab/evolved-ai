@@ -2,9 +2,11 @@ import makeWASocket, {
   useMultiFileAuthState,
   DisconnectReason,
   makeCacheableSignalKeyStore,
+  downloadMediaMessage,
 } from '@whiskeysockets/baileys';
 import { toDataURL } from 'qrcode';
 import env from '../config/env.js';
+import { transcribeAudio, isVoiceConfigured } from './voice.js';
 
 // ── Singleton state ──
 let sock = null;
@@ -72,15 +74,49 @@ export async function initBaileys() {
     for (const msg of messages) {
       if (msg.key.fromMe) continue; // skip own messages
 
-      const text =
+      const jid = msg.key.remoteJid; // e.g. "1234567890@s.whatsapp.net"
+      const pushName = msg.pushName || 'Unknown';
+
+      // ── Text messages ──
+      let text =
         msg.message?.conversation ||
         msg.message?.extendedTextMessage?.text ||
         '';
 
-      if (!text) continue;
+      // ── Voice notes / audio messages ──
+      if (!text && (msg.message?.audioMessage || msg.message?.pttMessage)) {
+        const audioMsg = msg.message.audioMessage || msg.message.pttMessage;
+        if (isVoiceConfigured()) {
+          try {
+            console.log(`[VOICE] Downloading voice note from ${jid}`);
+            const buffer = await downloadMediaMessage(msg, 'buffer', {});
+            const mimeType = audioMsg.mimetype || 'audio/ogg';
+            const { text: transcribed, error, durationMs } = await transcribeAudio(buffer, mimeType);
 
-      const jid = msg.key.remoteJid; // e.g. "1234567890@s.whatsapp.net"
-      const pushName = msg.pushName || 'Unknown';
+            if (transcribed) {
+              console.log(`[VOICE] Transcribed in ${durationMs}ms: "${transcribed.slice(0, 60)}..."`);
+              text = transcribed;
+            } else {
+              console.warn(`[VOICE] Transcription failed: ${error}`);
+              const { handleIncomingWhatsApp } = await import('../routes/webhooks.js');
+              // Lazy import to avoid circular deps
+              const { sendWhatsAppMessage: sendMsg } = await import('./baileys.js');
+              await sendMsg(jid, "🎤 I got your voice note but couldn't quite catch it. Could you type it out or try again?");
+              continue;
+            }
+          } catch (err) {
+            console.error(`[VOICE] Error processing voice note: ${err.message}`);
+            continue;
+          }
+        } else {
+          // Voice not configured — let user know
+          const { sendWhatsAppMessage: sendMsg } = await import('./baileys.js');
+          await sendMsg(jid, "🎤 Voice notes are coming soon! For now, could you type your message?");
+          continue;
+        }
+      }
+
+      if (!text) continue;
 
       // Lazy-import to avoid circular deps at module-load time
       const { handleIncomingWhatsApp } = await import('../routes/webhooks.js');

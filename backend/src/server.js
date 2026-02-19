@@ -20,6 +20,31 @@ async function build() {
     logger: env.NODE_ENV === 'test' ? false : {
       level: env.NODE_ENV === 'production' ? 'info' : 'debug',
     },
+    trustProxy: env.NODE_ENV === 'production',
+    bodyLimit: 1048576, // 1MB max body
+  });
+
+  // ── Security headers (production) ──
+  if (env.NODE_ENV === 'production') {
+    app.addHook('onSend', async (request, reply) => {
+      reply.header('X-Content-Type-Options', 'nosniff');
+      reply.header('X-Frame-Options', 'DENY');
+      reply.header('X-XSS-Protection', '1; mode=block');
+      reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+      reply.header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    });
+  }
+
+  // ── Global error handler — don't leak internals in production ──
+  app.setErrorHandler(async (error, request, reply) => {
+    const statusCode = error.statusCode || 500;
+    if (statusCode >= 500) {
+      console.error(`[ERROR] ${request.method} ${request.url}: ${error.message}`);
+    }
+    if (env.NODE_ENV === 'production' && statusCode >= 500) {
+      return reply.code(statusCode).send({ error: 'Internal server error' });
+    }
+    return reply.code(statusCode).send({ error: error.message || 'Unknown error' });
   });
 
   // Plugins
@@ -37,7 +62,8 @@ async function build() {
 
   await app.register(rateLimit, {
     global: false,
-    max: env.NODE_ENV === 'test' ? 1000 : 1000,
+    max: env.NODE_ENV === 'test' ? 1000 : 100,
+    timeWindow: '1 minute',
     allowList: env.NODE_ENV === 'test' ? () => true : undefined,
   });
 
@@ -50,9 +76,9 @@ async function build() {
     }
   });
 
-  // Health check
+  // Health check (with uptime for monitoring)
   app.get('/health', async () => {
-    return { status: 'ok', timestamp: new Date().toISOString() };
+    return { status: 'ok', timestamp: new Date().toISOString(), uptime: Math.floor(process.uptime()) };
   });
 
   // Routes
@@ -91,6 +117,9 @@ async function start() {
 
     const { startMemoryCleanupScheduler } = await import('./services/memory-scheduler.js');
     startMemoryCleanupScheduler();
+
+    const { startWeeklyRecapScheduler } = await import('./services/weekly-recap.js');
+    startWeeklyRecapScheduler();
   } catch (err) {
     console.error('[STARTUP] Failed to start server:', err.message);
     process.exit(1);

@@ -3,6 +3,7 @@ import { sendEmail, createDraft, markAsRead, archiveEmails, searchEmails, getEma
 import { createReminder, dismissReminder } from './reminders.js';
 import { searchFiles, listRecentFiles, createGoogleDoc, createGoogleSheet, createMeetLink } from './google-drive.js';
 import { saveFact } from './memory.js';
+import { webSearch, getWeather, getNews, calculate } from './skills.js';
 
 // ─────────────────────────────────────────────────────
 // Action Executor
@@ -65,6 +66,16 @@ export async function executeAction(actionType, params, subscriber, context = {}
       // ── Google Meet ──
       case 'create_meet':
         return await handleCreateMeet(params, subscriber);
+
+      // ── Skills (web search, weather, news, calc) ──
+      case 'web_search':
+        return await webSearch(params.query, parseInt(params.count, 10) || 3);
+      case 'weather':
+        return await getWeather(params.location);
+      case 'news':
+        return await getNews(params.topic, parseInt(params.count, 10) || 5);
+      case 'calculate':
+        return await calculate(params.expression);
 
       // ── Memory (silent — user never sees these) ──
       case 'memory_save':
