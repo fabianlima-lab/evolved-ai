@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Background & Surfaces — Warm Cream */
-  --color-bg: #FAF8F5;
-  --color-card: #FFFFFF;
+  /* Background & Surfaces — Brand Cream */
+  --color-bg: #F7F4EE;
+  --color-card: #FDFCFA;
   --color-card-end: #FDFCFA;
   --color-card-hover: #F5F2EE;
   --color-border: #E8E3DC;
   --color-elevated: #F3F0EB;
 
   /* Text — Deep Warm Charcoal */
-  --color-txt: #1A1A1A;
+  --color-txt: #222222;
   --color-txt-body: #3D3935;
   --color-txt-muted: #7A756E;
   --color-txt-dim: #A8A29E;
@@ -51,12 +51,11 @@
   /* Fonts */
   --font-display: var(--font-cormorant), 'Georgia', serif;
   --font-body: var(--font-montserrat), -apple-system, sans-serif;
-  --font-inter: var(--font-inter-loaded), -apple-system, sans-serif;
   --font-mono: 'SF Mono', 'Monaco', monospace;
 
-  /* Radius */
-  --radius-card: 16px;
-  --radius-btn: 10px;
+  /* Radius — Brand: sharp rectangles */
+  --radius-card: 2px;
+  --radius-btn: 0px;
 }
 
 body {
@@ -66,8 +65,8 @@ body {
 }
 
 ::selection {
-  background: rgba(42, 124, 123, 0.2);
-  color: #1A1A1A;
+  background: rgba(139, 196, 198, 0.2);
+  color: #222222;
 }
 
 /* Scrollbar styling */

@@ -46,6 +46,98 @@ describe('Channel Routes', () => {
     });
   });
 
+  // ── Connect Verify ──
+  describe('POST /api/channels/connect/verify', () => {
+    it('returns 400 when code or whatsappJid missing', async () => {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/channels/connect/verify',
+        payload: { code: '123456' }, // missing whatsappJid
+      });
+      expect(res.statusCode).toBe(400);
+    });
+
+    it('returns 404 for invalid code', async () => {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/channels/connect/verify',
+        payload: { code: '999999', whatsappJid: '+1234567890@s.whatsapp.net' },
+      });
+      expect(res.statusCode).toBe(404);
+    });
+
+    it('connects subscriber when code is valid', async () => {
+      // First generate a code
+      const codeRes = await app.inject({
+        method: 'POST',
+        url: '/api/channels/connect/request',
+        headers: { authorization: 'Bearer ' + token },
+        payload: {},
+      });
+      const { code } = JSON.parse(codeRes.body);
+
+      // No existing subscriber with this JID
+      mockPrisma.subscriber.findFirst.mockResolvedValue(null);
+      mockPrisma.subscriber.update.mockResolvedValue({});
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/channels/connect/verify',
+        payload: { code, whatsappJid: '+1234567890@s.whatsapp.net' },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const body = JSON.parse(res.body);
+      expect(body.status).toBe('connected');
+    });
+
+    it('returns already_connected if JID belongs to same subscriber', async () => {
+      // Generate a code
+      const codeRes = await app.inject({
+        method: 'POST',
+        url: '/api/channels/connect/request',
+        headers: { authorization: 'Bearer ' + token },
+        payload: {},
+      });
+      const { code } = JSON.parse(codeRes.body);
+
+      // JID already linked to the same subscriber
+      mockPrisma.subscriber.findFirst.mockResolvedValue({ id: 'test-subscriber-id' });
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/channels/connect/verify',
+        payload: { code, whatsappJid: '+1234567890@s.whatsapp.net' },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const body = JSON.parse(res.body);
+      expect(body.status).toBe('already_connected');
+    });
+
+    it('returns 409 if JID belongs to different subscriber', async () => {
+      // Generate a code
+      const codeRes = await app.inject({
+        method: 'POST',
+        url: '/api/channels/connect/request',
+        headers: { authorization: 'Bearer ' + token },
+        payload: {},
+      });
+      const { code } = JSON.parse(codeRes.body);
+
+      // JID belongs to a different subscriber
+      mockPrisma.subscriber.findFirst.mockResolvedValue({ id: 'other-subscriber-id' });
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/channels/connect/verify',
+        payload: { code, whatsappJid: '+1234567890@s.whatsapp.net' },
+      });
+
+      expect(res.statusCode).toBe(409);
+    });
+  });
+
   // ── Channel Status ──
   describe('GET /api/channels/status', () => {
     it('requires authentication', async () => {

@@ -237,7 +237,7 @@ describe('Chat Routes', () => {
 
       // Verify callAI received compiled SOUL.md + conversation history
       expect(aiClient.callAI).toHaveBeenCalledWith(
-        expect.stringContaining('Chief of Staff'),
+        expect.stringContaining('Personal Assistant'),
         expect.arrayContaining([
           { role: 'user', content: 'Previous user message' },
           { role: 'assistant', content: 'Previous AI response' },

@@ -203,7 +203,7 @@ export default function ChatPanel({ agent }) {
         <button
           onClick={handleSend}
           disabled={!input.trim() || sending}
-          className="bg-accent text-white px-4 py-2.5 rounded-[var(--radius-btn)] text-sm font-medium hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+          className="bg-accent text-brand-cream px-4 py-2.5 rounded-[var(--radius-btn)] text-sm font-semibold uppercase tracking-[0.2em] hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
         >
           {tCommon('send')}
         </button>

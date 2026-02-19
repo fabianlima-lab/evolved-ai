@@ -4,9 +4,9 @@ import { compileSoulMd, getSoulTemplate, SOUL_MD_TEMPLATE } from '../src/prompts
 describe('SOUL.md Personality System', () => {
   // ── Template ──
   describe('SOUL_MD_TEMPLATE', () => {
-    it('contains chief of staff identity', () => {
-      expect(SOUL_MD_TEMPLATE).toContain('Chief of Staff');
-      expect(SOUL_MD_TEMPLATE).toContain('personal chief of staff');
+    it('contains assistant identity', () => {
+      expect(SOUL_MD_TEMPLATE).toContain('Personal Assistant');
+      expect(SOUL_MD_TEMPLATE).toContain('personal assistant');
     });
 
     it('contains key template variables', () => {
@@ -18,15 +18,15 @@ describe('SOUL.md Personality System', () => {
       expect(SOUL_MD_TEMPLATE).toContain('{{USER_TIMEZONE}}');
     });
 
-    it('contains personal data boundaries', () => {
-      expect(SOUL_MD_TEMPLATE).toContain('PERSONAL DATA BOUNDARIES');
-      expect(SOUL_MD_TEMPLATE).toContain('Never invent fake appointments');
+    it('contains anti-hallucination rules', () => {
+      expect(SOUL_MD_TEMPLATE).toContain('NEVER FABRICATE');
+      expect(SOUL_MD_TEMPLATE).toContain('never invent senders');
     });
 
-    it('contains resourcefulness rules', () => {
-      expect(SOUL_MD_TEMPLATE).toContain('You are resourceful');
-      expect(SOUL_MD_TEMPLATE).toContain('NEVER lead with what you can\'t do');
-      expect(SOUL_MD_TEMPLATE).toContain('ALWAYS lead with what you CAN do');
+    it('contains honesty rules', () => {
+      expect(SOUL_MD_TEMPLATE).toContain('HONEST');
+      expect(SOUL_MD_TEMPLATE).toContain('not connected');
+      expect(SOUL_MD_TEMPLATE).toContain('never guess at personal facts');
     });
 
     it('contains WhatsApp communication style rules', () => {
@@ -57,8 +57,8 @@ describe('SOUL.md Personality System', () => {
 
     it('contains personality section', () => {
       expect(SOUL_MD_TEMPLATE).toContain('PERSONALITY');
-      expect(SOUL_MD_TEMPLATE).toContain('impossibly organized friend');
-      expect(SOUL_MD_TEMPLATE).toContain('Never judge the mess');
+      expect(SOUL_MD_TEMPLATE).toContain('helpful, honest, and thoughtful');
+      expect(SOUL_MD_TEMPLATE).toContain('Never judge');
     });
 
     it('contains safety boundaries', () => {

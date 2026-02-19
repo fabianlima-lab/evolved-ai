@@ -161,3 +161,23 @@ export function getBaileysStatus() {
     qr: currentQR,
   };
 }
+
+/**
+ * Send a typing indicator ("composing") to a WhatsApp chat.
+ * Call before starting AI generation so the user sees "typing...".
+ *
+ * @param {string} jid - Recipient JID
+ * @param {'composing'|'paused'} presence - composing = typing, paused = stop
+ */
+export async function sendTypingIndicator(jid, presence = 'composing') {
+  if (!sock || connectionStatus !== 'open') return;
+
+  try {
+    const normalised = jid.includes('@') ? jid : `${jid}@s.whatsapp.net`;
+    await sock.presenceSubscribe(normalised);
+    await sock.sendPresenceUpdate(presence, normalised);
+  } catch (err) {
+    // Non-critical — don't break message flow for a typing indicator
+    console.warn(`[TYPING] Failed: ${err.message}`);
+  }
+}

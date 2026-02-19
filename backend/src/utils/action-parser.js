@@ -20,11 +20,12 @@
 //   [ACTION:create_reminder title="Call dentist" due="2026-02-19T10:00:00"]
 // ─────────────────────────────────────────────────────
 
-// Regex to find action tags — non-greedy, multiline safe
-const ACTION_TAG_RE = /\[ACTION:(\w+)((?:\s+\w+="[^"]*?")*)\]/g;
+// Regex to find action tags — handles multiline content in quoted values
+// Uses [\s\S]*? instead of [^"]*? so values containing newlines (like doc content) get matched
+const ACTION_TAG_RE = /\[ACTION:(\w+)((?:\s+\w+="[\s\S]*?")*)\]/g;
 
-// Parse key="value" pairs
-const PARAM_RE = /(\w+)="([^"]*?)"/g;
+// Parse key="value" pairs — also multiline safe
+const PARAM_RE = /(\w+)="([\s\S]*?)"/g;
 
 /**
  * Extract all action tags from an AI response.

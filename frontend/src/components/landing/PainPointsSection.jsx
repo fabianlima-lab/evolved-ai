@@ -17,7 +17,7 @@ export default function PainPointsSection() {
   return (
     <section className="bg-brand-mint-bg py-20 lg:py-28">
       <div className="max-w-[1200px] mx-auto px-6">
-        <h2 className="font-[family-name:var(--font-display)] text-3xl sm:text-4xl font-semibold text-brand-charcoal text-center tracking-[-0.01em]">
+        <h2 className="font-[family-name:var(--font-display)] text-3xl sm:text-4xl font-light text-brand-charcoal text-center tracking-[-0.01em]">
           {t('painTitle')}
         </h2>
 
@@ -25,10 +25,11 @@ export default function PainPointsSection() {
           {items.map((item, i) => (
             <div
               key={i}
-              className="bg-white rounded-xl border border-brand-beige/40 p-6 shadow-[0_4px_20px_rgba(34,34,34,0.06)] hover:shadow-[0_8px_30px_rgba(34,34,34,0.1)] transition-shadow"
+              className="bg-brand-cream border border-brand-beige/40 p-6 shadow-[0_4px_20px_rgba(34,34,34,0.06)] hover:shadow-[0_8px_30px_rgba(34,34,34,0.1)] hover:-translate-y-1 transition-all duration-400"
+              style={{ borderRadius: '2px' }}
             >
               <span className="text-3xl">{item.icon}</span>
-              <h3 className="mt-4 text-lg font-semibold text-brand-charcoal">
+              <h3 className="mt-4 text-lg font-[family-name:var(--font-display)] font-medium text-brand-charcoal">
                 {item.title}
               </h3>
               <p className="mt-2 text-sm text-brand-brown leading-relaxed">

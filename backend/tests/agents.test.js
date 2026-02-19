@@ -74,7 +74,7 @@ describe('Agent Routes', () => {
       const createCall = mockPrisma.agent.create.mock.calls[0][0];
       expect(createCall.data.soulMd).toBeDefined();
       expect(createCall.data.soulMd).toContain('My Agent');
-      expect(createCall.data.soulMd).toContain('Chief of Staff');
+      expect(createCall.data.soulMd).toContain('Personal Assistant');
     });
 
     it('compiles soulMd with subscriber profile data', async () => {
@@ -98,7 +98,7 @@ describe('Agent Routes', () => {
 
       const createCall = mockPrisma.agent.create.mock.calls[0][0];
       expect(createCall.data.soulMd).toContain('Luna');
-      expect(createCall.data.soulMd).toContain('Chief of Staff');
+      expect(createCall.data.soulMd).toContain('Personal Assistant');
       expect(createCall.data.soulMd).toContain('CEO');
       expect(createCall.data.soulMd).toContain('Strategy');
     });
@@ -124,7 +124,7 @@ describe('Agent Routes', () => {
       const createCall = mockPrisma.agent.create.mock.calls[0][0];
       // New SOUL.md is a single template (no variants) — just check agent name
       expect(createCall.data.soulMd).toContain('Rex');
-      expect(createCall.data.soulMd).toContain('Chief of Staff');
+      expect(createCall.data.soulMd).toContain('Personal Assistant');
     });
 
     it('updates existing agent when one already exists (upsert) with soulMd', async () => {
@@ -157,7 +157,7 @@ describe('Agent Routes', () => {
       const updateCall = mockPrisma.agent.update.mock.calls[0][0];
       expect(updateCall.data.soulMd).toBeDefined();
       expect(updateCall.data.soulMd).toContain('Updated Agent');
-      expect(updateCall.data.soulMd).toContain('Chief of Staff');
+      expect(updateCall.data.soulMd).toContain('Personal Assistant');
     });
 
     it('rejects missing name with 400', async () => {

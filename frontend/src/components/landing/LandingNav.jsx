@@ -86,7 +86,7 @@ export default function LandingNav() {
             href={KAJABI_CHECKOUT_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-brand-deep-green text-brand-cream px-6 py-2.5 text-[0.7rem] uppercase tracking-[0.18em] font-semibold hover:bg-brand-teal hover:text-white transition-all duration-300 no-underline inline-block"
+            className="bg-brand-deep-green text-brand-cream px-6 py-2.5 text-[0.7rem] uppercase tracking-[0.18em] font-semibold hover:bg-brand-teal hover:text-brand-deep-green transition-all duration-300 no-underline inline-block"
           >
             {t('navCta')}
           </a>
@@ -112,7 +112,7 @@ export default function LandingNav() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setMobileOpen(false)}
-              className="bg-brand-deep-green text-brand-cream px-8 py-3 text-[0.75rem] uppercase tracking-[0.18em] font-semibold hover:bg-brand-teal hover:text-white transition-all duration-300 no-underline inline-block"
+              className="bg-brand-deep-green text-brand-cream px-8 py-3 text-[0.75rem] uppercase tracking-[0.18em] font-semibold hover:bg-brand-teal hover:text-brand-deep-green transition-all duration-300 no-underline inline-block"
             >
               {t('navCta')}
             </a>

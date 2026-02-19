@@ -1,4 +1,4 @@
-import { Montserrat, Cormorant_Garamond, Inter } from "next/font/google";
+import { Montserrat, Cormorant_Garamond } from "next/font/google";
 import { getLocale } from "next-intl/server";
 import "./globals.css";
 
@@ -12,19 +12,12 @@ const montserrat = Montserrat({
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
-const inter = Inter({
-  variable: "--font-inter-loaded",
-  subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
 export const viewport = {
-  themeColor: "#FAF8F5",
+  themeColor: "#F7F4EE",
 };
 
 export default async function RootLayout({ children }) {
@@ -32,7 +25,7 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang={locale}>
-      <body className={`${montserrat.variable} ${cormorant.variable} ${inter.variable} antialiased`}>
+      <body className={`${montserrat.variable} ${cormorant.variable} antialiased`}>
         {children}
       </body>
     </html>

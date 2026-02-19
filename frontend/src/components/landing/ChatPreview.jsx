@@ -54,7 +54,7 @@ export default function ChatPreview() {
         {/* Chat Input */}
         <div className="px-6 py-3 border-t border-black/5 flex items-center gap-3">
           <span className="flex-1 text-[0.8rem] text-brand-text-light">Type a message...</span>
-          <button className="w-8 h-8 bg-brand-teal border-none rounded-full text-brand-deep-green cursor-pointer flex items-center justify-center text-[0.8rem]">
+          <button className="w-8 h-8 bg-brand-teal border-none rounded-full text-brand-deep-green cursor-pointer flex items-center justify-center text-[0.8rem]" /* brand exception: chat send button is circular per guidelines */>
             →
           </button>
         </div>

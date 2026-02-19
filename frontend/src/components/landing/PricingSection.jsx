@@ -48,10 +48,6 @@ export default function PricingSection() {
               {t('pricingPeriod')}
             </span>
           </div>
-          <div className="text-[0.75rem] text-brand-teal-dark font-medium mb-8">
-            {t('pricingAnnual')}
-          </div>
-
           {/* Divider */}
           <div className="w-10 h-px bg-brand-sand mx-auto mb-8" />
 

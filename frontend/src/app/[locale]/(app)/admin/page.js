@@ -62,7 +62,7 @@ function TierBadge({ tier }) {
     pro_tribe: 'bg-mint/60 text-accent',
   };
   return (
-    <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap ${colors[tier] || colors.trial}`}>
+    <span className={`text-xs px-2 py-0.5 rounded-[var(--radius-card)] whitespace-nowrap ${colors[tier] || colors.trial}`}>
       {tier.replace('_', ' ')}
     </span>
   );
@@ -207,8 +207,8 @@ export default function AdminPage() {
                 return (
                   <div key={ti.tier} className="flex items-center gap-3">
                     <span className="text-xs text-txt-muted w-24 capitalize">{ti.tier.replace('_', ' ')}</span>
-                    <div className="flex-1 h-3 bg-elevated rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full ${colors[ti.tier] || 'bg-accent'}`} style={{ width: `${pct}%` }} />
+                    <div className="flex-1 h-3 bg-elevated rounded-[var(--radius-card)] overflow-hidden">
+                      <div className={`h-full rounded-[var(--radius-card)] ${colors[ti.tier] || 'bg-accent'}`} style={{ width: `${pct}%` }} />
                     </div>
                     <span className="text-xs text-txt-dim w-12 text-right">{ti.count}</span>
                   </div>

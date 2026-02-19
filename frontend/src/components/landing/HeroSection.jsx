@@ -36,7 +36,7 @@ export default function HeroSection() {
         >
           {t('heroHeadline')}<br />
           {t('heroHeadline2')}<br />
-          <em className="italic text-brand-teal font-normal">{t('heroHeadlineEm')}</em>
+          <em className="italic text-brand-teal font-light">{t('heroHeadlineEm')}</em>
         </h1>
 
         {/* Subheadline */}

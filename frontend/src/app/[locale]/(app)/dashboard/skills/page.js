@@ -89,7 +89,7 @@ export default function SkillsPage() {
                     <div className="flex-1">
                       <span className="text-sm text-txt font-medium">{t(skill.nameKey)}</span>
                     </div>
-                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${style.color} ${style.bg}`}>
+                    <span className={`text-xs font-medium px-2 py-1 rounded-[var(--radius-card)] ${style.color} ${style.bg}`}>
                       {t(style.labelKey)}
                     </span>
                   </Card>

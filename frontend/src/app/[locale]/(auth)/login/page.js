@@ -48,8 +48,8 @@ export default function LoginPage() {
   return (
     <Card className="w-full max-w-md p-8">
       <div className="text-center mb-8">
-        <Link href="/" className="font-[family-name:var(--font-display)] text-2xl text-txt">
-          {tCommon('brandName')}
+        <Link href="/" className="font-[family-name:var(--font-display)] text-2xl text-txt font-semibold tracking-[0.02em] no-underline">
+          The Evolved Vets <span className="font-light italic text-brand-teal">AI</span>
         </Link>
         <div className="flex justify-center gap-1 mt-6">
           <Link href="/signup" className="px-4 py-2 text-sm font-medium text-txt-muted border-b-2 border-transparent hover:text-txt">

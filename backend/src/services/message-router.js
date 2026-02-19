@@ -1,6 +1,7 @@
 import { isTrialExpired, stripHtml } from '../utils/helpers.js';
 import { compileSoulMd } from '../prompts/soul.js';
 import { sendWhatsAppMessage } from './whatsapp.js';
+import { sendTypingIndicator } from './baileys.js';
 import { callAI, isAIConfigured } from './ai-client.js';
 import { callOpenClawWithContext, isOpenClawConfigured } from './openclaw-bridge.js';
 import { buildLiveContext } from './context-builder.js';
@@ -116,6 +117,11 @@ export async function routeIncomingMessage({ channel, channelId, text, senderNam
       console.log(`[MSG] Conversation truncated for subscriber:${subscriber.id} (${rawHistory.length} → ${conversationHistory.length} messages)`);
     }
 
+    // ── Step 4.5: Show "typing..." indicator while AI thinks ──
+    if (channel === 'whatsapp') {
+      sendTypingIndicator(channelId, 'composing').catch(() => {});
+    }
+
     // ── Step 5: CALL — Send to AI (compile SOUL.md fresh from template) ──
     let aiResponse = await generateAIResponse(agent, subscriber, conversationHistory, {
       userMessage: cleanText,
@@ -159,6 +165,11 @@ export async function routeIncomingMessage({ channel, channelId, text, senderNam
       }),
       sendChannelReply(channel, channelId, aiResponse),
     ]);
+
+    // ── Clear typing indicator ──
+    if (channel === 'whatsapp') {
+      sendTypingIndicator(channelId, 'paused').catch(() => {});
+    }
 
   } catch (error) {
     console.error(`[ERROR] message routing failed: ${error.message}`);

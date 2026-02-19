@@ -11,7 +11,7 @@ export default function Error({ reset }) {
       <p className="text-txt-muted">{t('message')}</p>
       <button
         onClick={() => reset()}
-        className="bg-accent text-white px-6 py-3 rounded-[var(--radius-btn)] text-sm font-medium hover:opacity-90 transition-all cursor-pointer"
+        className="bg-accent text-brand-cream px-6 py-3 rounded-[var(--radius-btn)] text-sm font-semibold uppercase tracking-[0.2em] hover:opacity-90 transition-all cursor-pointer"
       >
         {t('tryAgain')}
       </button>
