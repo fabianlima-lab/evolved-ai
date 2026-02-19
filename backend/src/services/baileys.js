@@ -52,7 +52,9 @@ export async function initBaileys() {
         sock = null;
         await initBaileys();
       } else {
-        console.log('[BAILEYS] Logged out — admin must re-scan QR');
+        console.error('[BAILEYS] CRITICAL: Logged out — admin must re-scan QR');
+        console.error('[ALERT] WhatsApp session invalidated. All subscribers are offline.');
+        console.error('[ALERT] Action: Visit http://167.172.209.255/api/whatsapp/qr-page and scan with bot phone');
         sock = null;
       }
     }

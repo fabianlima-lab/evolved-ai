@@ -2,9 +2,10 @@ import { createEvent, updateEvent, deleteEvent, findFreeSlots } from './google-c
 import { sendEmail, createDraft, markAsRead, archiveEmails, searchEmails, getEmailBody } from './gmail.js';
 import { createReminder, dismissReminder } from './reminders.js';
 import { searchFiles, listRecentFiles, createGoogleDoc, createGoogleSheet, createMeetLink } from './google-drive.js';
-import { saveFact } from './memory.js';
+import { saveFact, getMemories, CATEGORY_ORDER } from './memory.js';
 import { webSearch, getWeather, getNews, calculate } from './skills.js';
 import { logExpense, getMonthlyExpenses, getCategoryTotal } from './expenses.js';
+import { TenantViolationError } from '../utils/tenant-guard.js';
 
 // ─────────────────────────────────────────────────────
 // Action Executor
@@ -22,6 +23,12 @@ import { logExpense, getMonthlyExpenses, getCategoryTotal } from './expenses.js'
  * Execute a single action and return a human-readable result.
  */
 export async function executeAction(actionType, params, subscriber, context = {}) {
+  // Tenant guard — every action must have a valid subscriber
+  if (!subscriber?.id) {
+    console.error(`[ACTION] BLOCKED: ${actionType} called without valid subscriber`);
+    return { success: false, result: '' };
+  }
+
   try {
     switch (actionType) {
       // ── Calendar Actions ──
@@ -84,15 +91,22 @@ export async function executeAction(actionType, params, subscriber, context = {}
       case 'expense_summary':
         return await handleExpenseSummary(params, subscriber);
 
-      // ── Memory (silent — user never sees these) ──
+      // ── Memory ──
       case 'memory_save':
         return await handleMemorySave(params, subscriber);
+      case 'memory_dump':
+        return await handleMemoryDump(subscriber);
 
       default:
         console.warn(`[ACTION] Unknown action type: ${actionType}`);
         return { success: false, result: '' };
     }
   } catch (err) {
+    // Tenant isolation violations are critical — log and block
+    if (err instanceof TenantViolationError) {
+      console.error(`[ACTION] TENANT VIOLATION in ${actionType}: ${err.message}`);
+      return { success: false, result: '' }; // Silent fail — don't leak info
+    }
     console.error(`[ACTION] Error executing ${actionType}: ${err.message}`);
     return { success: false, result: `(Action failed: ${err.message})` };
   }
@@ -441,4 +455,50 @@ async function handleMemorySave(params, subscriber) {
 
   // Always return empty result — memory ops are invisible to the user
   return { success: result.saved, result: '' };
+}
+
+// ─── Memory Dump Handler (QMD — Quick Memory Dump) ───
+
+const CATEGORY_LABELS_QMD = {
+  relationships: '👥 People',
+  preferences: '⚙️ Preferences',
+  schedule_patterns: '📅 Routines',
+  active_tasks: '🎯 Goals & Tasks',
+  career: '💼 Career',
+  financial: '💰 Financial',
+  recent_context: '📝 Recent',
+};
+
+async function handleMemoryDump(subscriber) {
+  const memories = await getMemories(subscriber.id);
+
+  if (!memories || memories.length === 0) {
+    return {
+      success: true,
+      result: "I don't have any memories saved about you yet. As we chat, I'll naturally remember things you share with me.",
+    };
+  }
+
+  // Group by category
+  const grouped = {};
+  for (const m of memories) {
+    if (!grouped[m.category]) grouped[m.category] = [];
+    grouped[m.category].push(m.fact);
+  }
+
+  let dump = `Here's everything I remember about you (${memories.length} fact${memories.length > 1 ? 's' : ''}):\n\n`;
+
+  for (const cat of CATEGORY_ORDER) {
+    if (!grouped[cat] || grouped[cat].length === 0) continue;
+    const label = CATEGORY_LABELS_QMD[cat] || cat;
+    dump += `${label}:\n`;
+    for (const fact of grouped[cat]) {
+      dump += `  - ${fact}\n`;
+    }
+    dump += '\n';
+  }
+
+  dump += 'If anything is wrong, just tell me and I\'ll update it.';
+
+  return { success: true, result: dump.trim() };
 }

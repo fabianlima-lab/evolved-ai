@@ -9,6 +9,7 @@ import { createReminder } from './reminders.js';
 import { parseActions, stripActionTags, hasActions } from '../utils/action-parser.js';
 import { executeAllActions } from './action-executor.js';
 import { estimateTokens, truncateConversation, checkBudget } from '../utils/token-budget.js';
+import { assertTenantAccess } from '../utils/tenant-guard.js';
 import prisma from '../lib/prisma.js';
 
 // Track OpenClaw availability (checked once at first message)
@@ -72,7 +73,7 @@ export async function routeIncomingMessage({ channel, channelId, text, senderNam
       return;
     }
 
-    // ── Step 3: LOAD — Get active agent ──
+    // ── Step 3: LOAD — Get active agent (tenant-scoped) ──
     const agent = await prisma.agent.findFirst({
       where: { subscriberId: subscriber.id, isActive: true },
     });
@@ -83,6 +84,9 @@ export async function routeIncomingMessage({ channel, channelId, text, senderNam
       );
       return;
     }
+
+    // ── Tenant isolation check — verify agent belongs to this subscriber ──
+    assertTenantAccess(subscriber.id, agent.subscriberId, `agent:${agent.id}`);
 
     // ── Step 4: CONTEXT — Save incoming THEN load history ──
     await prisma.message.create({

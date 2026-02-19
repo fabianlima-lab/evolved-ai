@@ -76,9 +76,17 @@ async function build() {
     }
   });
 
-  // Health check (with uptime for monitoring)
+  // Health check — basic (for load balancers / UptimeRobot)
   app.get('/health', async () => {
     return { status: 'ok', timestamp: new Date().toISOString(), uptime: Math.floor(process.uptime()) };
+  });
+
+  // Health check — detailed (for admin debugging)
+  app.get('/health/detailed', {
+    onRequest: [app.authenticate],
+  }, async () => {
+    const { getDetailedHealth } = await import('./services/health-monitor.js');
+    return getDetailedHealth();
   });
 
   // Routes
@@ -123,10 +131,29 @@ async function start() {
 
     const { startLifecycleScheduler } = await import('./services/lifecycle.js');
     startLifecycleScheduler();
+
+    // Health monitor + alerting (WhatsApp disconnect, memory, crash detection)
+    const { startHealthMonitor } = await import('./services/health-monitor.js');
+    startHealthMonitor();
   } catch (err) {
     console.error('[STARTUP] Failed to start server:', err.message);
     process.exit(1);
   }
+
+  // ── Graceful shutdown ──
+  const shutdown = async (signal) => {
+    console.log(`[SHUTDOWN] Received ${signal}, shutting down gracefully...`);
+    try {
+      await app.close();
+      console.log('[SHUTDOWN] Fastify closed');
+    } catch (err) {
+      console.error(`[SHUTDOWN] Error: ${err.message}`);
+    }
+    process.exit(0);
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 if (process.env.NODE_ENV !== 'test') {
