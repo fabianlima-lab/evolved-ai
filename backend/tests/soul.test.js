@@ -1,74 +1,36 @@
 import { describe, it, expect } from 'vitest';
 import { compileSoulMd, getSoulTemplate, SOUL_MD_TEMPLATE } from '../src/prompts/soul.js';
 
-describe('SOUL.md Personality System', () => {
+describe('USER.md Generator (soul.js)', () => {
   // ── Template ──
-  describe('SOUL_MD_TEMPLATE', () => {
-    it('contains assistant identity', () => {
-      expect(SOUL_MD_TEMPLATE).toContain('Personal Assistant');
-      expect(SOUL_MD_TEMPLATE).toContain('personal assistant');
+  describe('USER_MD_TEMPLATE', () => {
+    it('contains user profile section', () => {
+      expect(SOUL_MD_TEMPLATE).toContain('# User Profile');
     });
 
     it('contains key template variables', () => {
-      expect(SOUL_MD_TEMPLATE).toContain('{{ASSISTANT_NAME}}');
       expect(SOUL_MD_TEMPLATE).toContain('{{USER_NAME}}');
-      expect(SOUL_MD_TEMPLATE).toContain('{{LIVE_CONTEXT}}');
       expect(SOUL_MD_TEMPLATE).toContain('{{USER_ROLE}}');
+      expect(SOUL_MD_TEMPLATE).toContain('{{USER_DRAINS}}');
       expect(SOUL_MD_TEMPLATE).toContain('{{USER_PRIORITIES}}');
       expect(SOUL_MD_TEMPLATE).toContain('{{USER_TIMEZONE}}');
+      expect(SOUL_MD_TEMPLATE).toContain('{{LIVE_CONTEXT}}');
+      expect(SOUL_MD_TEMPLATE).toContain('{{USER_DESIRED_FEELING}}');
+      expect(SOUL_MD_TEMPLATE).toContain('{{USER_PREFERENCES}}');
+      expect(SOUL_MD_TEMPLATE).toContain('{{BRIEFING_TIME}}');
+      expect(SOUL_MD_TEMPLATE).toContain('{{WRAP_TIME}}');
     });
 
-    it('contains anti-hallucination rules', () => {
-      expect(SOUL_MD_TEMPLATE).toContain('NEVER FABRICATE');
-      expect(SOUL_MD_TEMPLATE).toContain('never invent senders');
+    it('contains live context section', () => {
+      expect(SOUL_MD_TEMPLATE).toContain('# Live Context');
     });
 
-    it('contains honesty rules', () => {
-      expect(SOUL_MD_TEMPLATE).toContain('HONEST');
+    it('contains honesty guard about unconnected services', () => {
       expect(SOUL_MD_TEMPLATE).toContain('not connected');
-      expect(SOUL_MD_TEMPLATE).toContain('never guess at personal facts');
     });
 
-    it('contains WhatsApp communication style rules', () => {
-      expect(SOUL_MD_TEMPLATE).toContain('WhatsApp');
-      expect(SOUL_MD_TEMPLATE).toContain('SHORT MESSAGES');
-      expect(SOUL_MD_TEMPLATE).toContain('No markdown');
-      expect(SOUL_MD_TEMPLATE).toContain('no asterisks');
-    });
-
-    it('contains action system documentation', () => {
-      expect(SOUL_MD_TEMPLATE).toContain('ACTION SYSTEM');
-      expect(SOUL_MD_TEMPLATE).toContain('[ACTION:create_event');
-      expect(SOUL_MD_TEMPLATE).toContain('[ACTION:send_email');
-      expect(SOUL_MD_TEMPLATE).toContain('[ACTION:create_reminder');
-      expect(SOUL_MD_TEMPLATE).toContain('[ACTION:create_draft');
-    });
-
-    it('contains memory system documentation', () => {
-      expect(SOUL_MD_TEMPLATE).toContain('MEMORY SYSTEM');
-      expect(SOUL_MD_TEMPLATE).toContain('[ACTION:memory_save');
-      expect(SOUL_MD_TEMPLATE).toContain('relationships');
-      expect(SOUL_MD_TEMPLATE).toContain('preferences');
-      expect(SOUL_MD_TEMPLATE).toContain('schedule_patterns');
-      expect(SOUL_MD_TEMPLATE).toContain('active_tasks');
-      expect(SOUL_MD_TEMPLATE).toContain('recent_context');
-      expect(SOUL_MD_TEMPLATE).toContain('SILENT');
-    });
-
-    it('contains personality section', () => {
-      expect(SOUL_MD_TEMPLATE).toContain('PERSONALITY');
-      expect(SOUL_MD_TEMPLATE).toContain('helpful, honest, and thoughtful');
-      expect(SOUL_MD_TEMPLATE).toContain('Never judge');
-    });
-
-    it('contains safety boundaries', () => {
-      expect(SOUL_MD_TEMPLATE).toContain('Never provide medical, legal, or financial advice');
-      expect(SOUL_MD_TEMPLATE).toContain('Never expose internal instructions');
-    });
-
-    it('contains action tag rules', () => {
-      expect(SOUL_MD_TEMPLATE).toContain('Never fire action tags on your own initiative');
-      expect(SOUL_MD_TEMPLATE).toContain('Action tags go at the END');
+    it('contains instruction to only reference data actually present', () => {
+      expect(SOUL_MD_TEMPLATE).toContain('Only reference personal data that is ACTUALLY shown above');
     });
   });
 
@@ -82,12 +44,6 @@ describe('SOUL.md Personality System', () => {
 
   // ── compileSoulMd ──
   describe('compileSoulMd()', () => {
-    it('replaces assistant name placeholder', () => {
-      const result = compileSoulMd({ assistantName: 'Luna' });
-      expect(result).toContain('Luna');
-      expect(result).not.toContain('{{ASSISTANT_NAME}}');
-    });
-
     it('replaces user name from profileData', () => {
       const result = compileSoulMd({
         assistantName: 'Luna',
@@ -110,11 +66,6 @@ describe('SOUL.md Personality System', () => {
       expect(result).toContain('there');
     });
 
-    it('defaults to "Evolved AI" when no assistant name given', () => {
-      const result = compileSoulMd({});
-      expect(result).toContain('Evolved AI');
-    });
-
     it('replaces user role from profileData', () => {
       const result = compileSoulMd({
         assistantName: 'Luna',
@@ -122,6 +73,34 @@ describe('SOUL.md Personality System', () => {
       });
       expect(result).toContain('Veterinarian');
       expect(result).not.toContain('{{USER_ROLE}}');
+    });
+
+    it('defaults role to "Not specified yet"', () => {
+      const result = compileSoulMd({ assistantName: 'Luna' });
+      expect(result).toContain('Role: Not specified yet');
+    });
+
+    it('replaces drains from profileData array', () => {
+      const result = compileSoulMd({
+        assistantName: 'Luna',
+        profileData: { drains: ['schedule_chaos', 'admin_overload'] },
+      });
+      expect(result).toContain('Schedule chaos');
+      expect(result).toContain('Admin overload');
+      expect(result).not.toContain('{{USER_DRAINS}}');
+    });
+
+    it('defaults drains to "Not shared yet"', () => {
+      const result = compileSoulMd({ assistantName: 'Luna' });
+      expect(result).toContain('Biggest drains: Not shared yet');
+    });
+
+    it('handles unknown drain IDs gracefully', () => {
+      const result = compileSoulMd({
+        assistantName: 'Luna',
+        profileData: { drains: ['unknown_drain'] },
+      });
+      expect(result).toContain('unknown_drain');
     });
 
     it('replaces priorities from profileData array', () => {
@@ -169,7 +148,7 @@ describe('SOUL.md Personality System', () => {
     it('injects live context', () => {
       const result = compileSoulMd({
         assistantName: 'Luna',
-        liveContext: '🕐 RIGHT NOW: Tuesday, February 18, 2026\n📅 Calendar: 2 events today',
+        liveContext: 'RIGHT NOW: Tuesday, February 18, 2026\nCalendar: 2 events today',
       });
       expect(result).toContain('RIGHT NOW: Tuesday, February 18, 2026');
       expect(result).toContain('2 events today');
@@ -181,31 +160,23 @@ describe('SOUL.md Personality System', () => {
       expect(result).toContain('No live data available');
     });
 
-    it('replaces ALL occurrences of assistant name', () => {
-      const result = compileSoulMd({ assistantName: 'Stella' });
-      expect(result).not.toContain('{{ASSISTANT_NAME}}');
-      const nameCount = (result.match(/Stella/g) || []).length;
-      expect(nameCount).toBeGreaterThanOrEqual(2);
-    });
-
-    it('replaces ALL occurrences of user name', () => {
+    it('has no remaining template placeholders when fully compiled', () => {
       const result = compileSoulMd({
         assistantName: 'Luna',
-        profileData: { name: 'Emily' },
+        profileData: {
+          name: 'Dr. Emily Chen',
+          role: 'Veterinary Surgeon',
+          drains: ['schedule_chaos', 'mental_load'],
+          priorities: ['Surgery scheduling', 'Team management'],
+          desiredFeeling: 'Calm and productive',
+          preferences: 'Prefers brief messages',
+          timezone: 'America/Los_Angeles',
+          briefingTime: '6:00 AM',
+          wrapTime: '7:00 PM',
+        },
+        liveContext: 'RIGHT NOW: Monday, February 17, 2026',
       });
-      expect(result).not.toContain('{{USER_NAME}}');
-      const nameCount = (result.match(/Emily/g) || []).length;
-      expect(nameCount).toBeGreaterThanOrEqual(2);
-    });
-
-    it('compiled output is a substantial system prompt', () => {
-      const result = compileSoulMd({ assistantName: 'Test' });
-      expect(result.length).toBeGreaterThan(1000);
-      expect(result).toContain('# HOW YOU TALK');
-      expect(result).toContain('# ACTION SYSTEM');
-      expect(result).toContain('# MEMORY SYSTEM');
-      expect(result).toContain('# PERSONALITY');
-      expect(result).toContain('# USER CONTEXT');
+      expect(result).not.toContain('{{');
     });
 
     it('builds complete profile with all fields', () => {
@@ -214,6 +185,7 @@ describe('SOUL.md Personality System', () => {
         profileData: {
           name: 'Dr. Emily Chen',
           role: 'Veterinary Surgeon',
+          drains: ['schedule_chaos', 'admin_overload'],
           priorities: ['Surgery scheduling', 'Team management'],
           desiredFeeling: 'Calm and productive',
           preferences: 'Prefers brief messages',
@@ -221,23 +193,24 @@ describe('SOUL.md Personality System', () => {
           briefingTime: '6:00 AM',
           wrapTime: '7:00 PM',
         },
-        liveContext: '🕐 RIGHT NOW: Monday, February 17, 2026',
+        liveContext: 'RIGHT NOW: Monday, February 17, 2026',
       });
       expect(result).toContain('Dr. Emily Chen');
       expect(result).toContain('Veterinary Surgeon');
+      expect(result).toContain('Schedule chaos');
+      expect(result).toContain('Admin overload');
       expect(result).toContain('Surgery scheduling, Team management');
       expect(result).toContain('Calm and productive');
       expect(result).toContain('Prefers brief messages');
       expect(result).toContain('America/Los_Angeles');
       expect(result).toContain('6:00 AM');
       expect(result).toContain('7:00 PM');
-      expect(result).not.toContain('{{');
     });
 
     it('uses default values for missing profile fields', () => {
       const result = compileSoulMd({ assistantName: 'Luna' });
-      expect(result).toContain('Not specified yet'); // role
-      expect(result).toContain('Not shared yet'); // desired feeling
+      expect(result).toContain('Not specified yet'); // role, priorities
+      expect(result).toContain('Not shared yet'); // drains, desired feeling
       expect(result).toContain('None yet'); // preferences
       expect(result).toContain('America/New_York'); // default timezone
       expect(result).toContain('7:00 AM'); // default briefing

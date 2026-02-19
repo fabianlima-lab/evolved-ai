@@ -235,9 +235,9 @@ describe('Chat Routes', () => {
         payload: { message: 'Follow up' },
       });
 
-      // Verify callAI received compiled SOUL.md + conversation history
+      // Verify callAI received compiled USER.md + conversation history
       expect(aiClient.callAI).toHaveBeenCalledWith(
-        expect.stringContaining('Personal Assistant'),
+        expect.stringContaining('# User Profile'),
         expect.arrayContaining([
           { role: 'user', content: 'Previous user message' },
           { role: 'assistant', content: 'Previous AI response' },

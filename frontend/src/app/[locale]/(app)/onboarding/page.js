@@ -5,7 +5,7 @@ import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { apiPost, apiFetch, apiPatch } from '@/lib/api';
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
 
 const NAME_SUGGESTIONS = ['Nova', 'Sage', 'Aria', 'Luna', 'Iris', 'Wren', 'Cleo', 'Ember'];
 
@@ -57,14 +57,27 @@ const DRAIN_OPTIONS = [
   },
 ];
 
-// ── Step Indicator: 3 bars ──
+// Shared input style
+const inputStyle = {
+  width: '100%',
+  padding: '14px',
+  border: '1px solid var(--color-border)',
+  borderRadius: '2px',
+  fontSize: '0.875rem',
+  backgroundColor: 'transparent',
+  color: 'var(--color-txt)',
+  outline: 'none',
+  transition: 'border-color 0.3s ease',
+  fontFamily: 'var(--font-body)',
+};
+
+// ── Step Indicator: 4 bars ──
 function StepIndicator({ current }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '32px' }}>
       {Array.from({ length: TOTAL_STEPS }).map((_, i) => {
         const isDone = i < current;
         const isActive = i === current;
-        const isPending = i > current;
         return (
           <div
             key={i}
@@ -77,9 +90,7 @@ function StepIndicator({ current }) {
                 ? 'var(--color-brand-teal-dark)'
                 : isActive
                   ? 'var(--color-brand-teal)'
-                  : isPending
-                    ? 'var(--color-border)'
-                    : 'var(--color-border)',
+                  : 'var(--color-border)',
             }}
           />
         );
@@ -115,7 +126,7 @@ function StepNameAssistant({ assistantName, setAssistantName, onNext }) {
           fontFamily: 'var(--font-body)',
         }}
       >
-        Step 1 of 3
+        Step 1 of {TOTAL_STEPS}
       </p>
 
       {/* Decorative line */}
@@ -272,8 +283,8 @@ function StepNameAssistant({ assistantName, setAssistantName, onNext }) {
   );
 }
 
-// ── Step 2: What Drains You Most? (step 1) ──
-function StepDrains({ selectedDrains, setSelectedDrains, onNext, onBack, saving }) {
+// ── Step 2: About You + What Drains You (step 1) ──
+function StepAboutYou({ userName, setUserName, userRole, setUserRole, selectedDrains, setSelectedDrains, onNext, onBack, saving }) {
   const toggleDrain = (id) => {
     setSelectedDrains((prev) => {
       if (prev.includes(id)) {
@@ -286,17 +297,19 @@ function StepDrains({ selectedDrains, setSelectedDrains, onNext, onBack, saving 
     });
   };
 
+  const canContinue = userName.trim() && selectedDrains.length > 0 && !saving;
+
   return (
     <div
       style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
         minHeight: '100vh',
         padding: '40px 24px',
         backgroundColor: 'var(--color-brand-cream)',
         animation: 'fadeSlideUp 0.4s ease-out',
+        overflowY: 'auto',
       }}
     >
       {/* Step indicator */}
@@ -314,7 +327,7 @@ function StepDrains({ selectedDrains, setSelectedDrains, onNext, onBack, saving 
           fontFamily: 'var(--font-body)',
         }}
       >
-        Step 2 of 3
+        Step 2 of {TOTAL_STEPS}
       </p>
 
       {/* Heading */}
@@ -329,8 +342,8 @@ function StepDrains({ selectedDrains, setSelectedDrains, onNext, onBack, saving 
           lineHeight: 1.2,
         }}
       >
-        What drains you{' '}
-        <em style={{ color: 'var(--color-brand-teal)', fontStyle: 'italic' }}>most?</em>
+        A little about{' '}
+        <em style={{ color: 'var(--color-brand-teal)', fontStyle: 'italic' }}>you</em>
       </h1>
 
       {/* Subtitle */}
@@ -341,11 +354,92 @@ function StepDrains({ selectedDrains, setSelectedDrains, onNext, onBack, saving 
           textAlign: 'center',
           maxWidth: '460px',
           lineHeight: 1.7,
-          marginBottom: '40px',
+          marginBottom: '32px',
           fontFamily: 'var(--font-body)',
         }}
       >
-        Pick the top 2 — this helps your assistant know where to start.
+        So your assistant can hit the ground running.
+      </p>
+
+      {/* Name + Role fields */}
+      <div
+        style={{
+          display: 'flex',
+          gap: '12px',
+          maxWidth: '540px',
+          width: '100%',
+          marginBottom: '32px',
+        }}
+      >
+        <div style={{ flex: 1 }}>
+          <label
+            style={{
+              display: 'block',
+              fontSize: '0.65rem',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.2em',
+              color: 'var(--color-txt)',
+              marginBottom: '8px',
+              fontFamily: 'var(--font-body)',
+            }}
+          >
+            Your first name
+          </label>
+          <input
+            type="text"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            placeholder="e.g. Sarah"
+            maxLength={50}
+            style={inputStyle}
+            onFocus={(e) => (e.target.style.borderColor = 'var(--color-brand-teal)')}
+            onBlur={(e) => (e.target.style.borderColor = 'var(--color-border)')}
+          />
+        </div>
+        <div style={{ flex: 1 }}>
+          <label
+            style={{
+              display: 'block',
+              fontSize: '0.65rem',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.2em',
+              color: 'var(--color-txt)',
+              marginBottom: '8px',
+              fontFamily: 'var(--font-body)',
+            }}
+          >
+            Your role
+          </label>
+          <input
+            type="text"
+            value={userRole}
+            onChange={(e) => setUserRole(e.target.value)}
+            placeholder="e.g. Vet nurse, Practice owner"
+            maxLength={100}
+            style={inputStyle}
+            onFocus={(e) => (e.target.style.borderColor = 'var(--color-brand-teal)')}
+            onBlur={(e) => (e.target.style.borderColor = 'var(--color-border)')}
+          />
+        </div>
+      </div>
+
+      {/* Drain section label */}
+      <p
+        style={{
+          fontSize: '0.65rem',
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          letterSpacing: '0.2em',
+          color: 'var(--color-txt)',
+          marginBottom: '16px',
+          fontFamily: 'var(--font-body)',
+          maxWidth: '540px',
+          width: '100%',
+        }}
+      >
+        What drains you most? <span style={{ fontWeight: 400, color: 'var(--color-txt-muted)' }}>Pick up to 2</span>
       </p>
 
       {/* 2x2 Grid */}
@@ -469,7 +563,7 @@ function StepDrains({ selectedDrains, setSelectedDrains, onNext, onBack, saving 
         <button
           type="button"
           onClick={onNext}
-          disabled={selectedDrains.length === 0 || saving}
+          disabled={!canContinue}
           style={{
             flex: 2,
             padding: '16px 24px',
@@ -481,8 +575,8 @@ function StepDrains({ selectedDrains, setSelectedDrains, onNext, onBack, saving 
             borderRadius: '0px',
             backgroundColor: 'var(--color-brand-deep-green)',
             color: 'var(--color-brand-cream)',
-            cursor: selectedDrains.length > 0 && !saving ? 'pointer' : 'not-allowed',
-            opacity: selectedDrains.length > 0 && !saving ? 1 : 0.5,
+            cursor: canContinue ? 'pointer' : 'not-allowed',
+            opacity: canContinue ? 1 : 0.5,
             transition: 'opacity 0.2s ease',
             fontFamily: 'var(--font-body)',
           }}
@@ -511,7 +605,256 @@ function StepDrains({ selectedDrains, setSelectedDrains, onNext, onBack, saving 
   );
 }
 
-// ── Step 3: Connect WhatsApp (step 2) ──
+// ── Step 3: Connect Google (step 2) ──
+function StepGoogle({ googleConnected, onConnect, onSkip, connecting }) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        padding: '40px 24px',
+        backgroundColor: 'var(--color-brand-cream)',
+        animation: 'fadeSlideUp 0.4s ease-out',
+      }}
+    >
+      {/* Step indicator */}
+      <StepIndicator current={2} />
+
+      {/* Google badge */}
+      <div
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
+          backgroundColor: 'rgba(66, 133, 244, 0.08)',
+          padding: '8px 20px',
+          borderRadius: '999px',
+          marginBottom: '24px',
+        }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+        </svg>
+        <span
+          style={{
+            fontSize: '11px',
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            color: '#4285F4',
+            fontWeight: 600,
+            fontFamily: 'var(--font-body)',
+          }}
+        >
+          Google Integration
+        </span>
+      </div>
+
+      {/* Heading */}
+      <h1
+        style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 'clamp(2rem, 5vw, 3rem)',
+          fontWeight: 400,
+          color: 'var(--color-txt)',
+          marginBottom: '12px',
+          textAlign: 'center',
+          lineHeight: 1.2,
+        }}
+      >
+        Connect{' '}
+        <em style={{ color: 'var(--color-brand-teal)', fontStyle: 'italic' }}>Google</em>
+      </h1>
+
+      {/* Subtitle */}
+      <p
+        style={{
+          fontSize: '15px',
+          color: 'var(--color-txt-muted)',
+          textAlign: 'center',
+          maxWidth: '480px',
+          lineHeight: 1.7,
+          marginBottom: '36px',
+          fontFamily: 'var(--font-body)',
+        }}
+      >
+        Your assistant needs access to your calendar and email to actually help.
+        One click — Google handles the rest.
+      </p>
+
+      {googleConnected ? (
+        /* Connected state */
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <div
+            style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(52, 168, 83, 0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 20px',
+            }}
+          >
+            <span style={{ color: '#34A853', fontSize: '36px' }}>&#10003;</span>
+          </div>
+          <h3
+            style={{
+              fontSize: '20px',
+              fontWeight: 500,
+              color: 'var(--color-txt)',
+              marginBottom: '8px',
+              fontFamily: 'var(--font-display)',
+            }}
+          >
+            Google connected!
+          </h3>
+          <p style={{ fontSize: '14px', color: 'var(--color-txt-muted)', fontFamily: 'var(--font-body)' }}>
+            Calendar, Gmail, and Drive are ready to go.
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* What gets connected */}
+          <div
+            style={{
+              display: 'flex',
+              gap: '24px',
+              justifyContent: 'center',
+              maxWidth: '480px',
+              width: '100%',
+              marginBottom: '36px',
+              flexWrap: 'wrap',
+            }}
+          >
+            {[
+              { icon: '📅', label: 'Calendar' },
+              { icon: '📧', label: 'Gmail' },
+              { icon: '📁', label: 'Drive' },
+            ].map((item) => (
+              <div
+                key={item.label}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '8px',
+                  flex: '1 1 100px',
+                }}
+              >
+                <span style={{ fontSize: '28px' }}>{item.icon}</span>
+                <span
+                  style={{
+                    fontSize: '13px',
+                    color: 'var(--color-txt-muted)',
+                    fontFamily: 'var(--font-body)',
+                  }}
+                >
+                  {item.label}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Connect button */}
+          <button
+            type="button"
+            onClick={onConnect}
+            disabled={connecting}
+            style={{
+              backgroundColor: 'var(--color-brand-deep-green)',
+              color: 'var(--color-brand-cream)',
+              border: 'none',
+              borderRadius: '0px',
+              padding: '16px 40px',
+              fontSize: '13px',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.2em',
+              cursor: connecting ? 'not-allowed' : 'pointer',
+              opacity: connecting ? 0.6 : 1,
+              width: '100%',
+              maxWidth: '320px',
+              fontFamily: 'var(--font-body)',
+              transition: 'opacity 0.2s ease',
+            }}
+          >
+            {connecting ? (
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <span
+                  style={{
+                    width: '16px',
+                    height: '16px',
+                    border: '2px solid currentColor',
+                    borderTopColor: 'transparent',
+                    borderRadius: '50%',
+                    animation: 'spin 0.8s linear infinite',
+                    display: 'inline-block',
+                  }}
+                />
+                Connecting...
+              </span>
+            ) : (
+              'Connect Google'
+            )}
+          </button>
+        </>
+      )}
+
+      {/* Continue (if connected) or Skip */}
+      {googleConnected ? (
+        <button
+          type="button"
+          onClick={onSkip}
+          style={{
+            backgroundColor: 'var(--color-brand-deep-green)',
+            color: 'var(--color-brand-cream)',
+            border: 'none',
+            borderRadius: '0px',
+            padding: '16px 40px',
+            fontSize: '13px',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.2em',
+            cursor: 'pointer',
+            width: '100%',
+            maxWidth: '320px',
+            marginTop: '24px',
+            fontFamily: 'var(--font-body)',
+          }}
+        >
+          Continue
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={onSkip}
+          style={{
+            background: 'none',
+            border: 'none',
+            fontSize: '13px',
+            color: 'var(--color-txt-dim)',
+            cursor: 'pointer',
+            marginTop: '16px',
+            fontFamily: 'var(--font-body)',
+            textDecoration: 'underline',
+            textUnderlineOffset: '3px',
+          }}
+        >
+          Skip for now — I&apos;ll connect later
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ── Step 4: Connect WhatsApp (step 3) ──
 function StepWhatsApp({ connectionCode, connected, whatsappNumber, onSkip, onConnect }) {
   const waLink =
     whatsappNumber && connectionCode
@@ -532,7 +875,7 @@ function StepWhatsApp({ connectionCode, connected, whatsappNumber, onSkip, onCon
       }}
     >
       {/* Step indicator */}
-      <StepIndicator current={2} />
+      <StepIndicator current={3} />
 
       {/* WhatsApp badge */}
       <div
@@ -893,17 +1236,51 @@ export default function OnboardingPage() {
   // Step 1: Assistant name
   const [assistantName, setAssistantName] = useState('');
 
-  // Step 2: Drains
+  // Step 2: About you + drains
+  const [userName, setUserName] = useState('');
+  const [userRole, setUserRole] = useState('');
   const [selectedDrains, setSelectedDrains] = useState([]);
   const [savingProfile, setSavingProfile] = useState(false);
 
-  // Step 3: WhatsApp
+  // Step 3: Google OAuth
+  const [googleConnected, setGoogleConnected] = useState(false);
+  const [connectingGoogle, setConnectingGoogle] = useState(false);
+
+  // Step 4: WhatsApp
   const [connectionCode, setConnectionCode] = useState(null);
   const [whatsappNumber, setWhatsappNumber] = useState(
     process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || ''
   );
   const [connected, setConnected] = useState(false);
   const pollRef = useRef(null);
+
+  // On mount: check if Google is already connected (e.g. from signup flow)
+  // and check if returning from OAuth callback
+  useEffect(() => {
+    // Check URL params from callback redirect
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('google') === 'connected') {
+      setGoogleConnected(true);
+      // Restore step to Google step so user sees the success state
+      setStep(2);
+      window.history.replaceState({}, '', window.location.pathname);
+      return;
+    }
+    if (params.get('google') === 'error') {
+      setStep(2);
+      window.history.replaceState({}, '', window.location.pathname);
+      return;
+    }
+
+    // Otherwise, check backend to see if Google scopes are already connected
+    apiFetch('/dashboard/stats')
+      .then((stats) => {
+        if (stats.google_connected) {
+          setGoogleConnected(true);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Track onboarding step on backend
   const updateStep = useCallback(async (stepName) => {
@@ -920,12 +1297,13 @@ export default function OnboardingPage() {
     updateStep('conversational');
   };
 
-  // Step 2 -> Step 3: save drains profile, request WhatsApp code
+  // Step 2 -> Step 3 (or skip to Step 4 if Google already connected)
   const handleStep2Next = async () => {
     setSavingProfile(true);
     try {
       const profileData = {
-        name: assistantName.trim(),
+        name: userName.trim(),
+        role: userRole.trim() || undefined,
         drains: selectedDrains,
         timezone:
           Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York',
@@ -936,7 +1314,47 @@ export default function OnboardingPage() {
     }
     setSavingProfile(false);
 
+    // Check if Google is already connected (e.g. from signup flow)
+    if (googleConnected) {
+      // Skip Google step, go straight to WhatsApp
+      handleGoogleDone();
+      return;
+    }
+
     setStep(2);
+    updateStep('google_oauth');
+  };
+
+  // Step 2 back to Step 1
+  const handleStep2Back = () => {
+    setStep(0);
+  };
+
+  // Step 3: Connect Google — redirect to Google consent
+  const handleGoogleConnect = async () => {
+    setConnectingGoogle(true);
+    try {
+      const data = await apiFetch('/auth/google/url');
+      if (data.url) {
+        // Store onboarding state so callback can restore it
+        sessionStorage.setItem('eai_onboarding', JSON.stringify({
+          assistantName,
+          userName,
+          userRole,
+          selectedDrains,
+        }));
+        // Tell callback page to redirect back to onboarding
+        sessionStorage.setItem('eai_google_return', 'onboarding');
+        window.location.href = data.url;
+      }
+    } catch {
+      setConnectingGoogle(false);
+    }
+  };
+
+  // Step 3 -> Step 4: Move to WhatsApp
+  const handleGoogleDone = async () => {
+    setStep(3);
     updateStep('whatsapp_connect');
 
     // Request WhatsApp connection code
@@ -953,14 +1371,26 @@ export default function OnboardingPage() {
     }
   };
 
-  // Step 2 back to Step 1
-  const handleStep2Back = () => {
-    setStep(0);
-  };
-
-  // Poll for WhatsApp connection when on step 3 (step index 2)
+  // Restore onboarding state from sessionStorage (after Google OAuth redirect)
   useEffect(() => {
-    if (step !== 2 || connected) return;
+    const saved = sessionStorage.getItem('eai_onboarding');
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        if (data.assistantName) setAssistantName(data.assistantName);
+        if (data.userName) setUserName(data.userName);
+        if (data.userRole) setUserRole(data.userRole);
+        if (data.selectedDrains) setSelectedDrains(data.selectedDrains);
+        sessionStorage.removeItem('eai_onboarding');
+      } catch {
+        // Ignore parse errors
+      }
+    }
+  }, []);
+
+  // Poll for WhatsApp connection when on step 4 (step index 3)
+  useEffect(() => {
+    if (step !== 3 || connected) return;
 
     pollRef.current = setInterval(async () => {
       try {
@@ -991,7 +1421,7 @@ export default function OnboardingPage() {
     router.push('/dashboard');
   };
 
-  // Step 1: Name Assistant (full viewport, no outer wrapper)
+  // Step 1: Name Assistant
   if (step === 0) {
     return (
       <StepNameAssistant
@@ -1002,10 +1432,14 @@ export default function OnboardingPage() {
     );
   }
 
-  // Step 2: What Drains You
+  // Step 2: About You + Drains
   if (step === 1) {
     return (
-      <StepDrains
+      <StepAboutYou
+        userName={userName}
+        setUserName={setUserName}
+        userRole={userRole}
+        setUserRole={setUserRole}
         selectedDrains={selectedDrains}
         setSelectedDrains={setSelectedDrains}
         onNext={handleStep2Next}
@@ -1015,8 +1449,20 @@ export default function OnboardingPage() {
     );
   }
 
-  // Step 3: WhatsApp Connect
+  // Step 3: Connect Google
   if (step === 2) {
+    return (
+      <StepGoogle
+        googleConnected={googleConnected}
+        onConnect={handleGoogleConnect}
+        onSkip={handleGoogleDone}
+        connecting={connectingGoogle}
+      />
+    );
+  }
+
+  // Step 4: WhatsApp Connect
+  if (step === 3) {
     return (
       <StepWhatsApp
         connectionCode={connectionCode}

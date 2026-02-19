@@ -262,10 +262,35 @@ export async function cleanExpiredRecentContext() {
  * @param {object|null} profileData - Subscriber's profileData JSON
  * @returns {Promise<number>} Number of memories seeded
  */
+// Human-readable labels for drain IDs from onboarding
+const DRAIN_LABELS = {
+  schedule_chaos: 'Schedule chaos — back-to-back shifts, no recovery time',
+  admin_overload: 'Admin overload — emails, forms, follow-ups piling up',
+  decision_fatigue: 'Decision fatigue — too many small choices',
+  mental_load: 'Mental load — carrying everything in their head',
+};
+
 export async function seedMemoriesFromProfile(subscriberId, profileData) {
   if (!profileData) return 0;
 
   let seeded = 0;
+
+  // Seed drains (from onboarding step 2)
+  if (profileData.drains) {
+    const drains = Array.isArray(profileData.drains)
+      ? profileData.drains
+      : [profileData.drains];
+
+    for (const drain of drains) {
+      const label = DRAIN_LABELS[drain] || drain;
+      const result = await saveFact(subscriberId, {
+        category: 'preferences',
+        fact: `Biggest drain: ${label}`,
+        source: 'onboarding',
+      });
+      if (result.saved) seeded++;
+    }
+  }
 
   // Seed role
   if (profileData.role) {

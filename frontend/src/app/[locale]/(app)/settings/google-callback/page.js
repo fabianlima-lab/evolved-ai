@@ -10,9 +10,13 @@ import { apiPost } from '@/lib/api';
  * Google redirects here after the user grants consent.
  * This page reads the authorization code from the URL,
  * sends it to the backend to exchange for tokens,
- * then redirects to the settings page.
+ * then redirects back to wherever the user came from.
  *
  * URL: /settings/google-callback?code=XXX&state=YYY
+ *
+ * Supports returnTo via sessionStorage:
+ *   - 'onboarding' → redirects to /onboarding?google=connected
+ *   - default → redirects to /settings
  */
 export default function GoogleCallbackPage() {
   const searchParams = useSearchParams();
@@ -24,19 +28,30 @@ export default function GoogleCallbackPage() {
     const code = searchParams.get('code');
     const errorParam = searchParams.get('error');
 
+    // Determine where to redirect after completion
+    const returnTo = sessionStorage.getItem('eai_google_return') || 'settings';
+    sessionStorage.removeItem('eai_google_return');
+
+    const getRedirectPath = (success) => {
+      if (returnTo === 'onboarding') {
+        return `/onboarding?google=${success ? 'connected' : 'error'}`;
+      }
+      return '/settings';
+    };
+
     if (errorParam) {
       setStatus('error');
       setError(errorParam === 'access_denied'
-        ? 'You cancelled the Google connection. Redirecting to settings...'
+        ? 'You cancelled the Google connection. Redirecting...'
         : `Google returned an error: ${errorParam}`);
-      setTimeout(() => router.replace('/settings'), 3000);
+      setTimeout(() => router.replace(getRedirectPath(false)), 3000);
       return;
     }
 
     if (!code) {
       setStatus('error');
-      setError('No authorization code received. Redirecting to settings...');
-      setTimeout(() => router.replace('/settings'), 3000);
+      setError('No authorization code received. Redirecting...');
+      setTimeout(() => router.replace(getRedirectPath(false)), 3000);
       return;
     }
 
@@ -45,12 +60,12 @@ export default function GoogleCallbackPage() {
       .then(() => {
         setStatus('success');
         // Short delay so user sees success before redirect
-        setTimeout(() => router.replace('/settings'), 1500);
+        setTimeout(() => router.replace(getRedirectPath(true)), 1500);
       })
       .catch((err) => {
         setStatus('error');
         setError(err.message || 'Failed to connect Google. Please try again.');
-        setTimeout(() => router.replace('/settings'), 3000);
+        setTimeout(() => router.replace(getRedirectPath(false)), 3000);
       });
   }, [searchParams, router]);
 
@@ -65,14 +80,14 @@ export default function GoogleCallbackPage() {
         )}
         {status === 'success' && (
           <>
-            <div className="text-4xl">✅</div>
+            <div className="text-4xl">&#10003;</div>
             <p className="text-txt font-medium">Google connected!</p>
-            <p className="text-txt-muted text-sm">Redirecting to settings...</p>
+            <p className="text-txt-muted text-sm">Redirecting...</p>
           </>
         )}
         {status === 'error' && (
           <>
-            <div className="text-4xl">⚠️</div>
+            <div className="text-4xl">&#9888;</div>
             <p className="text-txt font-medium">Connection Issue</p>
             <p className="text-txt-muted text-sm">{error}</p>
           </>

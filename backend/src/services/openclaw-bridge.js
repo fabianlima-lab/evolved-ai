@@ -16,10 +16,10 @@ import env from '../config/env.js';
 
 const GATEWAY_URL = 'http://127.0.0.1:18789/v1/chat/completions';
 const GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN || 'evo-luna-gw-2026-secret';
-const AGENT_ID = 'luna';
+const AGENT_ID = 'main';
 const DEFAULT_TIMEOUT_MS = 45000; // 45s for Claude Sonnet responses
-const LUNA_WORKSPACE = process.env.HOME + '/clawd/agents/luna';
-const USER_MD_PATH = LUNA_WORKSPACE + '/USER.md';
+const OPENCLAW_WORKSPACE = process.env.HOME + '/clawd';
+const USER_MD_PATH = OPENCLAW_WORKSPACE + '/USER.md';
 
 // Rate limit cooldown: skip OpenClaw for 5 minutes after a rate limit hit
 let rateLimitedUntil = 0;

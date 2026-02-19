@@ -70,11 +70,11 @@ describe('Agent Routes', () => {
       const body = JSON.parse(res.body);
       expect(body.agent_id).toBe('new-agent-id');
 
-      // Verify soulMd was passed to prisma.agent.create
+      // Verify soulMd (USER.md) was passed to prisma.agent.create
       const createCall = mockPrisma.agent.create.mock.calls[0][0];
       expect(createCall.data.soulMd).toBeDefined();
-      expect(createCall.data.soulMd).toContain('My Agent');
-      expect(createCall.data.soulMd).toContain('Personal Assistant');
+      expect(createCall.data.soulMd).toContain('# User Profile');
+      expect(createCall.data.soulMd).toContain('Name:');
     });
 
     it('compiles soulMd with subscriber profile data', async () => {
@@ -97,13 +97,12 @@ describe('Agent Routes', () => {
       expect(res.statusCode).toBe(201);
 
       const createCall = mockPrisma.agent.create.mock.calls[0][0];
-      expect(createCall.data.soulMd).toContain('Luna');
-      expect(createCall.data.soulMd).toContain('Personal Assistant');
+      expect(createCall.data.soulMd).toContain('Sarah');
       expect(createCall.data.soulMd).toContain('CEO');
       expect(createCall.data.soulMd).toContain('Strategy');
     });
 
-    it('compiles vets variant when specified', async () => {
+    it('compiles soulMd with default values when no profile data', async () => {
       mockPrisma.subscriber.findUnique.mockResolvedValue({
         id: 'test-subscriber-id',
         tier: 'active',
@@ -116,15 +115,14 @@ describe('Agent Routes', () => {
         method: 'POST',
         url: '/api/agents/deploy',
         headers: { authorization: 'Bearer ' + token },
-        payload: { name: 'Rex', systemPrompt: 'test', variant: 'vets' },
+        payload: { name: 'Rex', systemPrompt: 'test' },
       });
 
       expect(res.statusCode).toBe(201);
 
       const createCall = mockPrisma.agent.create.mock.calls[0][0];
-      // New SOUL.md is a single template (no variants) — just check agent name
-      expect(createCall.data.soulMd).toContain('Rex');
-      expect(createCall.data.soulMd).toContain('Personal Assistant');
+      expect(createCall.data.soulMd).toContain('# User Profile');
+      expect(createCall.data.soulMd).toContain('Not specified yet');
     });
 
     it('updates existing agent when one already exists (upsert) with soulMd', async () => {
@@ -153,11 +151,10 @@ describe('Agent Routes', () => {
       expect(body.agent_id).toBe('existing-agent-id');
       expect(body.name).toBe('Updated Agent');
 
-      // Verify soulMd was included in the update
+      // Verify soulMd (USER.md) was included in the update
       const updateCall = mockPrisma.agent.update.mock.calls[0][0];
       expect(updateCall.data.soulMd).toBeDefined();
-      expect(updateCall.data.soulMd).toContain('Updated Agent');
-      expect(updateCall.data.soulMd).toContain('Personal Assistant');
+      expect(updateCall.data.soulMd).toContain('# User Profile');
     });
 
     it('rejects missing name with 400', async () => {

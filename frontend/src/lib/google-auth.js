@@ -5,23 +5,19 @@ import { useRouter } from '@/i18n/navigation';
 import { apiPost, apiFetch } from './api';
 
 /**
- * Determines where to send a user after Google auth based on their progress:
- * - Onboarding not complete → /onboarding
- * - Everything done → /dashboard
+ * Determines where to send a user after auth based on their progress:
+ * - Onboarding never completed → /onboarding
+ * - Onboarding complete (even if agent is down) → /dashboard
  */
 export async function resolveDestination() {
   try {
     const stats = await apiFetch('/dashboard/stats');
 
-    // If onboarding is not complete, send them back
+    // Only send to onboarding if they've never completed it
     if (stats.onboarding_step && stats.onboarding_step !== 'complete') {
       return '/onboarding';
     }
 
-    // No agent deployed yet → onboarding
-    if (stats.active_agents === 0) return '/onboarding';
-
-    // Fully onboarded
     return '/dashboard';
   } catch {
     // If stats fail, safest default is onboarding
@@ -44,6 +40,20 @@ export function useGoogleAuth() {
       localStorage.setItem('eai_token', data.token);
 
       if (data.is_new_subscriber) {
+        // New Google signup — chain directly into OAuth consent for
+        // Calendar/Gmail/Drive scopes so everything is connected before
+        // the user even starts onboarding.
+        try {
+          const oauthData = await apiFetch('/auth/google/url');
+          if (oauthData.url) {
+            sessionStorage.setItem('eai_google_return', 'onboarding');
+            window.location.href = oauthData.url;
+            return; // Don't setLoading(false) — we're navigating away
+          }
+        } catch {
+          // If scope request fails, still send to onboarding —
+          // they can connect Google in step 3
+        }
         router.push('/onboarding');
       } else {
         // Returning user — route to wherever they left off
