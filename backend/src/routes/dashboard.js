@@ -17,17 +17,26 @@ async function dashboardRoutes(app) {
         where: { subscriberId, isActive: true },
       });
 
+      const agent = await prisma.agent.findFirst({
+        where: { subscriberId, isActive: true },
+        select: { name: true },
+      });
+
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-      const messagesToday = await prisma.message.count({
-        where: { subscriberId, createdAt: { gte: today } },
-      });
-
-      const messagesThisMonth = await prisma.message.count({
-        where: { subscriberId, createdAt: { gte: startOfMonth } },
-      });
+      const [messagesToday, messagesThisMonth, totalMessages] = await Promise.all([
+        prisma.message.count({
+          where: { subscriberId, createdAt: { gte: today } },
+        }),
+        prisma.message.count({
+          where: { subscriberId, createdAt: { gte: startOfMonth } },
+        }),
+        prisma.message.count({
+          where: { subscriberId },
+        }),
+      ]);
 
       const trialExpired = isTrialExpired(subscriber);
       const daysRemaining = subscriber.trialEndsAt
@@ -37,6 +46,40 @@ async function dashboardRoutes(app) {
         : null;
 
       const features = getFeaturesByTier(subscriber.tier);
+
+      const whatsappConnected = !!subscriber.whatsappJid;
+      const googleConnected = !!(subscriber.googleAccessToken && subscriber.googleRefreshToken);
+      const scopes = subscriber.googleScopes || '';
+      const assistantName = agent?.name || null;
+      const profileData = subscriber.profileData || null;
+
+      // Build integrations status
+      const integrations = {
+        whatsapp: { connected: whatsappConnected, label: 'WhatsApp' },
+        google_calendar: {
+          connected: googleConnected && scopes.includes('calendar'),
+          label: 'Google Calendar',
+        },
+        gmail: {
+          connected: googleConnected && scopes.includes('gmail'),
+          label: 'Gmail',
+        },
+        google_drive: {
+          connected: googleConnected && scopes.includes('drive'),
+          label: 'Google Drive',
+        },
+        oura: { connected: false, label: 'Oura Ring', coming_soon: true },
+      };
+
+      // Calculate tuned score (max 100)
+      let tunedScore = 0;
+      if (whatsappConnected) tunedScore += 20;
+      if (assistantName) tunedScore += 15;
+      if (profileData?.drains) tunedScore += 15;
+      if (googleConnected) tunedScore += 20;
+      if (subscriber.name) tunedScore += 10;
+      if (subscriber.onboardingStep === 'complete') tunedScore += 10;
+      if (totalMessages > 10) tunedScore += 10;
 
       return reply.send({
         email: subscriber.email,
@@ -50,11 +93,18 @@ async function dashboardRoutes(app) {
         max_agents: features.max_active_agents,
         messages_today: messagesToday,
         messages_this_month: messagesThisMonth,
-        whatsapp_connected: !!subscriber.whatsappJid,
-        google_connected: !!(subscriber.googleAccessToken && subscriber.googleRefreshToken),
+        total_messages: totalMessages,
+        whatsapp_connected: whatsappConnected,
+        google_connected: googleConnected,
         google_scopes: subscriber.googleScopes || null,
         onboarding_step: subscriber.onboardingStep || 'pending',
         features,
+        assistant_name: assistantName,
+        subscriber_name: subscriber.name || null,
+        profile_data: profileData,
+        created_at: subscriber.createdAt,
+        integrations,
+        tuned_score: tunedScore,
       });
     } catch (error) {
       console.error('[ERROR] dashboard stats failed:', error.message);

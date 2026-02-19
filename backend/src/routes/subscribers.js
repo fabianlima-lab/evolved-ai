@@ -81,9 +81,9 @@ async function subscriberRoutes(app) {
     },
   }, async (request, reply) => {
     const subscriberId = request.user.userId;
-    const { name, role, priorities, desiredFeeling, preferences, briefingTime, wrapTime, timezone, communicationPreferences, schedulePreferences } = request.body || {};
+    const { name, role, priorities, desiredFeeling, preferences, briefingTime, wrapTime, timezone, communicationPreferences, schedulePreferences, drains } = request.body || {};
 
-    if (!name && !role && !priorities && !desiredFeeling && !preferences && !timezone && !communicationPreferences && !schedulePreferences) {
+    if (!name && !role && !priorities && !desiredFeeling && !preferences && !timezone && !communicationPreferences && !schedulePreferences && !drains) {
       return reply.code(400).send({ error: 'At least one profile field is required' });
     }
 
@@ -101,6 +101,11 @@ async function subscriberRoutes(app) {
     if (briefingTime) profileData.briefingTime = stripHtml(String(briefingTime)).slice(0, 20);
     if (wrapTime) profileData.wrapTime = stripHtml(String(wrapTime)).slice(0, 20);
     if (timezone) profileData.timezone = stripHtml(String(timezone)).slice(0, 50);
+    if (drains) {
+      profileData.drains = Array.isArray(drains)
+        ? drains.map((d) => stripHtml(String(d)).slice(0, 100)).slice(0, 4)
+        : [stripHtml(String(drains)).slice(0, 100)];
+    }
     if (communicationPreferences) {
       profileData.communicationPreferences = typeof communicationPreferences === 'object'
         ? communicationPreferences

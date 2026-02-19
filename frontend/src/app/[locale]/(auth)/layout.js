@@ -8,15 +8,13 @@ const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 export default function AuthLayout({ children }) {
   return (
     <PageShell>
-      <div className="min-h-screen flex items-center justify-center px-6 py-12">
-        {GOOGLE_CLIENT_ID ? (
-          <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-            {children}
-          </GoogleOAuthProvider>
-        ) : (
-          children
-        )}
-      </div>
+      {GOOGLE_CLIENT_ID ? (
+        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+          {children}
+        </GoogleOAuthProvider>
+      ) : (
+        children
+      )}
     </PageShell>
   );
 }

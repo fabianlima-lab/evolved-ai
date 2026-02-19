@@ -113,3 +113,262 @@ body.menu-open { overflow: hidden; }
 section[id] {
   scroll-margin-top: 80px;
 }
+
+/* ============================================ */
+/* Auth Split Layout                            */
+/* ============================================ */
+.auth-visual-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-visual-panel::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  right: -20%;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(139, 196, 198, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+/* ============================================ */
+/* Choice Grid Cards (Onboarding)              */
+/* ============================================ */
+.choice-card-item {
+  padding: 24px;
+  border: 1px solid rgba(0,0,0,0.03);
+  border-radius: 2px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.4s ease;
+}
+
+.choice-card-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.06);
+}
+
+.choice-card-item.selected {
+  border-color: var(--color-brand-teal);
+  background: rgba(139, 196, 198, 0.06);
+}
+
+/* ============================================ */
+/* Dashboard Control Tower                     */
+/* ============================================ */
+.dash-sidebar-nav a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 2px;
+  color: var(--color-brand-brown);
+  text-decoration: none;
+  font-size: 0.75rem;
+  font-weight: 400;
+  transition: all 0.3s ease;
+  letter-spacing: 0.05em;
+}
+
+.dash-sidebar-nav a:hover {
+  background: var(--color-brand-cream);
+  color: var(--color-txt);
+}
+
+.dash-sidebar-nav a.active {
+  background: rgba(139, 196, 198, 0.06);
+  color: var(--color-txt);
+  font-weight: 500;
+}
+
+.dash-sidebar-nav a svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--color-brand-text-light);
+  opacity: 0.7;
+}
+
+.dash-sidebar-nav a.active svg {
+  stroke: var(--color-brand-teal);
+  opacity: 1;
+}
+
+/* Tuned Ring */
+.tuned-ring-svg {
+  transform: rotate(-90deg);
+}
+
+.tuned-ring-bg {
+  fill: none;
+  stroke: var(--color-brand-cream);
+  stroke-width: 5;
+}
+
+.tuned-ring-fill {
+  fill: none;
+  stroke: var(--color-brand-teal);
+  stroke-width: 5;
+  stroke-linecap: square;
+  stroke-dasharray: 251;
+  transition: stroke-dashoffset 1s ease;
+}
+
+/* Integration rows */
+.integration-status-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+}
+
+.integration-status-row:last-child {
+  border-bottom: none;
+}
+
+/* Kanban Board */
+.kanban-col-area {
+  min-width: 200px;
+  flex: 1;
+  background: var(--color-brand-cream);
+  border-radius: 2px;
+  padding: 16px;
+}
+
+.kanban-card-item {
+  background: white;
+  border: 1px solid rgba(0,0,0,0.03);
+  border-radius: 2px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.kanban-card-item:last-child {
+  margin-bottom: 0;
+}
+
+/* Activity items */
+.activity-log-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+  align-items: flex-start;
+}
+
+.activity-log-item:last-child {
+  border-bottom: none;
+}
+
+/* Account cards */
+.account-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+}
+
+.account-info-row:last-child {
+  border-bottom: none;
+}
+
+/* Status chips */
+.status-chip-item {
+  padding: 6px 14px;
+  border-radius: 2px;
+  font-size: 0.6rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* WhatsApp banner */
+.wa-channel-banner {
+  position: relative;
+  overflow: hidden;
+}
+
+.wa-channel-banner::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 40%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(139, 196, 198, 0.06) 0%, transparent 70%);
+}
+
+/* QR card styling */
+.qr-connection-card {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s ease;
+}
+
+.qr-connection-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-brand-teal);
+}
+
+.qr-connection-card:hover {
+  box-shadow: 0 16px 48px rgba(0,0,0,0.06);
+  transform: translateY(-4px);
+}
+
+/* Name suggestions */
+.name-suggestion-pill {
+  padding: 6px 16px;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 2px;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--color-brand-brown);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+  letter-spacing: 0.05em;
+}
+
+.name-suggestion-pill:hover {
+  border-color: var(--color-brand-teal);
+  color: var(--color-brand-teal-dark);
+  background: rgba(139, 196, 198, 0.06);
+  transform: translateY(-2px);
+}
+
+/* Onboarding items (dashboard) */
+.ob-check-done {
+  background: var(--color-brand-teal);
+}
+
+.ob-check-pending {
+  border: 1.5px solid rgba(0,0,0,0.08);
+}
+
+.ob-check-in-progress {
+  border: 1.5px solid var(--color-brand-teal);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .dash-sidebar-hide {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .auth-visual-hide {
+    display: none;
+  }
+}
