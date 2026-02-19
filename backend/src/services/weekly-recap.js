@@ -14,8 +14,12 @@
 
 import prisma from '../lib/prisma.js';
 import { sendWhatsAppMessage } from './whatsapp.js';
+import { getCurrentDayOfWeek, getCurrentHour, isQuietHours } from '../utils/quiet-hours.js';
 
 const WEEKLY_RECAP_INTERVAL_MS = 60 * 60 * 1000; // Check every hour
+
+// Track sent recaps to prevent duplicates
+const sentRecaps = new Map();
 
 /**
  * Start the weekly recap scheduler.
@@ -35,27 +39,13 @@ export function startWeeklyRecapScheduler() {
 
 /**
  * Check if it's recap time and send to eligible subscribers.
+ * Now timezone-aware: checks each subscriber's timezone individually.
  */
 async function checkAndSendRecaps() {
-  const now = new Date();
-  const dayOfWeek = now.getUTCDay(); // 0 = Sunday
-
-  // Only run on Sundays
-  if (dayOfWeek !== 0) return;
-
-  // Check UTC hour — we target 7 PM ET which is 0:00 UTC (midnight Sun→Mon)
-  // or various hours depending on timezone. We'll check broadly.
-  const utcHour = now.getUTCHours();
-
-  // Send recaps between 23:00-01:00 UTC (covers 6-8 PM US timezones)
-  if (utcHour < 23 && utcHour > 1) return;
-
-  console.log('[WEEKLY-RECAP] Sunday evening — sending weekly recaps');
-
   const subscribers = await prisma.subscriber.findMany({
     where: {
       whatsappJid: { not: null },
-      tier: { in: ['trial', 'active'] },
+      tier: { in: ['trial', 'active', 'past_due'] },
     },
     include: {
       agents: { where: { isActive: true }, take: 1 },
@@ -65,15 +55,38 @@ async function checkAndSendRecaps() {
   for (const sub of subscribers) {
     if (!sub.agents[0]) continue;
 
+    const tz = sub.profileData?.timezone || 'America/New_York';
+
+    // Check if it's Sunday 7PM in THEIR timezone
+    const dayInTz = getCurrentDayOfWeek(tz);
+    const hourInTz = getCurrentHour(tz);
+
+    if (dayInTz !== 0 || hourInTz !== 19) continue; // Only Sunday at 7 PM local
+
+    // Don't send during quiet hours
+    if (isQuietHours(tz)) continue;
+
+    // Dedup: one recap per subscriber per week
+    const weekKey = `${sub.id}_${new Date().toISOString().slice(0, 10)}`;
+    if (sentRecaps.has(weekKey)) continue;
+    sentRecaps.set(weekKey, Date.now());
+
     try {
       const recap = await buildRecap(sub, sub.agents[0]);
       if (recap) {
         await sendWhatsAppMessage(sub.whatsappJid, recap);
-        console.log(`[WEEKLY-RECAP] Sent recap to subscriber:${sub.id}`);
+        console.log(`[WEEKLY-RECAP] Sent recap to subscriber:${sub.id} (tz:${tz})`);
       }
     } catch (err) {
       console.error(`[WEEKLY-RECAP] Error for subscriber:${sub.id}: ${err.message}`);
+      sentRecaps.delete(weekKey); // Allow retry
     }
+  }
+
+  // Clean old tracking entries
+  const cutoff = Date.now() - 8 * 24 * 60 * 60 * 1000;
+  for (const [key, ts] of sentRecaps) {
+    if (ts < cutoff) sentRecaps.delete(key);
   }
 }
 

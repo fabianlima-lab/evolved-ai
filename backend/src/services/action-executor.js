@@ -4,6 +4,7 @@ import { createReminder, dismissReminder } from './reminders.js';
 import { searchFiles, listRecentFiles, createGoogleDoc, createGoogleSheet, createMeetLink } from './google-drive.js';
 import { saveFact } from './memory.js';
 import { webSearch, getWeather, getNews, calculate } from './skills.js';
+import { logExpense, getMonthlyExpenses, getCategoryTotal } from './expenses.js';
 
 // ─────────────────────────────────────────────────────
 // Action Executor
@@ -76,6 +77,12 @@ export async function executeAction(actionType, params, subscriber, context = {}
         return await getNews(params.topic, parseInt(params.count, 10) || 5);
       case 'calculate':
         return await calculate(params.expression);
+
+      // ── Expense Tracking ──
+      case 'log_expense':
+        return await handleLogExpense(params, subscriber);
+      case 'expense_summary':
+        return await handleExpenseSummary(params, subscriber);
 
       // ── Memory (silent — user never sees these) ──
       case 'memory_save':
@@ -365,6 +372,59 @@ async function handleCreateMeet(params, subscriber) {
     return { success: true, result: result.meetLink };
   }
   return { success: false, result: `(Could not create meeting: ${result.error})` };
+}
+
+// ─── Expense Handlers ───
+
+async function handleLogExpense(params, subscriber) {
+  const { amount, category, description } = params;
+
+  if (!amount) {
+    return { success: false, result: '(Could not log expense — missing amount)' };
+  }
+
+  const result = await logExpense(subscriber.id, {
+    amount,
+    category: category || 'other',
+    description: description || null,
+  });
+
+  if (result.success) {
+    return { success: true, result: '' };
+  }
+  return { success: false, result: `(Could not log expense: ${result.error})` };
+}
+
+async function handleExpenseSummary(params, subscriber) {
+  const category = params.category;
+
+  if (category) {
+    // Category-specific total
+    const { total, count } = await getCategoryTotal(subscriber.id, category);
+    const label = category.charAt(0).toUpperCase() + category.slice(1);
+    return {
+      success: true,
+      result: count > 0
+        ? `${label} this month: $${total.toFixed(2)} (${count} expense${count > 1 ? 's' : ''})`
+        : `No ${label.toLowerCase()} expenses logged this month`,
+    };
+  }
+
+  // Full monthly summary
+  const { total, byCategory, count } = await getMonthlyExpenses(subscriber.id);
+
+  if (count === 0) {
+    return { success: true, result: 'No expenses logged this month yet' };
+  }
+
+  let summary = `This month: $${total.toFixed(2)} across ${count} expense${count > 1 ? 's' : ''}\n`;
+  const sorted = Object.entries(byCategory).sort((a, b) => b[1].total - a[1].total);
+  for (const [cat, data] of sorted) {
+    const label = cat.charAt(0).toUpperCase() + cat.slice(1);
+    summary += `${label}: $${data.total.toFixed(2)} (${data.count}x)\n`;
+  }
+
+  return { success: true, result: summary.trim() };
 }
 
 // ─── Memory Handler (silent) ───

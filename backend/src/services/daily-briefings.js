@@ -2,6 +2,7 @@ import { buildLiveContext } from './context-builder.js';
 import { compileSoulMd } from '../prompts/soul.js';
 import { callAI, isAIConfigured } from './ai-client.js';
 import { sendWhatsAppMessage } from './whatsapp.js';
+import { isQuietHours } from '../utils/quiet-hours.js';
 import prisma from '../lib/prisma.js';
 
 // ─────────────────────────────────────────────────────
@@ -107,6 +108,9 @@ async function processBriefings() {
     const tz = subscriber.profileData?.timezone || 'America/New_York';
     const briefingTime = subscriber.profileData?.briefingTime || '7:00 AM';
     const wrapTime = subscriber.profileData?.wrapTime || '8:00 PM';
+
+    // Skip if in quiet hours
+    if (isQuietHours(tz)) continue;
 
     // Check morning briefing
     if (isWithinTimeWindow(now, briefingTime, tz)) {

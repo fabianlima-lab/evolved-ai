@@ -1,11 +1,15 @@
 import { getDueReminders, markReminderSent } from './reminders.js';
 import { sendWhatsAppMessage } from './whatsapp.js';
+import { isQuietHours } from '../utils/quiet-hours.js';
 
 // ─────────────────────────────────────────────────────
 // Reminder Scheduler
 //
 // Background loop that checks for due reminders every 60s
 // and sends them via WhatsApp. Called once at server startup.
+//
+// Respects quiet hours (10pm-6am) — reminders due during
+// quiet hours are held until quiet hours end.
 // ─────────────────────────────────────────────────────
 
 const CHECK_INTERVAL_MS = 60 * 1000; // Check every 60 seconds
@@ -59,6 +63,13 @@ async function processReminders() {
     if (!subscriber) {
       console.error(`[REMINDER-SCHEDULER] No subscriber for reminder:${reminder.id}`);
       await markReminderSent(reminder.id); // Mark sent to avoid retry loop
+      continue;
+    }
+
+    // Check quiet hours — hold reminders during 10pm-6am in subscriber's timezone
+    const tz = subscriber.profileData?.timezone || 'America/New_York';
+    if (isQuietHours(tz)) {
+      // Skip for now — will retry next tick after quiet hours end
       continue;
     }
 

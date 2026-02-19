@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import env from '../config/env.js';
 import prisma from '../lib/prisma.js';
+import { onTrialConverted, onPaymentFailed, onCancelled, onReactivated } from '../services/lifecycle.js';
 
 /**
  * Kajabi Webhook Routes
@@ -109,6 +110,9 @@ async function kajabiWebhookRoutes(app) {
       });
 
       if (subscriber) {
+        const wasCancelled = subscriber.tier === 'cancelled';
+        const wasTrial = subscriber.tier === 'trial';
+
         // Existing subscriber — activate
         subscriber = await prisma.subscriber.update({
           where: { id: subscriber.id },
@@ -119,9 +123,27 @@ async function kajabiWebhookRoutes(app) {
             kajabiPurchaseDate: new Date(),
             kajabiCancelDate: null, // Clear any previous cancellation
           },
+          include: { agent: true },
         });
 
-        console.log(`[KAJABI] reactivated subscriber: ${subscriber.id} (${email})`);
+        // Reactivate agent if it was deactivated
+        if (wasCancelled) {
+          await prisma.agent.updateMany({
+            where: { subscriberId: subscriber.id, isActive: false },
+            data: { isActive: true },
+          });
+        }
+
+        // Send lifecycle messages
+        if (wasCancelled) {
+          onReactivated(subscriber).catch((e) => console.error(`[LIFECYCLE] reactivation msg failed: ${e.message}`));
+          console.log(`[KAJABI] reactivated subscriber: ${subscriber.id} (${email})`);
+        } else if (wasTrial) {
+          onTrialConverted(subscriber).catch((e) => console.error(`[LIFECYCLE] conversion msg failed: ${e.message}`));
+          console.log(`[KAJABI] trial converted subscriber: ${subscriber.id} (${email})`);
+        } else {
+          console.log(`[KAJABI] payment confirmed subscriber: ${subscriber.id} (${email})`);
+        }
       } else {
         // New subscriber — provision with 3-day trial
         subscriber = await prisma.subscriber.create({
@@ -196,6 +218,13 @@ async function kajabiWebhookRoutes(app) {
         return reply.code(200).send({ received: true, error: 'subscriber_not_found' });
       }
 
+      // Send farewell message BEFORE deactivating
+      const subWithAgent = await prisma.subscriber.findUnique({
+        where: { id: subscriber.id },
+        include: { agent: true },
+      });
+      onCancelled(subWithAgent || subscriber).catch((e) => console.error(`[LIFECYCLE] cancel msg failed: ${e.message}`));
+
       // Deactivate subscriber
       await prisma.subscriber.update({
         where: { id: subscriber.id },
@@ -220,6 +249,61 @@ async function kajabiWebhookRoutes(app) {
       });
     } catch (error) {
       console.error('[KAJABI] cancel webhook error:', error.message);
+      return reply.code(200).send({ received: true, error: 'internal' });
+    }
+  });
+  // ─────────────────────────────────────────────
+  // POST /api/webhooks/kajabi/payment-failed
+  // Fires when a recurring payment fails.
+  // Sets subscriber to past_due with 7-day grace period.
+  // ─────────────────────────────────────────────
+  app.post('/payment-failed', async (request, reply) => {
+    try {
+      if (!verifySignature(request.rawBody, request.headers['x-kajabi-signature'])) {
+        console.error('[KAJABI] invalid webhook signature on /payment-failed');
+        return reply.code(200).send({ received: true, error: 'invalid_signature' });
+      }
+
+      const { payload } = request.body || {};
+      const email = payload?.email || payload?.member?.email;
+      const kajabiContactId = payload?.id ? String(payload.id) : null;
+
+      if (!email && !kajabiContactId) {
+        return reply.code(200).send({ received: true, error: 'missing_identifier' });
+      }
+
+      const subscriber = await prisma.subscriber.findFirst({
+        where: {
+          OR: [
+            ...(email ? [{ email }] : []),
+            ...(kajabiContactId ? [{ kajabiContactId }] : []),
+          ],
+        },
+        include: { agent: true },
+      });
+
+      if (!subscriber) {
+        return reply.code(200).send({ received: true, error: 'subscriber_not_found' });
+      }
+
+      // Set to past_due — agent continues working during 7-day grace
+      await prisma.subscriber.update({
+        where: { id: subscriber.id },
+        data: { tier: 'past_due' },
+      });
+
+      // Send payment failed message
+      onPaymentFailed(subscriber).catch((e) => console.error(`[LIFECYCLE] payment failed msg: ${e.message}`));
+
+      console.log(`[KAJABI] payment failed for subscriber: ${subscriber.id} (${subscriber.email})`);
+
+      return reply.code(200).send({
+        received: true,
+        subscriber_id: subscriber.id,
+        status: 'past_due',
+      });
+    } catch (error) {
+      console.error('[KAJABI] payment-failed webhook error:', error.message);
       return reply.code(200).send({ received: true, error: 'internal' });
     }
   });

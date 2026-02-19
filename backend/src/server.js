@@ -100,7 +100,7 @@ async function start() {
   const app = await build();
 
   try {
-    await app.listen({ port: env.PORT, host: '0.0.0.0' });
+    await app.listen({ port: env.PORT, host: env.NODE_ENV === 'production' ? '127.0.0.1' : '0.0.0.0' });
     console.log(`[STARTUP] Server running on port ${env.PORT}`);
     console.log(`[STARTUP] Environment: ${env.NODE_ENV}`);
 
@@ -120,6 +120,9 @@ async function start() {
 
     const { startWeeklyRecapScheduler } = await import('./services/weekly-recap.js');
     startWeeklyRecapScheduler();
+
+    const { startLifecycleScheduler } = await import('./services/lifecycle.js');
+    startLifecycleScheduler();
   } catch (err) {
     console.error('[STARTUP] Failed to start server:', err.message);
     process.exit(1);

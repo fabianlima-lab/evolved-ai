@@ -8,6 +8,7 @@ import { parseReminderFromText } from '../utils/reminder-parser.js';
 import { createReminder } from './reminders.js';
 import { parseActions, stripActionTags, hasActions } from '../utils/action-parser.js';
 import { executeAllActions } from './action-executor.js';
+import { estimateTokens, truncateConversation, checkBudget } from '../utils/token-budget.js';
 import prisma from '../lib/prisma.js';
 
 // Track OpenClaw availability (checked once at first message)
@@ -97,13 +98,19 @@ export async function routeIncomingMessage({ channel, channelId, text, senderNam
     const recentMessages = await prisma.message.findMany({
       where: { subscriberId: subscriber.id, agentId: agent.id },
       orderBy: { createdAt: 'desc' },
-      take: 20,
+      take: 30, // Fetch more than needed, token budget will trim
     });
 
-    const conversationHistory = recentMessages.reverse().map((m) => ({
+    const rawHistory = recentMessages.reverse().map((m) => ({
       role: m.role,
       content: m.content,
     }));
+
+    // Apply token budget truncation
+    const { messages: conversationHistory, truncated } = truncateConversation(rawHistory);
+    if (truncated) {
+      console.log(`[MSG] Conversation truncated for subscriber:${subscriber.id} (${rawHistory.length} → ${conversationHistory.length} messages)`);
+    }
 
     // ── Step 5: CALL — Send to AI (compile SOUL.md fresh from template) ──
     let aiResponse = await generateAIResponse(agent, subscriber, conversationHistory, {
@@ -220,6 +227,12 @@ async function generateAIResponse(agent, subscriber, conversationHistory, option
   } catch (err) {
     console.error('[MSG] SOUL.md compilation failed, using DB fallback:', err.message);
     systemPrompt = agent.soulMd || agent.systemPrompt || FALLBACK_PROMPT;
+  }
+
+  // Log token budget check
+  const budget = checkBudget(systemPrompt, conversationHistory);
+  if (budget.warning) {
+    console.warn(`[MSG] Token budget: ${budget.totalTokens} tokens (system:${budget.systemTokens} history:${budget.historyTokens})`);
   }
 
   // Reminder parser still runs as backup for simple "remind me" messages

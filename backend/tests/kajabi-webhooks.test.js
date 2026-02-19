@@ -87,7 +87,9 @@ describe('Kajabi Webhook Routes', () => {
         id: 'existing-sub-id',
         email: 'buyer@example.com',
         tier: 'active',
+        agent: null,
       });
+      mockPrisma.agent.updateMany.mockResolvedValue({ count: 1 });
 
       const res = await app.inject({
         method: 'POST',
@@ -116,6 +118,7 @@ describe('Kajabi Webhook Routes', () => {
           tier: 'active',
           kajabiCancelDate: null,
         }),
+        include: { agent: true },
       });
     });
 
@@ -226,6 +229,12 @@ describe('Kajabi Webhook Routes', () => {
         id: 'sub-to-cancel',
         email: 'canceller@example.com',
         tier: 'active',
+      });
+      mockPrisma.subscriber.findUnique.mockResolvedValue({
+        id: 'sub-to-cancel',
+        email: 'canceller@example.com',
+        tier: 'active',
+        agent: null,
       });
       mockPrisma.subscriber.update.mockResolvedValue({
         id: 'sub-to-cancel',
