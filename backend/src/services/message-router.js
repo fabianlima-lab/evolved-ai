@@ -261,7 +261,7 @@ async function generateAIResponse(agent, subscriber, conversationHistory, option
     console.warn(`[MSG] OpenClaw failed: ${ocResult.error}${ocResult.rawError ? ` (${ocResult.rawError})` : ''} — falling back to direct AI`);
   }
 
-  // ── Fallback: Direct AI call (Groq → NVIDIA) ──
+  // ── Fallback: Direct AI call (Anthropic → Groq → NVIDIA) ──
   if (!isAIConfigured()) {
     console.log(`[MSG_OUT] AI not configured, using stub for agent:${agent.id}`);
     return ERROR_MESSAGES.ai_not_configured;

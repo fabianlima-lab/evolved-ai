@@ -44,6 +44,17 @@ describe('SOUL.md Personality System', () => {
       expect(SOUL_MD_TEMPLATE).toContain('[ACTION:create_draft');
     });
 
+    it('contains memory system documentation', () => {
+      expect(SOUL_MD_TEMPLATE).toContain('MEMORY SYSTEM');
+      expect(SOUL_MD_TEMPLATE).toContain('[ACTION:memory_save');
+      expect(SOUL_MD_TEMPLATE).toContain('relationships');
+      expect(SOUL_MD_TEMPLATE).toContain('preferences');
+      expect(SOUL_MD_TEMPLATE).toContain('schedule_patterns');
+      expect(SOUL_MD_TEMPLATE).toContain('active_tasks');
+      expect(SOUL_MD_TEMPLATE).toContain('recent_context');
+      expect(SOUL_MD_TEMPLATE).toContain('SILENT');
+    });
+
     it('contains personality section', () => {
       expect(SOUL_MD_TEMPLATE).toContain('PERSONALITY');
       expect(SOUL_MD_TEMPLATE).toContain('impossibly organized friend');
@@ -192,6 +203,7 @@ describe('SOUL.md Personality System', () => {
       expect(result.length).toBeGreaterThan(1000);
       expect(result).toContain('# HOW YOU TALK');
       expect(result).toContain('# ACTION SYSTEM');
+      expect(result).toContain('# MEMORY SYSTEM');
       expect(result).toContain('# PERSONALITY');
       expect(result).toContain('# USER CONTEXT');
     });

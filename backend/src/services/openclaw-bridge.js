@@ -1,5 +1,6 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { writeFile } from 'node:fs/promises';
 import env from '../config/env.js';
 
 const execFileAsync = promisify(execFile);
@@ -20,7 +21,14 @@ const execFileAsync = promisify(execFile);
 
 const OPENCLAW_CLI = 'openclaw';
 const AGENT_ID = 'luna';
-const DEFAULT_TIMEOUT_MS = 60000; // 60s timeout for AI calls
+const DEFAULT_TIMEOUT_MS = 20000; // 20s timeout — fail fast, fallback handles it
+const LUNA_WORKSPACE = process.env.HOME + '/clawd/agents/luna';
+const USER_MD_PATH = LUNA_WORKSPACE + '/USER.md';
+
+// Rate limit cooldown: skip OpenClaw for 5 minutes after a rate limit hit
+// (OpenClaw uses the same Groq key as direct AI, so if one is limited, both are)
+let rateLimitedUntil = 0;
+const RATE_LIMIT_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
 
 /**
  * Check if OpenClaw is available and configured.
@@ -64,6 +72,13 @@ export async function isOpenClawConfigured() {
 export async function callOpenClaw(message, options = {}) {
   const startTime = Date.now();
 
+  // Skip if we're in a rate limit cooldown period
+  if (Date.now() < rateLimitedUntil) {
+    const secsLeft = Math.ceil((rateLimitedUntil - Date.now()) / 1000);
+    console.log(`[OPENCLAW] Skipping — rate limit cooldown (${secsLeft}s remaining)`);
+    return { content: null, error: 'rate_limited', model: 'groq/llama-3.3-70b-versatile', responseTimeMs: 0, tier: 0 };
+  }
+
   // Note: we do NOT use --json here because in plain text mode,
   // OpenClaw outputs the response directly (more reliable with Groq/Llama).
   // With --json, tool-calling failures produce error JSON instead of text.
@@ -97,6 +112,8 @@ export async function callOpenClaw(message, options = {}) {
     const responseTimeMs = Date.now() - startTime;
 
     if (stderr && stderr.includes('rate limit')) {
+      rateLimitedUntil = Date.now() + RATE_LIMIT_COOLDOWN_MS;
+      console.log(`[OPENCLAW] Rate limited — cooling down for 5 min`);
       return {
         content: null,
         error: 'rate_limited',
@@ -149,7 +166,9 @@ export async function callOpenClaw(message, options = {}) {
 
     // Check stderr for specific errors
     const stderr = err.stderr || '';
-    if (stderr.includes('rate limit')) {
+    if (stderr.includes('rate limit') || stderr.includes('FailoverError')) {
+      rateLimitedUntil = Date.now() + RATE_LIMIT_COOLDOWN_MS;
+      console.log(`[OPENCLAW] Rate limited — cooling down for 5 min`);
       return { content: null, error: 'rate_limited', model: 'groq/llama-3.3-70b-versatile', responseTimeMs, tier: 0 };
     }
 
@@ -169,8 +188,10 @@ export async function callOpenClaw(message, options = {}) {
  * Call OpenClaw with full context injection.
  *
  * This is the main entry point from the message router.
- * It compiles SOUL.md + live context, injects it into the
- * USER.md workspace file, then calls the Luna agent.
+ * It writes our compiled system prompt (with live context, user profile,
+ * action system, memory, and anti-refusal rules) into the OpenClaw
+ * workspace USER.md file before calling the agent. This ensures OpenClaw
+ * gets our full context on every call.
  *
  * @param {string} systemPrompt - Pre-compiled SOUL.md with live context
  * @param {Array<{role: string, content: string}>} conversationHistory - Recent messages
@@ -178,15 +199,23 @@ export async function callOpenClaw(message, options = {}) {
  * @returns {Promise<{content: string, error: string|null, model: string, responseTimeMs: number, tier: number}>}
  */
 export async function callOpenClawWithContext(systemPrompt, conversationHistory, options = {}) {
-  // Build the full message with conversation context
-  // OpenClaw manages its own session state, but we pass recent history
-  // as part of the message for context on first interaction
   const userMessage = options.userMessage
     || conversationHistory.filter((m) => m.role === 'user').pop()?.content
     || '';
 
   if (!userMessage) {
     return { content: null, error: 'empty_message', model: null, responseTimeMs: 0, tier: 0 };
+  }
+
+  // Inject our compiled system prompt into USER.md so OpenClaw picks it up.
+  // OpenClaw reads SOUL.md (personality) + USER.md (per-user context) on each call.
+  // Our systemPrompt contains live calendar/email/reminder data, user profile,
+  // action system docs, memory system, and the strong anti-refusal rules.
+  try {
+    await writeFile(USER_MD_PATH, systemPrompt, 'utf-8');
+  } catch (err) {
+    console.error(`[OPENCLAW] Failed to write USER.md: ${err.message}`);
+    // Continue anyway — OpenClaw will use stale USER.md or defaults
   }
 
   return callOpenClaw(userMessage, {

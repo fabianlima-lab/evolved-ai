@@ -1,10 +1,12 @@
 import OpenAI from 'openai';
+import Anthropic from '@anthropic-ai/sdk';
 import env from '../config/env.js';
-import { PRIMARY_CONFIG, FALLBACK_CONFIG, MODEL_CONFIG, NVIDIA_BASE_URL } from '../config/models.js';
+import { PRIMARY_CONFIG, FALLBACK_CONFIG, SAFETY_NET_CONFIG, MODEL_CONFIG, NVIDIA_BASE_URL } from '../config/models.js';
 
 // ─────────────────────────────────────────────────────
-// AI Client — Primary: NVIDIA NIMs + Fallback: Groq
-// Both OpenAI-compatible. Auto-fallback on failure.
+// AI Client — Primary: Anthropic Claude + Fallback: Groq + Safety Net: NVIDIA
+// Anthropic uses its own SDK. Groq/NVIDIA are OpenAI-compatible.
+// Auto-fallback on failure.
 // ─────────────────────────────────────────────────────
 
 /**
@@ -18,11 +20,20 @@ function stripLlamaTokens(text) {
     .trim();
 }
 
-/** Cached OpenAI clients (one per provider) */
+/** Cached clients (one per provider) */
 const clients = {};
 
 function getClient(provider) {
   if (clients[provider]) return clients[provider];
+
+  if (provider === 'anthropic') {
+    if (!env.ANTHROPIC_API_KEY || env.ANTHROPIC_API_KEY === 'sk-ant-xxx') return null;
+    clients.anthropic = new Anthropic({
+      apiKey: env.ANTHROPIC_API_KEY,
+      timeout: 30000,
+    });
+    return clients.anthropic;
+  }
 
   if (provider === 'groq') {
     if (!env.GROQ_API_KEY || env.GROQ_API_KEY === 'gsk-xxx') return null;
@@ -48,10 +59,56 @@ function getClient(provider) {
 }
 
 /**
- * Try a single AI call against a specific provider config.
+ * Try a single AI call against Anthropic.
+ * Anthropic uses a different API format:
+ * - System prompt goes in a separate `system` parameter
+ * - Messages array must NOT contain system messages
+ * - Response is in response.content[0].text
+ */
+async function tryAnthropic(config, messages) {
+  const client = getClient('anthropic');
+  if (!client) {
+    return { content: null, error: 'anthropic_not_configured' };
+  }
+
+  const startTime = Date.now();
+
+  // Extract system prompt from messages (first message with role 'system')
+  const systemMessage = messages.find((m) => m.role === 'system');
+  const systemPrompt = systemMessage?.content || '';
+
+  // Filter out system messages — Anthropic wants them separate
+  const userMessages = messages.filter((m) => m.role !== 'system');
+
+  try {
+    const response = await client.messages.create({
+      model: config.model,
+      max_tokens: config.maxTokens,
+      temperature: config.temperature,
+      system: systemPrompt,
+      messages: userMessages,
+    });
+
+    const responseTimeMs = Date.now() - startTime;
+
+    const textBlock = response.content?.find((b) => b.type === 'text');
+    if (!textBlock || !textBlock.text?.trim()) {
+      return { content: null, error: 'empty_response', model: config.model, responseTimeMs };
+    }
+
+    return { content: textBlock.text.trim(), error: null, model: config.model, responseTimeMs };
+  } catch (error) {
+    const responseTimeMs = Date.now() - startTime;
+    const errorType = categorizeError(error);
+    return { content: null, error: errorType, model: config.model, responseTimeMs, rawError: error.message };
+  }
+}
+
+/**
+ * Try a single AI call against an OpenAI-compatible provider (Groq / NVIDIA).
  * Returns { content, error, model, responseTimeMs }
  */
-async function tryProvider(config, messages) {
+async function tryOpenAIProvider(config, messages) {
   const ai = getClient(config.provider);
   if (!ai) {
     return { content: null, error: `${config.provider}_not_configured` };
@@ -88,9 +145,19 @@ async function tryProvider(config, messages) {
 }
 
 /**
+ * Route to the correct provider handler.
+ */
+async function tryProvider(config, messages) {
+  if (config.provider === 'anthropic') {
+    return tryAnthropic(config, messages);
+  }
+  return tryOpenAIProvider(config, messages);
+}
+
+/**
  * Call the AI with automatic fallback.
  *
- * Flow: NVIDIA NIMs → Groq (if primary fails)
+ * Flow: Anthropic Claude → Groq 70B → NVIDIA 8B
  *
  * @param {string} systemPrompt - Compiled SOUL.md or agent system prompt
  * @param {Array<{role: string, content: string}>} conversationHistory - Recent messages
@@ -110,7 +177,7 @@ export async function callAI(systemPrompt, conversationHistory, options = {}) {
     ...conversationHistory,
   ];
 
-  // ── Try Primary (NVIDIA NIMs) ──
+  // ── Try Primary (Anthropic Claude) ──
   console.log(`[AI] trying primary: ${PRIMARY_CONFIG.model} (${PRIMARY_CONFIG.provider})`);
   const primary = await tryProvider(PRIMARY_CONFIG, messages);
 
@@ -122,7 +189,7 @@ export async function callAI(systemPrompt, conversationHistory, options = {}) {
   // Primary failed — log and try fallback
   console.warn(`[AI] ⚠️ primary failed: ${primary.error}${primary.rawError ? ` (${primary.rawError})` : ''} — trying fallback`);
 
-  // ── Try Fallback (Groq) ──
+  // ── Try Fallback (Groq 70B) ──
   console.log(`[AI] trying fallback: ${FALLBACK_CONFIG.model} (${FALLBACK_CONFIG.provider})`);
   const fallback = await tryProvider(FALLBACK_CONFIG, messages);
 
@@ -131,14 +198,25 @@ export async function callAI(systemPrompt, conversationHistory, options = {}) {
     return { content: fallback.content, error: null, tier: 2, model: fallback.model, responseTimeMs: fallback.responseTimeMs };
   }
 
-  // Both failed
-  console.error(`[AI] ❌ all providers failed. primary:${primary.error} fallback:${fallback.error}`);
+  console.warn(`[AI] ⚠️ fallback failed: ${fallback.error}${fallback.rawError ? ` (${fallback.rawError})` : ''} — trying safety net`);
+
+  // ── Try Safety Net (NVIDIA 8B) ──
+  console.log(`[AI] trying safety net: ${SAFETY_NET_CONFIG.model} (${SAFETY_NET_CONFIG.provider})`);
+  const safetyNet = await tryProvider(SAFETY_NET_CONFIG, messages);
+
+  if (safetyNet.content) {
+    console.log(`[AI] ✅ safety net ok model:${safetyNet.model} time:${safetyNet.responseTimeMs}ms len:${safetyNet.content.length}`);
+    return { content: safetyNet.content, error: null, tier: 3, model: safetyNet.model, responseTimeMs: safetyNet.responseTimeMs };
+  }
+
+  // All failed
+  console.error(`[AI] ❌ all providers failed. primary:${primary.error} fallback:${fallback.error} safetyNet:${safetyNet.error}`);
   return {
     content: null,
-    error: `all_providers_failed (primary:${primary.error}, fallback:${fallback.error})`,
+    error: `all_providers_failed (primary:${primary.error}, fallback:${fallback.error}, safetyNet:${safetyNet.error})`,
     tier: 0,
     model: null,
-    responseTimeMs: (primary.responseTimeMs || 0) + (fallback.responseTimeMs || 0),
+    responseTimeMs: (primary.responseTimeMs || 0) + (fallback.responseTimeMs || 0) + (safetyNet.responseTimeMs || 0),
   };
 }
 
@@ -151,19 +229,23 @@ export async function callAIStream(systemPrompt, conversationHistory, options = 
     ...conversationHistory,
   ];
 
-  // Try primary first
-  const primaryClient = getClient('nvidia');
-  if (primaryClient) {
+  // Try Anthropic first (streaming)
+  const anthropicClient = getClient('anthropic');
+  if (anthropicClient) {
     try {
       console.log(`[AI:STREAM] trying primary: ${PRIMARY_CONFIG.model}`);
-      const stream = await primaryClient.chat.completions.create({
+
+      const systemMessage = messages.find((m) => m.role === 'system');
+      const userMessages = messages.filter((m) => m.role !== 'system');
+
+      const stream = anthropicClient.messages.stream({
         model: PRIMARY_CONFIG.model,
-        messages,
         max_tokens: PRIMARY_CONFIG.maxTokens,
         temperature: PRIMARY_CONFIG.temperature,
-        stream: true,
+        system: systemMessage?.content || '',
+        messages: userMessages,
       });
-      return { stream, tier: 1, model: PRIMARY_CONFIG.model };
+      return { stream, tier: 1, model: PRIMARY_CONFIG.model, provider: 'anthropic' };
     } catch (err) {
       console.warn(`[AI:STREAM] ⚠️ primary failed: ${err.message} — trying fallback`);
     }
@@ -171,19 +253,37 @@ export async function callAIStream(systemPrompt, conversationHistory, options = 
 
   // Fallback to Groq
   const groqClient = getClient('groq');
-  if (!groqClient) {
+  if (groqClient) {
+    try {
+      console.log(`[AI:STREAM] trying fallback: ${FALLBACK_CONFIG.model}`);
+      const stream = await groqClient.chat.completions.create({
+        model: FALLBACK_CONFIG.model,
+        messages,
+        max_tokens: FALLBACK_CONFIG.maxTokens,
+        temperature: FALLBACK_CONFIG.temperature,
+        stream: true,
+      });
+      return { stream, tier: 2, model: FALLBACK_CONFIG.model, provider: 'groq' };
+    } catch (err) {
+      console.warn(`[AI:STREAM] ⚠️ fallback failed: ${err.message} — trying safety net`);
+    }
+  }
+
+  // Safety net: NVIDIA
+  const nvidiaClient = getClient('nvidia');
+  if (!nvidiaClient) {
     throw new Error('All AI providers unavailable');
   }
 
-  console.log(`[AI:STREAM] trying fallback: ${FALLBACK_CONFIG.model}`);
-  const stream = await groqClient.chat.completions.create({
-    model: FALLBACK_CONFIG.model,
+  console.log(`[AI:STREAM] trying safety net: ${SAFETY_NET_CONFIG.model}`);
+  const stream = await nvidiaClient.chat.completions.create({
+    model: SAFETY_NET_CONFIG.model,
     messages,
-    max_tokens: FALLBACK_CONFIG.maxTokens,
-    temperature: FALLBACK_CONFIG.temperature,
+    max_tokens: SAFETY_NET_CONFIG.maxTokens,
+    temperature: SAFETY_NET_CONFIG.temperature,
     stream: true,
   });
-  return { stream, tier: 2, model: FALLBACK_CONFIG.model };
+  return { stream, tier: 3, model: SAFETY_NET_CONFIG.model, provider: 'nvidia' };
 }
 
 /**
@@ -202,6 +302,7 @@ function categorizeError(error) {
  */
 export function isAIConfigured() {
   return !!(
+    (env.ANTHROPIC_API_KEY && env.ANTHROPIC_API_KEY !== 'sk-ant-xxx') ||
     (env.NVIDIA_API_KEY && env.NVIDIA_API_KEY !== 'nvapi-xxx') ||
     (env.GROQ_API_KEY && env.GROQ_API_KEY !== 'gsk-xxx')
   );

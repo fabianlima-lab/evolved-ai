@@ -1,6 +1,7 @@
 import { getTodaySchedule, formatEventsForContext } from './google-calendar.js';
 import { getEmailSummary, formatEmailsForContext } from './gmail.js';
 import { getPendingReminders, formatRemindersForContext } from './reminders.js';
+import { getMemories, formatMemoriesForContext } from './memory.js';
 
 // ─────────────────────────────────────────────────────
 // Context Builder
@@ -72,6 +73,18 @@ export async function buildLiveContext(subscriber) {
   } catch (err) {
     console.error(`[CONTEXT] Reminders error for subscriber:${subscriber.id}: ${err.message}`);
     sections.push('⏳ Reminders: unable to load');
+  }
+
+  // ── Long-term Memory (always available — no Google needed) ──
+  try {
+    const memories = await getMemories(subscriber.id);
+    const memoryContext = formatMemoriesForContext(memories);
+    if (memoryContext) {
+      sections.push(memoryContext);
+    }
+  } catch (err) {
+    console.error(`[CONTEXT] Memory error for subscriber:${subscriber.id}: ${err.message}`);
+    sections.push('🧠 Memory: unable to load');
   }
 
   const context = sections.join('\n\n');

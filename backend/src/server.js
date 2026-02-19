@@ -88,6 +88,9 @@ async function start() {
 
     const { startBriefingScheduler } = await import('./services/daily-briefings.js');
     startBriefingScheduler();
+
+    const { startMemoryCleanupScheduler } = await import('./services/memory-scheduler.js');
+    startMemoryCleanupScheduler();
   } catch (err) {
     console.error('[STARTUP] Failed to start server:', err.message);
     process.exit(1);

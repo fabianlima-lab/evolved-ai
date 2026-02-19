@@ -29,7 +29,8 @@ const env = {
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI,
 
-  // AI Models — Primary: NVIDIA NIMs, Fallback: Groq
+  // AI Models — Primary: Anthropic Claude, Fallback: Groq, Safety net: NVIDIA
+  ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
   NVIDIA_API_KEY: process.env.NVIDIA_API_KEY,
   GROQ_API_KEY: process.env.GROQ_API_KEY,
   MODEL_ROUTING_ENABLED: process.env.MODEL_ROUTING_ENABLED !== 'false', // default: true

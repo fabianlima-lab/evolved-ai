@@ -38,6 +38,7 @@ model Subscriber {
   agent                    Agent?
   messages                 Message[]
   reminders                Reminder[]
+  memories                 Memory[]
 
   @@map("subscribers")
 }
@@ -88,4 +89,19 @@ model Reminder {
   @@index([subscriberId, status, dueAt])
   @@index([status, dueAt])
   @@map("reminders")
+}
+
+model Memory {
+  id            String    @id @default(uuid()) @db.Uuid
+  subscriberId  String    @map("subscriber_id") @db.Uuid
+  category      String    @db.VarChar(30)
+  fact          String    @db.VarChar(300)
+  source        String    @default("ai") @db.VarChar(20)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  subscriber    Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  @@index([subscriberId, category])
+  @@map("memories")
 }

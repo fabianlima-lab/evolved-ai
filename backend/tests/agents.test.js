@@ -25,6 +25,15 @@ describe('Agent Routes', () => {
     mockPrisma.subscriber.findUnique.mockReset();
     mockPrisma.subscriber.update.mockReset();
     mockPrisma.message.deleteMany.mockReset();
+    mockPrisma.memory.findFirst.mockReset();
+    mockPrisma.memory.findMany.mockReset();
+    mockPrisma.memory.create.mockReset();
+    mockPrisma.memory.update.mockReset();
+    mockPrisma.memory.deleteMany.mockReset();
+
+    // Default: memory operations succeed silently
+    mockPrisma.memory.findFirst.mockResolvedValue(null);
+    mockPrisma.memory.create.mockResolvedValue({ id: 'mem-1' });
   });
 
   // ── Deploy ──

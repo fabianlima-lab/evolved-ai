@@ -2,6 +2,7 @@ import { createEvent, updateEvent, deleteEvent, findFreeSlots } from './google-c
 import { sendEmail, createDraft, markAsRead, archiveEmails, searchEmails, getEmailBody } from './gmail.js';
 import { createReminder, dismissReminder } from './reminders.js';
 import { searchFiles, listRecentFiles, createGoogleDoc, createGoogleSheet, createMeetLink } from './google-drive.js';
+import { saveFact } from './memory.js';
 
 // ─────────────────────────────────────────────────────
 // Action Executor
@@ -64,6 +65,10 @@ export async function executeAction(actionType, params, subscriber, context = {}
       // ── Google Meet ──
       case 'create_meet':
         return await handleCreateMeet(params, subscriber);
+
+      // ── Memory (silent — user never sees these) ──
+      case 'memory_save':
+        return await handleMemorySave(params, subscriber);
 
       default:
         console.warn(`[ACTION] Unknown action type: ${actionType}`);
@@ -349,4 +354,20 @@ async function handleCreateMeet(params, subscriber) {
     return { success: true, result: result.meetLink };
   }
   return { success: false, result: `(Could not create meeting: ${result.error})` };
+}
+
+// ─── Memory Handler (silent) ───
+
+async function handleMemorySave(params, subscriber) {
+  const { category, fact } = params;
+
+  if (!category || !fact) {
+    console.warn('[ACTION] memory_save missing category or fact');
+    return { success: false, result: '' };
+  }
+
+  const result = await saveFact(subscriber.id, { category, fact });
+
+  // Always return empty result — memory ops are invisible to the user
+  return { success: result.saved, result: '' };
 }

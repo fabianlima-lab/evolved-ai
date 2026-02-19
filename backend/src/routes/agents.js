@@ -1,5 +1,6 @@
 import { isTrialExpired, getFeaturesByTier, stripHtml } from '../utils/helpers.js';
 import { compileSoulMd } from '../prompts/soul.js';
+import { seedMemoriesFromProfile } from '../services/memory.js';
 import prisma from '../lib/prisma.js';
 
 async function agentRoutes(app) {
@@ -80,6 +81,13 @@ async function agentRoutes(app) {
           soulMd: soulMd || FALLBACK_PROMPT,
         },
       });
+
+      // Seed long-term memories from onboarding profile data
+      try {
+        await seedMemoriesFromProfile(subscriberId, subscriber.profileData);
+      } catch (err) {
+        console.error(`[AGENT] Memory seeding failed (non-fatal): ${err.message}`);
+      }
 
       console.log(`[AGENT] deployed: ${agent.id} (${cleanName}) for subscriber:${subscriberId}`);
 
