@@ -580,7 +580,7 @@ export default function DashboardPage() {
               icon={Icon.WhatsApp}
               label="Chat on WhatsApp"
               description="Message your assistant"
-              onClick={() => window.open('https://wa.me/', '_blank')}
+              onClick={() => window.open('https://wa.me/7373303234', '_blank')}
             />
             <QuickAction
               icon={Icon.Calendar}
