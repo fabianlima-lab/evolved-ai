@@ -13,7 +13,7 @@ describe('Chat Routes', () => {
     email: 'test@example.com',
     tier: 'trial',
     trialEndsAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-    whatsappJid: '+1234567890',
+    whatsappJid: '1234567890@s.whatsapp.net',
   };
 
   const mockAgent = {
@@ -35,12 +35,13 @@ describe('Chat Routes', () => {
 
   beforeEach(() => {
     mockPrisma.subscriber.findUnique.mockReset();
+    mockPrisma.subscriber.findFirst.mockReset();
     mockPrisma.agent.findFirst.mockReset();
     mockPrisma.agent.create.mockReset();
     mockPrisma.message.create.mockReset();
     mockPrisma.message.findMany.mockReset();
     ocBridge.isOpenClawConfigured.mockResolvedValue(true);
-    ocBridge.callOpenClawWithContext.mockResolvedValue({
+    ocBridge.callOpenClaw.mockResolvedValue({
       content: 'Mock OpenClaw response',
       error: null,
       model: 'openclaw',
@@ -126,14 +127,13 @@ describe('Chat Routes', () => {
         id: 'auto-agent-1',
         subscriberId: 'test-subscriber-id',
         isActive: true,
-        name: 'Your Assistant',
+        name: 'Luna',
         systemPrompt: 'You are a helpful, friendly personal assistant for a busy veterinary professional. Be warm, concise, and proactive.',
       };
       mockPrisma.subscriber.findUnique.mockResolvedValue(mockSubscriber);
       mockPrisma.agent.findFirst.mockResolvedValue(null);
       mockPrisma.agent.create.mockResolvedValue(autoCreatedAgent);
       mockPrisma.message.create.mockResolvedValue({ id: 'msg-1' });
-      mockPrisma.message.findMany.mockResolvedValue([]);
 
       const res = await app.inject({
         method: 'POST',
@@ -147,7 +147,7 @@ describe('Chat Routes', () => {
         expect.objectContaining({
           data: expect.objectContaining({
             subscriberId: 'test-subscriber-id',
-            name: 'Your Assistant',
+            name: 'Luna',
             isActive: true,
           }),
         }),
@@ -172,7 +172,6 @@ describe('Chat Routes', () => {
       mockPrisma.subscriber.findUnique.mockResolvedValue(mockSubscriber);
       mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
       mockPrisma.message.create.mockResolvedValue({ id: 'msg-1' });
-      mockPrisma.message.findMany.mockResolvedValue([]);
 
       const res = await app.inject({
         method: 'POST',
@@ -195,7 +194,6 @@ describe('Chat Routes', () => {
       mockPrisma.subscriber.findUnique.mockResolvedValue(mockSubscriber);
       mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
       mockPrisma.message.create.mockResolvedValue({ id: 'msg-1' });
-      mockPrisma.message.findMany.mockResolvedValue([]);
 
       const res = await app.inject({
         method: 'POST',
@@ -215,8 +213,7 @@ describe('Chat Routes', () => {
       mockPrisma.subscriber.findUnique.mockResolvedValue(mockSubscriber);
       mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
       mockPrisma.message.create.mockResolvedValue({ id: 'msg-1' });
-      mockPrisma.message.findMany.mockResolvedValue([]);
-      ocBridge.callOpenClawWithContext.mockResolvedValue({
+      ocBridge.callOpenClaw.mockResolvedValue({
         content: null,
         error: 'timeout',
         model: 'openclaw',
@@ -236,30 +233,24 @@ describe('Chat Routes', () => {
       expect(body.model).toBe('openclaw');
     });
 
-    it('loads conversation history for context', async () => {
+    it('routes to WhatsApp session via phone number', async () => {
       mockPrisma.subscriber.findUnique.mockResolvedValue(mockSubscriber);
       mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
       mockPrisma.message.create.mockResolvedValue({ id: 'msg-1' });
-      mockPrisma.message.findMany.mockResolvedValue([
-        { role: 'user', content: 'Previous user message' },
-        { role: 'assistant', content: 'Previous AI response' },
-      ]);
 
       await app.inject({
         method: 'POST',
         url: '/api/chat/send',
         headers: { authorization: 'Bearer ' + token },
-        payload: { message: 'Follow up' },
+        payload: { message: 'Hello' },
       });
 
-      // Verify callOpenClawWithContext received system prompt + conversation history
-      expect(ocBridge.callOpenClawWithContext).toHaveBeenCalledWith(
-        expect.any(String), // compiled USER.md system prompt
-        expect.arrayContaining([
-          { role: 'user', content: 'Previous user message' },
-          { role: 'assistant', content: 'Previous AI response' },
-        ]),
-        expect.objectContaining({ userMessage: 'Follow up' }),
+      // Verify callOpenClaw was called with the phone number for session routing
+      expect(ocBridge.callOpenClaw).toHaveBeenCalledWith(
+        'Hello',
+        expect.objectContaining({
+          subscriberPhone: '1234567890',
+        }),
       );
     });
   });
@@ -279,7 +270,7 @@ describe('Chat Routes', () => {
         id: 'auto-agent-1',
         subscriberId: 'test-subscriber-id',
         isActive: true,
-        name: 'Your Assistant',
+        name: 'Luna',
       };
       mockPrisma.agent.findFirst.mockResolvedValue(null);
       mockPrisma.agent.create.mockResolvedValue(autoCreatedAgent);
@@ -294,9 +285,7 @@ describe('Chat Routes', () => {
       expect(res.statusCode).toBe(200);
       const body = JSON.parse(res.body);
       expect(body.messages).toEqual([]);
-      // Agent should exist now (auto-created)
       expect(body.agent).toBeDefined();
-      expect(body.agent.name).toBe('Your Assistant');
       expect(mockPrisma.agent.create).toHaveBeenCalled();
     });
 

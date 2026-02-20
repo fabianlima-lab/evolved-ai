@@ -1,12 +1,27 @@
+import { readFile } from 'node:fs/promises';
 import { isTrialExpired, stripHtml } from '../utils/helpers.js';
-import { compileSoulMd } from '../prompts/soul.js';
-import { callOpenClawWithContext, isOpenClawConfigured } from '../services/openclaw-bridge.js';
-import { buildLiveContext } from '../services/context-builder.js';
+import { callOpenClaw, isOpenClawConfigured } from '../services/openclaw-bridge.js';
+import env from '../config/env.js';
 import prisma from '../lib/prisma.js';
+
+const OPENCLAW_WORKSPACE = env.OPENCLAW_WORKSPACE || process.env.HOME + '/clawd';
+
+/**
+ * Read the agent name from the OpenClaw workspace IDENTITY.md.
+ * Falls back to the DB agent name or 'Luna' if not found.
+ */
+async function getAgentNameFromWorkspace(fallback = 'Luna') {
+  try {
+    const identity = await readFile(`${OPENCLAW_WORKSPACE}/IDENTITY.md`, 'utf-8');
+    const match = identity.match(/\*\*Name:\*\*\s*(.+)/);
+    if (match && match[1].trim()) return match[1].trim();
+  } catch { /* ignore */ }
+  return fallback;
+}
 
 const MAX_MESSAGE_LENGTH = 4000;
 
-const DEFAULT_AGENT_NAME = 'Your Assistant';
+const DEFAULT_AGENT_NAME = 'Luna';
 const DEFAULT_SYSTEM_PROMPT = 'You are a helpful, friendly personal assistant for a busy veterinary professional. Be warm, concise, and proactive.';
 
 /**
@@ -99,51 +114,30 @@ async function chatRoutes(app) {
         },
       });
 
-      // Load conversation history (last 20 messages)
-      const recentMessages = await prisma.message.findMany({
-        where: { subscriberId, agentId: agent.id },
-        orderBy: { createdAt: 'desc' },
-        take: 20,
-      });
+      // ── Route to the SAME OpenClaw session as WhatsApp ──
+      // Find the WhatsApp-connected phone number. This ensures the web
+      // chat talks to the exact same agent session (same memory, same
+      // conversation history) as WhatsApp messages.
+      let subscriberPhone = subscriber.whatsappJid?.replace('@s.whatsapp.net', '');
 
-      const conversationHistory = recentMessages.reverse().map((m) => ({
-        role: m.role,
-        content: m.content,
-      }));
-
-      // Build live context (calendar, email, reminders)
-      let liveContext = '';
-      try {
-        liveContext = await buildLiveContext(subscriber);
-      } catch (err) {
-        console.error(`[CHAT] Live context build failed: ${err.message}`);
-      }
-
-      // Compile system prompt (USER.md for OpenClaw)
-      let systemPrompt;
-      try {
-        systemPrompt = compileSoulMd({
-          assistantName: agent.name,
-          profileData: subscriber.profileData,
-          subscriber,
-          liveContext,
+      // If this subscriber doesn't have WhatsApp linked, look for the
+      // connected phone on any subscriber (single-tenant: one phone serves all)
+      if (!subscriberPhone) {
+        const waSubscriber = await prisma.subscriber.findFirst({
+          where: { whatsappJid: { not: null } },
+          select: { whatsappJid: true },
         });
-      } catch (err) {
-        console.error('[CHAT] SOUL.md compilation failed:', err.message);
-        systemPrompt = 'You are a helpful personal assistant.';
+        subscriberPhone = waSubscriber?.whatsappJid?.replace('@s.whatsapp.net', '') || null;
       }
 
-      // Call OpenClaw
+      // Call OpenClaw directly — no USER.md overwrite.
+      // The OpenClaw workspace already has SOUL.md, IDENTITY.md, USER.md
+      // managed by the gateway. We just route to the right session.
       const startTime = Date.now();
-      const ocResult = await callOpenClawWithContext(
-        systemPrompt,
-        conversationHistory,
-        {
-          userMessage: cleanMessage,
-          subscriberPhone: subscriber.whatsappJid?.replace('@s.whatsapp.net', ''),
-          sessionId: `sub-${subscriber.id}`,
-        },
-      );
+      const ocResult = await callOpenClaw(cleanMessage, {
+        subscriberPhone,
+        sessionId: subscriberPhone ? undefined : `sub-${subscriber.id}`,
+      });
 
       const responseTimeMs = Date.now() - startTime;
 
@@ -233,11 +227,15 @@ async function chatRoutes(app) {
 
       messages.reverse();
 
+      // Use the workspace agent name (from IDENTITY.md) for consistency
+      // with WhatsApp — the DB agent name is just a fallback.
+      const agentDisplayName = await getAgentNameFromWorkspace(agent.name);
+
       return reply.send({
         messages,
         agent: {
           id: agent.id,
-          name: agent.name,
+          name: agentDisplayName,
         },
       });
     } catch (error) {
