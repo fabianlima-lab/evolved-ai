@@ -7,12 +7,21 @@ import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { apiFetch, apiPost } from '@/lib/api';
+import { KAJABI_CHECKOUT_URL } from '@/lib/constants';
+
+function formatDate(dateStr) {
+  if (!dateStr) return '--';
+  return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
 
 export default function SettingsPage() {
   const t = useTranslations('Settings');
   const { logout } = useAuth();
   const [email, setEmail] = useState('');
   const [authProvider, setAuthProvider] = useState('email');
+  const [tier, setTier] = useState('');
+  const [trialEndsAt, setTrialEndsAt] = useState(null);
+  const [trialDaysRemaining, setTrialDaysRemaining] = useState(null);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -33,6 +42,9 @@ export default function SettingsPage() {
         setAuthProvider(data.auth_provider || 'email');
         setGoogleConnected(data.google_connected || false);
         setGoogleScopes(data.google_scopes || '');
+        setTier(data.tier || '');
+        setTrialEndsAt(data.trial_ends_at || null);
+        setTrialDaysRemaining(data.trial_days_remaining ?? null);
       })
       .catch(() => {});
   }, []);
@@ -218,15 +230,71 @@ export default function SettingsPage() {
       </Card>
       )}
 
-      {/* Subscription */}
+      {/* Subscription & Billing */}
       <Card className="p-6">
-        <h3 className="text-sm font-medium text-txt uppercase tracking-wider mb-4">{t('subscription')}</h3>
-        <p className="text-sm text-txt-muted mb-4">
-          {t('subscriptionDesc')}
+        <h3 className="text-sm font-medium text-txt uppercase tracking-wider mb-4">{t('billing')}</h3>
+        <div className="space-y-3 mb-5">
+          <div className="flex items-center justify-between py-2 border-b border-border/50">
+            <span className="text-xs text-txt-muted uppercase tracking-wider">{t('currentPlan')}</span>
+            <span className="text-sm text-txt font-medium">
+              {tier === 'trial' ? 'Free Trial' : tier === 'active' ? 'Active Plan' : tier || '--'}
+            </span>
+          </div>
+          <div className="flex items-center justify-between py-2 border-b border-border/50">
+            <span className="text-xs text-txt-muted uppercase tracking-wider">{t('price')}</span>
+            <span className="text-sm text-txt">
+              {tier === 'trial' ? '$0 (trial)' : '$49/mo'}
+            </span>
+          </div>
+          {tier === 'trial' && trialEndsAt && (
+            <div className="flex items-center justify-between py-2 border-b border-border/50">
+              <span className="text-xs text-txt-muted uppercase tracking-wider">{t('trialEnds')}</span>
+              <span className="text-sm text-danger font-medium">
+                {formatDate(trialEndsAt)}
+                {trialDaysRemaining != null && ` (${trialDaysRemaining} day${trialDaysRemaining !== 1 ? 's' : ''} left)`}
+              </span>
+            </div>
+          )}
+          {tier === 'active' && (
+            <div className="flex items-center justify-between py-2 border-b border-border/50">
+              <span className="text-xs text-txt-muted uppercase tracking-wider">{t('nextBilling')}</span>
+              <span className="text-sm text-txt">{t('billingMonthly')}</span>
+            </div>
+          )}
+          <div className="flex items-center justify-between py-2">
+            <span className="text-xs text-txt-muted uppercase tracking-wider">{t('paymentMethod')}</span>
+            <span className="text-sm text-txt-muted">{t('managedByKajabi')}</span>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          {tier === 'trial' ? (
+            <Button onClick={() => window.open(KAJABI_CHECKOUT_URL, '_blank')}>
+              {t('upgradePlan')}
+            </Button>
+          ) : (
+            <Button variant="ghost" onClick={handleManageSubscription}>
+              {t('manageSubscription')}
+            </Button>
+          )}
+          {tier === 'active' && (
+            <Button
+              variant="ghost"
+              onClick={() => {
+                if (window.confirm(t('cancelConfirm'))) {
+                  handleManageSubscription();
+                }
+              }}
+              className="text-danger"
+            >
+              {t('cancelSubscription')}
+            </Button>
+          )}
+        </div>
+
+        <p className="text-xs text-txt-dim mt-4">
+          {t('billingNote')}
         </p>
-        <Button variant="ghost" onClick={handleManageSubscription}>
-          {t('manageSubscription')}
-        </Button>
       </Card>
 
       {/* Log Out */}

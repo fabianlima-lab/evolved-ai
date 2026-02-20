@@ -36,8 +36,8 @@ export function AppNav({ userEmail }) {
   const initials = userEmail ? userEmail.slice(0, 2).toUpperCase() : '??';
 
   const APP_LINKS = [
-    { href: '/dashboard', labelKey: 'dashboard', exact: true },
-    { href: '/dashboard/skills', labelKey: 'skillsApps' },
+    { href: '/dashboard', labelKey: 'home', exact: true },
+    { href: '/dashboard/chat', labelKey: 'chat' },
     { href: '/settings', labelKey: 'settings' },
   ];
 

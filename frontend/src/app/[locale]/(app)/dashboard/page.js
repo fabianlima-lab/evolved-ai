@@ -16,9 +16,9 @@ const Icon = {
       <path d="M3 12L12 3l9 9" /><path d="M5 10v10a1 1 0 001 1h3v-6h6v6h3a1 1 0 001-1V10" />
     </svg>
   ),
-  Clock: (p) => (
+  Chat: (p) => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...p}>
-      <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
+      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
     </svg>
   ),
   Person: (p) => (
@@ -30,11 +30,6 @@ const Icon = {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...p}>
       <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
       <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
-    </svg>
-  ),
-  Bars: (p) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...p}>
-      <rect x="3" y="3" width="5" height="18" rx="1" /><rect x="10" y="8" width="5" height="13" rx="1" /><rect x="17" y="5" width="5" height="16" rx="1" />
     </svg>
   ),
   Card: (p) => (
@@ -82,14 +77,9 @@ const Icon = {
       <path d="M9 18l6-6-6-6" />
     </svg>
   ),
-  Menu: (p) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" {...p}>
-      <path d="M4 6h16M4 12h16M4 18h16" />
-    </svg>
-  ),
-  X: (p) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" {...p}>
-      <path d="M18 6L6 18M6 6l12 12" />
+  ArrowRight: (p) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...p}>
+      <path d="M5 12h14M12 5l7 7-7 7" />
     </svg>
   ),
 };
@@ -195,246 +185,6 @@ function HoverCard({ children, style, className, ...rest }) {
 }
 
 /* ================================================================
-   NAV ITEMS CONFIG
-   ================================================================ */
-const NAV_MAIN = [
-  { id: 'overview', label: 'Overview', icon: Icon.Home },
-  { id: 'about-her', label: 'Companion', icon: Icon.Clock },
-  { id: 'about-you', label: 'About You', icon: Icon.Person },
-  { id: 'integrations', label: 'Integrations', icon: Icon.Chain, badge: '1/7' },
-  { id: 'activity', label: 'Activity Log', icon: Icon.Clock },
-  { id: 'taskboard', label: 'Task Board', icon: Icon.Bars },
-];
-
-const NAV_BOTTOM = [
-  { id: 'account', label: 'Account', icon: Icon.Person },
-  { id: 'subscription', label: 'Subscription', icon: Icon.Card },
-  { id: 'support', label: 'Support', icon: Icon.Question },
-];
-
-/* ================================================================
-   SIDEBAR COMPONENT
-   ================================================================ */
-function Sidebar({ activeSection, onNav, stats, mobileOpen, onCloseMobile }) {
-  const email = stats?.email || '';
-  const initials = email ? email.slice(0, 2).toUpperCase() : '??';
-  const tierLabel = stats?.tier === 'trial' ? 'Trial' : stats?.tier === 'active' ? 'Active' : stats?.tier || '--';
-
-  const renderItem = (item) => {
-    const isActive = activeSection === item.id;
-    const IconComp = item.icon;
-    return (
-      <a
-        key={item.id}
-        href={`#${item.id}`}
-        className={isActive ? 'active' : ''}
-        onClick={(e) => {
-          e.preventDefault();
-          onNav(item.id);
-          if (onCloseMobile) onCloseMobile();
-        }}
-      >
-        <IconComp style={{ width: 18, height: 18 }} />
-        <span style={{ flex: 1 }}>{item.label}</span>
-        {item.badge && (
-          <span style={{
-            fontSize: '0.55rem',
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            letterSpacing: '0.06em',
-            padding: '2px 7px',
-            borderRadius: '2px',
-            background: 'rgba(139,196,198,0.12)',
-            color: 'var(--color-brand-teal-dark)',
-          }}>
-            {item.badge}
-          </span>
-        )}
-      </a>
-    );
-  };
-
-  const sidebarContent = (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      background: 'var(--color-brand-white)',
-      borderRight: '1px solid rgba(0,0,0,0.04)',
-    }}>
-      {/* Brand */}
-      <div style={{ padding: '28px 22px 20px', borderBottom: '1px solid rgba(0,0,0,0.03)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{
-            width: 36,
-            height: 36,
-            borderRadius: '2px',
-            background: 'var(--color-brand-deep-green)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--color-brand-cream)',
-            fontSize: '0.7rem',
-            fontWeight: 600,
-            letterSpacing: '0.05em',
-          }}>
-            EA
-          </div>
-          <div>
-            <div style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '1.1rem',
-              fontWeight: 600,
-              color: 'var(--color-txt)',
-              letterSpacing: '0.02em',
-              lineHeight: 1.2,
-            }}>
-              Evolved AI
-            </div>
-            <div style={{
-              fontSize: '0.6rem',
-              fontWeight: 400,
-              textTransform: 'uppercase',
-              letterSpacing: '0.2em',
-              color: 'var(--color-brand-text-light)',
-              marginTop: '2px',
-            }}>
-              Lighthouse
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Nav */}
-      <nav className="dash-sidebar-nav" style={{ flex: 1, padding: '16px 12px', overflowY: 'auto' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          {NAV_MAIN.map(renderItem)}
-        </div>
-        <div style={{
-          height: '1px',
-          background: 'rgba(0,0,0,0.04)',
-          margin: '14px 0',
-        }} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          {NAV_BOTTOM.map(renderItem)}
-        </div>
-      </nav>
-
-      {/* Footer */}
-      <div style={{
-        padding: '16px 18px',
-        borderTop: '1px solid rgba(0,0,0,0.04)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-      }}>
-        <div style={{
-          width: 32,
-          height: 32,
-          borderRadius: '2px',
-          background: 'var(--color-brand-deep-green)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'var(--color-brand-cream)',
-          fontSize: '0.6rem',
-          fontWeight: 600,
-          letterSpacing: '0.04em',
-        }}>
-          {initials}
-        </div>
-        <div style={{ minWidth: 0 }}>
-          <div style={{
-            fontSize: '0.72rem',
-            fontWeight: 400,
-            color: 'var(--color-txt)',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            maxWidth: '160px',
-          }}>
-            {email}
-          </div>
-          <div style={{
-            fontSize: '0.55rem',
-            fontWeight: 500,
-            textTransform: 'uppercase',
-            letterSpacing: '0.15em',
-            color: 'var(--color-brand-text-light)',
-            marginTop: '1px',
-          }}>
-            {tierLabel}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  return (
-    <>
-      {/* Desktop sidebar */}
-      <aside className="dash-sidebar-hide" style={{
-        width: 260,
-        minHeight: '100vh',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        zIndex: 40,
-      }}>
-        {sidebarContent}
-      </aside>
-
-      {/* Mobile overlay */}
-      {mobileOpen && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 50,
-          display: 'flex',
-        }}>
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'rgba(0,0,0,0.3)',
-            }}
-            onClick={onCloseMobile}
-          />
-          <div style={{
-            position: 'relative',
-            width: 280,
-            maxWidth: '85vw',
-            height: '100vh',
-            zIndex: 51,
-          }}>
-            <button
-              onClick={onCloseMobile}
-              style={{
-                position: 'absolute',
-                top: 12,
-                right: 12,
-                width: 32,
-                height: 32,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                zIndex: 52,
-              }}
-            >
-              <Icon.X style={{ width: 18, height: 18, color: 'var(--color-txt-muted)' }} />
-            </button>
-            {sidebarContent}
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
-
-/* ================================================================
    TUNED SCORE RING
    ================================================================ */
 function TunedRing({ percent }) {
@@ -481,8 +231,8 @@ function StatusBadge({ label, variant = 'default' }) {
 /* ================================================================
    ONBOARDING CHECKLIST ITEM
    ================================================================ */
-function ChecklistItem({ done, inProgress, label }) {
-  const cls = done ? 'ob-check-done' : inProgress ? 'ob-check-in-progress' : 'ob-check-pending';
+function ChecklistItem({ done, label }) {
+  const cls = done ? 'ob-check-done' : 'ob-check-pending';
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0' }}>
       <div
@@ -511,45 +261,48 @@ function ChecklistItem({ done, inProgress, label }) {
 }
 
 /* ================================================================
-   KANBAN COLUMN
+   QUICK ACTION CARD
    ================================================================ */
-function KanbanColumn({ title, cards }) {
+function QuickAction({ icon: IconComp, label, description, href, onClick }) {
+  const Wrapper = href ? Link : 'button';
+  const wrapperProps = href ? { href } : { onClick };
+
   return (
-    <div className="kanban-col-area">
+    <Wrapper
+      {...wrapperProps}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '14px',
+        padding: '14px 18px',
+        background: 'var(--color-brand-white)',
+        border: '1px solid rgba(0,0,0,0.04)',
+        borderRadius: '2px',
+        textDecoration: 'none',
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+        width: '100%',
+        textAlign: 'left',
+      }}
+    >
       <div style={{
-        ...EYEBROW,
-        marginBottom: '12px',
-        fontSize: '0.6rem',
+        width: 36,
+        height: 36,
+        borderRadius: '50%',
+        background: 'rgba(139,196,198,0.08)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
       }}>
-        {title}
+        <IconComp style={{ width: 18, height: 18, color: 'var(--color-brand-teal)' }} />
       </div>
-      {cards.map((card, i) => (
-        <div key={i} className="kanban-card-item">
-          <div style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--color-txt)', marginBottom: '6px' }}>
-            {card.title}
-          </div>
-          {card.tag && (
-            <span style={{
-              fontSize: '0.5rem',
-              fontWeight: 500,
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              padding: '2px 8px',
-              borderRadius: '2px',
-              background: card.tagColor || 'rgba(139,196,198,0.1)',
-              color: card.tagTextColor || 'var(--color-brand-teal-dark)',
-            }}>
-              {card.tag}
-            </span>
-          )}
-        </div>
-      ))}
-      {cards.length === 0 && (
-        <div style={{ ...BODY_SM, fontSize: '0.7rem', opacity: 0.5, textAlign: 'center', padding: '20px 0' }}>
-          No items
-        </div>
-      )}
-    </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: '0.82rem', fontWeight: 400, color: 'var(--color-txt)' }}>{label}</div>
+        {description && <div style={{ fontSize: '0.68rem', fontWeight: 300, color: 'var(--color-brand-text-light)', marginTop: '2px' }}>{description}</div>}
+      </div>
+      <Icon.Chevron style={{ width: 16, height: 16, color: 'var(--color-txt-dim)', flexShrink: 0 }} />
+    </Wrapper>
   );
 }
 
@@ -564,10 +317,7 @@ export default function DashboardPage() {
   const [stats, setStats] = useState(null);
   const [agents, setAgents] = useState([]);
   const [messages, setMessages] = useState([]);
-  const [tasks, setTasks] = useState(null);
   const [apiIntegrations, setApiIntegrations] = useState(null);
-  const [activeSection, setActiveSection] = useState('overview');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     apiFetch('/dashboard/stats').then(setStats).catch(() => {});
@@ -577,28 +327,16 @@ export default function DashboardPage() {
         setAgents(list);
       })
       .catch(() => {});
-    apiFetch('/dashboard/messages?limit=10')
+    apiFetch('/dashboard/messages?limit=5')
       .then((data) => {
         const list = Array.isArray(data) ? data : [];
         setMessages(list);
       })
       .catch(() => {});
-    apiFetch('/tasks')
-      .then(setTasks)
-      .catch(() => {});
     apiFetch('/integrations')
       .then((data) => setApiIntegrations(Array.isArray(data) ? data : []))
       .catch(() => {});
   }, []);
-
-  /* Scroll to section on nav click */
-  const handleNav = (id) => {
-    setActiveSection(id);
-    const el = document.getElementById(`section-${id}`);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
 
   /* Computed values */
   const userName = useMemo(() => extractName(stats?.email), [stats?.email]);
@@ -612,18 +350,9 @@ export default function DashboardPage() {
     if (stats.goals) score += 15;
     if (stats.onboarding_step === 'complete') score += 10;
     if (agents.length > 0) score += 15;
-    // profile_data estimate
-    score += 10; // base
+    score += 10;
     return Math.min(score, 100);
   }, [stats, agents]);
-
-  const connectedIntegrations = useMemo(() => {
-    if (!stats) return 0;
-    let count = 0;
-    if (stats.whatsapp_connected) count++;
-    if (stats.google_connected) count++;
-    return count;
-  }, [stats]);
 
   /* ── Loading skeleton ── */
   if (!stats) {
@@ -752,29 +481,9 @@ export default function DashboardPage() {
 
   const completedSteps = onboardingItems.filter((i) => i.done).length;
   const totalSteps = onboardingItems.length;
+  const allComplete = completedSteps === totalSteps;
 
-  /* ── Kanban data from real tasks API ── */
-  const PRIORITY_TAG = {
-    high: { tag: 'High', tagColor: 'rgba(212,129,107,0.1)', tagTextColor: 'var(--color-brand-alert)' },
-    medium: { tag: 'Medium', tagColor: 'rgba(139,196,198,0.1)', tagTextColor: 'var(--color-brand-teal-dark)' },
-    low: { tag: 'Low', tagColor: 'rgba(0,0,0,0.03)', tagTextColor: 'var(--color-brand-text-light)' },
-  };
-
-  const taskCols = tasks || { backlog: [], todo: [], in_progress: [], review: [], done: [] };
-  const toCards = (list) => list.map((t) => ({
-    title: t.title,
-    ...(PRIORITY_TAG[t.priority] || {}),
-  }));
-
-  const kanbanColumns = [
-    { title: 'Backlog', cards: toCards(taskCols.backlog) },
-    { title: 'To Do', cards: toCards(taskCols.todo) },
-    { title: 'In Progress', cards: toCards(taskCols.in_progress) },
-    { title: 'Review', cards: toCards(taskCols.review) },
-    { title: 'Done', cards: toCards(taskCols.done) },
-  ];
-
-  /* ── Integration rows (from real API, fallback to stats) ── */
+  /* ── Integration rows ── */
   const ICON_MAP = { whatsapp: Icon.WhatsApp, 'google-calendar': Icon.Calendar, gmail: Icon.Mail, 'google-drive': Icon.Drive, 'oura-ring': Icon.Ring };
   const integrations = apiIntegrations
     ? apiIntegrations.map((i) => ({
@@ -790,344 +499,258 @@ export default function DashboardPage() {
       ];
 
   /* ──────────────────────────────────────────────
-     RENDER
+     RENDER — No sidebar, clean card layout
      ────────────────────────────────────────────── */
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--color-bg)' }}>
-      {/* Sidebar */}
-      <Sidebar
-        activeSection={activeSection}
-        onNav={handleNav}
-        stats={stats}
-        mobileOpen={mobileMenuOpen}
-        onCloseMobile={() => setMobileMenuOpen(false)}
-      />
-
-      {/* Main content */}
+    <div style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
       <main style={{
-        flex: 1,
-        marginLeft: 0,
-        padding: '0 24px 80px',
-        maxWidth: '100%',
-        overflowX: 'hidden',
+        maxWidth: 780,
+        margin: '0 auto',
+        padding: '24px 24px 80px',
       }}>
-        {/* Desktop push for sidebar */}
-        <style>{`
-          @media (min-width: 1025px) {
-            main { margin-left: 260px !important; }
-          }
-        `}</style>
-
-        {/* Mobile top bar */}
-        <div className="lg:hidden" style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '16px 0',
-          position: 'sticky',
-          top: 0,
-          background: 'var(--color-bg)',
-          zIndex: 30,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{
-              width: 30,
-              height: 30,
-              borderRadius: '2px',
-              background: 'var(--color-brand-deep-green)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--color-brand-cream)',
-              fontSize: '0.55rem',
-              fontWeight: 600,
-            }}>
-              EA
-            </div>
-            <span style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '1rem',
-              fontWeight: 600,
-              color: 'var(--color-txt)',
-            }}>
-              Lighthouse
+        {/* ─── Greeting ─── */}
+        <section style={{ marginBottom: '32px' }}>
+          <div style={EYEBROW}>Home</div>
+          <h1 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(1.6rem, 4vw, 2.2rem)',
+            fontWeight: 300,
+            color: 'var(--color-txt)',
+            lineHeight: 1.2,
+            marginBottom: '10px',
+          }}>
+            {getGreeting()},{' '}
+            <span style={{ fontStyle: 'italic', color: 'var(--color-brand-teal)' }}>
+              {userName}
             </span>
-          </div>
-          <button
-            onClick={() => setMobileMenuOpen(true)}
-            style={{
-              width: 36,
-              height: 36,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'none',
-              border: '1px solid rgba(0,0,0,0.06)',
+          </h1>
+          <p style={{ ...BODY_MD, maxWidth: 540 }}>
+            Here is a snapshot of your account. Chat with {assistantName} on WhatsApp or right here from the web.
+          </p>
+
+          {/* Trial banner */}
+          {stats.tier === 'trial' && stats.trial_days_remaining != null && (
+            <div style={{
+              marginTop: '16px',
+              padding: '10px 16px',
+              background: 'rgba(212,129,107,0.06)',
+              border: '1px solid rgba(212,129,107,0.12)',
               borderRadius: '2px',
-              cursor: 'pointer',
-            }}
-          >
-            <Icon.Menu style={{ width: 18, height: 18, color: 'var(--color-txt-muted)' }} />
-          </button>
-        </div>
-
-        <div style={{ maxWidth: 880, margin: '0 auto', padding: '20px 0' }}>
-
-          {/* ─── SECTION: Greeting ─── */}
-          <section id="section-overview" style={{ marginBottom: '40px' }}>
-            <div style={EYEBROW}>Lighthouse</div>
-            <h1 style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(1.6rem, 4vw, 2.4rem)',
-              fontWeight: 300,
-              color: 'var(--color-txt)',
-              lineHeight: 1.2,
-              marginBottom: '10px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
             }}>
-              {getGreeting()},{' '}
               <span style={{
-                fontStyle: 'italic',
-                color: 'var(--color-brand-teal)',
+                fontSize: '0.65rem',
+                fontWeight: 500,
+                color: 'var(--color-brand-alert)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
               }}>
-                {userName}
+                Trial: {stats.trial_days_remaining} day{stats.trial_days_remaining !== 1 ? 's' : ''} remaining
               </span>
-            </h1>
-            <p style={{
-              ...BODY_MD,
-              maxWidth: 540,
-            }}>
-              This is your read-only view. Everything happens in WhatsApp — this is just the mirror.
-            </p>
-
-            {/* Trial banner */}
-            {stats.tier === 'trial' && stats.trial_days_remaining != null && (
-              <div style={{
-                marginTop: '16px',
-                padding: '10px 16px',
-                background: 'rgba(212,129,107,0.06)',
-                border: '1px solid rgba(212,129,107,0.12)',
-                borderRadius: '2px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}>
-                <span style={{
-                  fontSize: '0.65rem',
+              <button
+                onClick={() => window.open(KAJABI_CHECKOUT_URL, '_blank')}
+                style={{
+                  fontSize: '0.6rem',
                   fontWeight: 500,
-                  color: 'var(--color-brand-alert)',
+                  color: 'var(--color-brand-deep-green)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                }}>
-                  Trial: {stats.trial_days_remaining} day{stats.trial_days_remaining !== 1 ? 's' : ''} remaining
-                </span>
-                <button
-                  onClick={() => window.open(KAJABI_CHECKOUT_URL, '_blank')}
-                  style={{
-                    fontSize: '0.6rem',
-                    fontWeight: 500,
-                    color: 'var(--color-brand-deep-green)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    textDecoration: 'underline',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.08em',
-                  }}
-                >
-                  Upgrade
-                </button>
-              </div>
-            )}
-          </section>
-
-          {/* ─── SECTION: WhatsApp Banner ─── */}
-          <section style={{ marginBottom: '32px' }}>
-            <div
-              className="wa-channel-banner"
-              style={{
-                background: 'var(--color-brand-deep-green)',
-                borderRadius: '2px',
-                padding: '28px 32px',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '20px',
-                position: 'relative',
-                overflow: 'hidden',
-              }}
-            >
-              <div style={{
-                width: 40,
-                height: 40,
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.08)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                marginTop: '2px',
-              }}>
-                <Icon.WhatsApp style={{ width: 20, height: 20, color: '#25D366' }} />
-              </div>
-              <div style={{ flex: 1, zIndex: 1 }}>
-                <div style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '1.15rem',
-                  fontWeight: 500,
-                  color: 'var(--color-brand-cream)',
-                  marginBottom: '8px',
-                }}>
-                  {assistantName} is your primary channel
-                </div>
-                <p style={{
-                  fontSize: '0.78rem',
-                  fontWeight: 300,
-                  color: 'rgba(247,244,238,0.65)',
-                  lineHeight: 1.6,
-                  maxWidth: 500,
-                  margin: 0,
-                }}>
-                  All actions, conversations, and changes happen through WhatsApp. This dashboard reflects that progress.
-                </p>
-              </div>
+                  letterSpacing: '0.08em',
+                }}
+              >
+                Upgrade
+              </button>
             </div>
-          </section>
+          )}
+        </section>
 
-          {/* ─── SECTION: Tuned Score ─── */}
-          <section id="section-about-her" style={{ marginBottom: '32px' }}>
-            <HoverCard style={{ padding: '28px 32px' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '28px', flexWrap: 'wrap' }}>
-                {/* Level ring */}
-                <div style={{ textAlign: 'center', flexShrink: 0 }}>
-                  <div style={{ position: 'relative', width: 100, height: 100 }}>
-                    <TunedRing percent={stats.companion ? Math.round((stats.companion.traits.warmth + stats.companion.traits.knowsYou + stats.companion.traits.reliability + stats.companion.traits.growth) / 4) : tunedScore} />
-                    <div style={{
-                      position: 'absolute',
-                      inset: 0,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+        {/* ─── Quick Actions ─── */}
+        <section style={{ marginBottom: '32px' }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '12px',
+          }}>
+            <QuickAction
+              icon={Icon.Chat}
+              label="Chat with your assistant"
+              description="Open the web chat"
+              href="/dashboard/chat"
+            />
+            <QuickAction
+              icon={Icon.WhatsApp}
+              label="Chat on WhatsApp"
+              description="Continue in WhatsApp"
+              onClick={() => window.open('https://wa.me/', '_blank')}
+            />
+            <QuickAction
+              icon={Icon.Calendar}
+              label="Connect Google"
+              description={stats.google_connected ? 'Calendar & email synced' : 'Calendar, email & drive'}
+              href="/settings"
+            />
+          </div>
+        </section>
+
+        {/* ─── Companion Card ─── */}
+        <section style={{ marginBottom: '24px' }}>
+          <HoverCard style={{ padding: '28px 32px' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '28px', flexWrap: 'wrap' }}>
+              {/* Level ring */}
+              <div style={{ textAlign: 'center', flexShrink: 0 }}>
+                <div style={{ position: 'relative', width: 100, height: 100 }}>
+                  <TunedRing percent={stats.companion ? Math.round((stats.companion.traits.warmth + stats.companion.traits.knowsYou + stats.companion.traits.reliability + stats.companion.traits.growth) / 4) : tunedScore} />
+                  <div style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <span style={{
+                      fontFamily: 'var(--font-display)',
+                      fontSize: '1.5rem',
+                      fontWeight: 500,
+                      color: 'var(--color-txt)',
+                      lineHeight: 1,
                     }}>
-                      <span style={{
-                        fontFamily: 'var(--font-display)',
-                        fontSize: '1.5rem',
-                        fontWeight: 500,
-                        color: 'var(--color-txt)',
-                        lineHeight: 1,
-                      }}>
-                        {stats.companion?.level || 1}
-                      </span>
-                      <span style={{
-                        fontSize: '0.5rem',
-                        fontWeight: 500,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.2em',
-                        color: 'var(--color-brand-teal)',
-                        marginTop: '2px',
-                      }}>
-                        Level
-                      </span>
-                    </div>
+                      {stats.companion?.level || 1}
+                    </span>
+                    <span style={{
+                      fontSize: '0.5rem',
+                      fontWeight: 500,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.2em',
+                      color: 'var(--color-brand-teal)',
+                      marginTop: '2px',
+                    }}>
+                      Level
+                    </span>
                   </div>
                 </div>
+              </div>
 
-                {/* Info */}
-                <div style={{ flex: 1, minWidth: 240 }}>
-                  <div style={EYEBROW}>Companion</div>
-                  <h2 style={{
-                    fontFamily: 'var(--font-display)',
-                    fontSize: '1.2rem',
-                    fontWeight: 500,
-                    color: 'var(--color-txt)',
-                    marginBottom: '8px',
-                  }}>
-                    {assistantName} is learning you
-                  </h2>
-                  <p style={{ ...BODY_SM, marginBottom: '16px', maxWidth: 400 }}>
-                    Every conversation, skill, and integration builds the relationship. {assistantName} evolves with you over time.
-                  </p>
+              {/* Info */}
+              <div style={{ flex: 1, minWidth: 240 }}>
+                <div style={EYEBROW}>Companion</div>
+                <h2 style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: '1.2rem',
+                  fontWeight: 500,
+                  color: 'var(--color-txt)',
+                  marginBottom: '8px',
+                }}>
+                  {assistantName} is learning you
+                </h2>
+                <p style={{ ...BODY_SM, marginBottom: '16px', maxWidth: 400 }}>
+                  Every conversation, skill, and integration builds the relationship. {assistantName} evolves with you over time.
+                </p>
 
-                  {/* Trait mini bars */}
-                  {stats.companion ? (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 16px' }}>
-                      {[
-                        { label: 'Warmth', value: stats.companion.traits.warmth },
-                        { label: 'Knows You', value: stats.companion.traits.knowsYou },
-                        { label: 'Reliability', value: stats.companion.traits.reliability },
-                        { label: 'Growth', value: stats.companion.traits.growth },
-                      ].map((trait) => (
-                        <div key={trait.label}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-                            <span style={{ fontSize: '0.62rem', fontWeight: 400, color: 'var(--color-brand-text-light)' }}>{trait.label}</span>
-                            <span style={{ fontSize: '0.6rem', fontWeight: 500, color: 'var(--color-brand-teal-dark)' }}>{trait.value}%</span>
-                          </div>
-                          <div style={{ height: '3px', borderRadius: '2px', background: 'rgba(139,196,198,0.12)', overflow: 'hidden' }}>
-                            <div style={{ width: `${trait.value}%`, height: '100%', background: 'var(--color-brand-teal)', borderRadius: '2px', transition: 'width 0.8s ease' }} />
-                          </div>
+                {/* Trait mini bars */}
+                {stats.companion ? (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 16px' }}>
+                    {[
+                      { label: 'Warmth', value: stats.companion.traits.warmth },
+                      { label: 'Knows You', value: stats.companion.traits.knowsYou },
+                      { label: 'Reliability', value: stats.companion.traits.reliability },
+                      { label: 'Growth', value: stats.companion.traits.growth },
+                    ].map((trait) => (
+                      <div key={trait.label}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                          <span style={{ fontSize: '0.62rem', fontWeight: 400, color: 'var(--color-brand-text-light)' }}>{trait.label}</span>
+                          <span style={{ fontSize: '0.6rem', fontWeight: 500, color: 'var(--color-brand-teal-dark)' }}>{trait.value}%</span>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                      <StatusBadge
-                        label={stats.whatsapp_connected ? 'WhatsApp connected' : 'WhatsApp not connected'}
-                        variant={stats.whatsapp_connected ? 'connected' : 'pending'}
-                      />
-                      <StatusBadge
-                        label={stats.google_connected ? 'Calendar connected' : 'Calendar -- not yet'}
-                        variant={stats.google_connected ? 'connected' : 'pending'}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </HoverCard>
-          </section>
-
-          {/* ─── SECTION: 2-col grid (Integrations + Onboarding) ─── */}
-          <section id="section-integrations" style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-            gap: '20px',
-            marginBottom: '32px',
-          }}>
-            {/* Integration Status */}
-            <HoverCard style={{ padding: '24px 28px' }}>
-              <div style={EYEBROW}>Integrations</div>
-              <h3 style={CARD_HEADING}>Integration Status</h3>
-              <div>
-                {integrations.map((integ, i) => {
-                  const IconComp = integ.icon;
-                  return (
-                    <div key={i} className="integration-status-row">
-                      <div style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: '2px',
-                        background: integ.connected ? 'rgba(45,139,111,0.06)' : 'rgba(0,0,0,0.02)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                      }}>
-                        <IconComp style={{
-                          width: 16,
-                          height: 16,
-                          color: integ.connected ? 'var(--color-success)' : 'var(--color-txt-dim)',
-                        }} />
+                        <div style={{ height: '3px', borderRadius: '2px', background: 'rgba(139,196,198,0.12)', overflow: 'hidden' }}>
+                          <div style={{ width: `${trait.value}%`, height: '100%', background: 'var(--color-brand-teal)', borderRadius: '2px', transition: 'width 0.8s ease' }} />
+                        </div>
                       </div>
-                      <span style={{ ...BODY_SM, flex: 1, fontSize: '0.8rem' }}>{integ.name}</span>
-                      <StatusBadge
-                        label={integ.status}
-                        variant={integ.connected ? 'connected' : integ.comingSoon ? 'coming' : 'pending'}
-                      />
-                    </div>
-                  );
-                })}
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    <StatusBadge
+                      label={stats.whatsapp_connected ? 'WhatsApp connected' : 'WhatsApp not connected'}
+                      variant={stats.whatsapp_connected ? 'connected' : 'pending'}
+                    />
+                    <StatusBadge
+                      label={stats.google_connected ? 'Calendar connected' : 'Calendar -- not yet'}
+                      variant={stats.google_connected ? 'connected' : 'pending'}
+                    />
+                  </div>
+                )}
               </div>
-            </HoverCard>
+            </div>
+          </HoverCard>
+        </section>
 
-            {/* Onboarding Progress */}
+        {/* ─── 2-column: Integrations + Onboarding ─── */}
+        <section style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '20px',
+          marginBottom: '24px',
+        }}>
+          {/* Integration Status */}
+          <HoverCard style={{ padding: '24px 28px' }}>
+            <div style={EYEBROW}>Integrations</div>
+            <h3 style={CARD_HEADING}>Integration Status</h3>
+            <div>
+              {integrations.map((integ, i) => {
+                const IconComp = integ.icon;
+                return (
+                  <div key={i} className="integration-status-row">
+                    <div style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '2px',
+                      background: integ.connected ? 'rgba(45,139,111,0.06)' : 'rgba(0,0,0,0.02)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}>
+                      <IconComp style={{
+                        width: 16,
+                        height: 16,
+                        color: integ.connected ? 'var(--color-success)' : 'var(--color-txt-dim)',
+                      }} />
+                    </div>
+                    <span style={{ ...BODY_SM, flex: 1, fontSize: '0.8rem' }}>{integ.name}</span>
+                    <StatusBadge
+                      label={integ.status}
+                      variant={integ.connected ? 'connected' : integ.comingSoon ? 'coming' : 'pending'}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            <Link
+              href="/settings"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                marginTop: '16px',
+                fontSize: '0.7rem',
+                fontWeight: 500,
+                color: 'var(--color-brand-teal)',
+                textDecoration: 'none',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+              }}
+            >
+              Manage integrations <Icon.ArrowRight style={{ width: 12, height: 12 }} />
+            </Link>
+          </HoverCard>
+
+          {/* Onboarding Progress — only show if not complete */}
+          {!allComplete ? (
             <HoverCard style={{ padding: '24px 28px' }}>
               <div style={EYEBROW}>Getting started</div>
               <h3 style={CARD_HEADING}>Onboarding Progress</h3>
@@ -1164,177 +787,39 @@ export default function DashboardPage() {
                 ))}
               </div>
             </HoverCard>
-          </section>
-
-          {/* ─── SECTION: Activity Log ─── */}
-          <section id="section-activity" style={{ marginBottom: '32px' }}>
+          ) : (
+            /* Account summary when onboarding is complete */
             <HoverCard style={{ padding: '24px 28px' }}>
-              <div style={EYEBROW}>Activity</div>
-              <h3 style={CARD_HEADING}>Activity Log</h3>
-              {messages.length > 0 ? (
-                <div>
-                  {messages.map((msg) => (
-                    <div key={msg.id} className="activity-log-item">
-                      <div style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        background: msg.role === 'user' ? 'var(--color-accent)' : 'var(--color-success)',
-                        flexShrink: 0,
-                        marginTop: '6px',
-                      }} />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                          <span style={{
-                            fontSize: '0.6rem',
-                            fontWeight: 500,
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.1em',
-                            color: msg.role === 'user' ? 'var(--color-accent)' : 'var(--color-success)',
-                          }}>
-                            {msg.role === 'user' ? 'You' : assistantName}
-                          </span>
-                          {msg.channel && (
-                            <span style={{
-                              fontSize: '0.5rem',
-                              fontWeight: 400,
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.08em',
-                              color: 'var(--color-txt-dim)',
-                              padding: '1px 6px',
-                              background: 'rgba(0,0,0,0.02)',
-                              borderRadius: '2px',
-                            }}>
-                              {msg.channel}
-                            </span>
-                          )}
-                          <span style={{
-                            fontSize: '0.6rem',
-                            color: 'var(--color-txt-dim)',
-                            marginLeft: 'auto',
-                            flexShrink: 0,
-                          }}>
-                            {timeAgo(msg.createdAt || msg.created_at)}
-                          </span>
-                        </div>
-                        <p style={{
-                          ...BODY_SM,
-                          margin: 0,
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                        }}>
-                          {msg.content}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div style={{
-                  textAlign: 'center',
-                  padding: '40px 0',
-                }}>
-                  <p style={{ ...BODY_SM, opacity: 0.5 }}>No activity yet. Start chatting in WhatsApp to see activity here.</p>
-                </div>
-              )}
-            </HoverCard>
-          </section>
-
-          {/* ─── SECTION: Task Board (Kanban) ─── */}
-          <section id="section-taskboard" style={{ marginBottom: '32px' }}>
-            <div style={EYEBROW}>Tasks</div>
-            <h3 style={{ ...CARD_HEADING, marginBottom: '20px' }}>Task Board</h3>
-            <div style={{
-              display: 'flex',
-              gap: '12px',
-              overflowX: 'auto',
-              paddingBottom: '8px',
-            }}>
-              {kanbanColumns.map((col, i) => (
-                <KanbanColumn key={i} title={col.title} cards={col.cards} />
-              ))}
-            </div>
-            <div style={{
-              ...BODY_SM,
-              fontSize: '0.65rem',
-              opacity: 0.5,
-              marginTop: '12px',
-              fontStyle: 'italic',
-            }}>
-              Read-only view. Tasks are managed through WhatsApp conversations.
-            </div>
-          </section>
-
-          {/* ─── SECTION: Account / Subscription / Support ─── */}
-          <section id="section-account" style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-            gap: '20px',
-            marginBottom: '32px',
-          }}>
-            {/* Account card */}
-            <HoverCard style={{ padding: '24px 28px' }}>
-              <div style={EYEBROW}>Profile</div>
-              <h3 style={CARD_HEADING}>Account</h3>
+              <div style={EYEBROW}>Account</div>
+              <h3 style={CARD_HEADING}>Your Account</h3>
               <div>
-                <div className="account-info-row">
-                  <span style={{ ...BODY_SM, color: 'var(--color-txt-dim)' }}>Name</span>
-                  <span style={{ ...BODY_SM, color: 'var(--color-txt)' }}>{userName}</span>
-                </div>
                 <div className="account-info-row">
                   <span style={{ ...BODY_SM, color: 'var(--color-txt-dim)' }}>Email</span>
                   <span style={{
                     ...BODY_SM,
                     color: 'var(--color-txt)',
-                    maxWidth: 160,
+                    maxWidth: 180,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
                   }}>{stats.email}</span>
                 </div>
                 <div className="account-info-row">
-                  <span style={{ ...BODY_SM, color: 'var(--color-txt-dim)' }}>Timezone</span>
-                  <span style={{ ...BODY_SM, color: 'var(--color-txt)' }}>
-                    {Intl.DateTimeFormat().resolvedOptions().timeZone || '--'}
-                  </span>
-                </div>
-                <div className="account-info-row">
-                  <span style={{ ...BODY_SM, color: 'var(--color-txt-dim)' }}>Member since</span>
-                  <span style={{ ...BODY_SM, color: 'var(--color-txt)' }}>
-                    {stats.trial_ends_at ? formatDate(new Date(new Date(stats.trial_ends_at).getTime() - 14 * 24 * 60 * 60 * 1000).toISOString()) : '--'}
-                  </span>
+                  <span style={{ ...BODY_SM, color: 'var(--color-txt-dim)' }}>Plan</span>
+                  <StatusBadge
+                    label={stats.tier === 'trial' ? 'Trial' : stats.tier === 'active' ? 'Active' : stats.tier || '--'}
+                    variant={stats.tier === 'trial' ? 'pending' : 'connected'}
+                  />
                 </div>
                 <div className="account-info-row">
                   <span style={{ ...BODY_SM, color: 'var(--color-txt-dim)' }}>Assistant</span>
                   <span style={{ ...BODY_SM, color: 'var(--color-brand-teal)' }}>{assistantName}</span>
-                </div>
-              </div>
-            </HoverCard>
-
-            {/* Subscription card */}
-            <HoverCard id="section-subscription" style={{ padding: '24px 28px' }}>
-              <div style={EYEBROW}>Billing</div>
-              <h3 style={CARD_HEADING}>Subscription</h3>
-              <div>
-                <div className="account-info-row">
-                  <span style={{ ...BODY_SM, color: 'var(--color-txt-dim)' }}>Plan</span>
-                  <span style={{ ...BODY_SM, color: 'var(--color-txt)' }}>
-                    {stats.tier === 'trial' ? 'Free Trial' : stats.tier === 'active' ? 'Active' : stats.tier || '--'}
-                  </span>
                 </div>
                 <div className="account-info-row">
                   <span style={{ ...BODY_SM, color: 'var(--color-txt-dim)' }}>Price</span>
                   <span style={{ ...BODY_SM, color: 'var(--color-txt)' }}>
                     {stats.tier === 'trial' ? '$0 (trial)' : '$49/mo'}
                   </span>
-                </div>
-                <div className="account-info-row">
-                  <span style={{ ...BODY_SM, color: 'var(--color-txt-dim)' }}>Status</span>
-                  <StatusBadge
-                    label={stats.tier === 'trial' ? 'Trial' : 'Active'}
-                    variant={stats.tier === 'trial' ? 'pending' : 'connected'}
-                  />
                 </div>
                 {stats.tier === 'trial' && stats.trial_ends_at && (
                   <div className="account-info-row">
@@ -1344,123 +829,168 @@ export default function DashboardPage() {
                     </span>
                   </div>
                 )}
-                <div className="account-info-row">
-                  <span style={{ ...BODY_SM, color: 'var(--color-txt-dim)' }}>Next billing</span>
-                  <span style={{ ...BODY_SM, color: 'var(--color-txt)' }}>
-                    {stats.tier === 'trial' ? 'After trial' : formatDate(stats.trial_ends_at)}
-                  </span>
-                </div>
               </div>
-              {stats.tier === 'trial' && (
-                <button
-                  onClick={() => window.open(KAJABI_CHECKOUT_URL, '_blank')}
-                  style={{
-                    marginTop: '16px',
-                    width: '100%',
-                    padding: '10px',
-                    background: 'var(--color-brand-deep-green)',
-                    color: 'var(--color-brand-cream)',
-                    border: 'none',
-                    borderRadius: '0px',
-                    fontSize: '0.65rem',
-                    fontWeight: 500,
-                    letterSpacing: '0.12em',
-                    textTransform: 'uppercase',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                  }}
-                >
-                  Upgrade Plan
-                </button>
-              )}
+              <Link
+                href="/settings"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  marginTop: '16px',
+                  fontSize: '0.7rem',
+                  fontWeight: 500,
+                  color: 'var(--color-brand-teal)',
+                  textDecoration: 'none',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                }}
+              >
+                Manage account <Icon.ArrowRight style={{ width: 12, height: 12 }} />
+              </Link>
             </HoverCard>
+          )}
+        </section>
 
-            {/* Support card */}
-            <HoverCard id="section-support" style={{ padding: '24px 28px' }}>
-              <div style={EYEBROW}>Help</div>
-              <h3 style={CARD_HEADING}>Support</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <a
-                  href="https://wa.me/message/evolvedai"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    padding: '12px 14px',
-                    background: 'rgba(37,211,102,0.04)',
-                    border: '1px solid rgba(37,211,102,0.1)',
-                    borderRadius: '2px',
-                    textDecoration: 'none',
-                    transition: 'all 0.3s ease',
-                  }}
-                >
-                  <Icon.WhatsApp style={{ width: 16, height: 16, color: '#25D366' }} />
-                  <span style={{ ...BODY_SM, color: 'var(--color-txt)' }}>Chat with support</span>
-                  <Icon.Chevron style={{ width: 14, height: 14, color: 'var(--color-txt-dim)', marginLeft: 'auto' }} />
-                </a>
-                <a
-                  href="mailto:support@evolvedvets.com"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    padding: '12px 14px',
-                    background: 'rgba(0,0,0,0.01)',
-                    border: '1px solid rgba(0,0,0,0.04)',
-                    borderRadius: '2px',
-                    textDecoration: 'none',
-                    transition: 'all 0.3s ease',
-                  }}
-                >
-                  <Icon.Mail style={{ width: 16, height: 16, color: 'var(--color-txt-muted)' }} />
-                  <span style={{ ...BODY_SM, color: 'var(--color-txt)' }}>Email us</span>
-                  <Icon.Chevron style={{ width: 14, height: 14, color: 'var(--color-txt-dim)', marginLeft: 'auto' }} />
-                </a>
-                <a
-                  href="#"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    padding: '12px 14px',
-                    background: 'rgba(0,0,0,0.01)',
-                    border: '1px solid rgba(0,0,0,0.04)',
-                    borderRadius: '2px',
-                    textDecoration: 'none',
-                    transition: 'all 0.3s ease',
-                  }}
-                >
-                  <Icon.Question style={{ width: 16, height: 16, color: 'var(--color-txt-muted)' }} />
-                  <span style={{ ...BODY_SM, color: 'var(--color-txt)' }}>Knowledge base</span>
-                  <Icon.Chevron style={{ width: 14, height: 14, color: 'var(--color-txt-dim)', marginLeft: 'auto' }} />
-                </a>
-                <a
-                  href="#"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    padding: '12px 14px',
-                    background: 'rgba(139,196,198,0.04)',
-                    border: '1px solid rgba(139,196,198,0.1)',
-                    borderRadius: '2px',
-                    textDecoration: 'none',
-                    transition: 'all 0.3s ease',
-                  }}
-                >
-                  <Icon.Calendar style={{ width: 16, height: 16, color: 'var(--color-brand-teal)' }} />
-                  <span style={{ ...BODY_SM, color: 'var(--color-txt)' }}>Book a setup call</span>
-                  <Icon.Chevron style={{ width: 14, height: 14, color: 'var(--color-txt-dim)', marginLeft: 'auto' }} />
-                </a>
+        {/* ─── Recent Activity ─── */}
+        <section style={{ marginBottom: '24px' }}>
+          <HoverCard style={{ padding: '24px 28px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div>
+                <div style={EYEBROW}>Activity</div>
+                <h3 style={{ ...CARD_HEADING, marginBottom: 0 }}>Recent Messages</h3>
               </div>
-            </HoverCard>
-          </section>
+              <Link
+                href="/dashboard/chat"
+                style={{
+                  fontSize: '0.65rem',
+                  fontWeight: 500,
+                  color: 'var(--color-brand-teal)',
+                  textDecoration: 'none',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                View all <Icon.ArrowRight style={{ width: 12, height: 12 }} />
+              </Link>
+            </div>
+            {messages.length > 0 ? (
+              <div>
+                {messages.map((msg) => (
+                  <div key={msg.id} className="activity-log-item">
+                    <div style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      background: msg.role === 'user' ? 'var(--color-accent)' : 'var(--color-success)',
+                      flexShrink: 0,
+                      marginTop: '6px',
+                    }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                        <span style={{
+                          fontSize: '0.6rem',
+                          fontWeight: 500,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.1em',
+                          color: msg.role === 'user' ? 'var(--color-accent)' : 'var(--color-success)',
+                        }}>
+                          {msg.role === 'user' ? 'You' : assistantName}
+                        </span>
+                        {msg.channel && (
+                          <span style={{
+                            fontSize: '0.5rem',
+                            fontWeight: 400,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.08em',
+                            color: 'var(--color-txt-dim)',
+                            padding: '1px 6px',
+                            background: 'rgba(0,0,0,0.02)',
+                            borderRadius: '2px',
+                          }}>
+                            {msg.channel}
+                          </span>
+                        )}
+                        <span style={{
+                          fontSize: '0.6rem',
+                          color: 'var(--color-txt-dim)',
+                          marginLeft: 'auto',
+                          flexShrink: 0,
+                        }}>
+                          {timeAgo(msg.createdAt || msg.created_at)}
+                        </span>
+                      </div>
+                      <p style={{
+                        ...BODY_SM,
+                        margin: 0,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}>
+                        {msg.content}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{
+                textAlign: 'center',
+                padding: '40px 0',
+              }}>
+                <p style={{ ...BODY_SM, opacity: 0.5 }}>No activity yet. Start chatting with {assistantName} to see activity here.</p>
+              </div>
+            )}
+          </HoverCard>
+        </section>
 
-          {/* Hidden anchors for "About You" nav */}
-          <div id="section-about-you" style={{ height: 0 }} />
-        </div>
+        {/* ─── Support ─── */}
+        <section style={{ marginBottom: '24px' }}>
+          <HoverCard style={{ padding: '24px 28px' }}>
+            <div style={EYEBROW}>Help</div>
+            <h3 style={CARD_HEADING}>Support</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+              <a
+                href="https://wa.me/message/evolvedai"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '12px 14px',
+                  background: 'rgba(37,211,102,0.04)',
+                  border: '1px solid rgba(37,211,102,0.1)',
+                  borderRadius: '2px',
+                  textDecoration: 'none',
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                <Icon.WhatsApp style={{ width: 16, height: 16, color: '#25D366' }} />
+                <span style={{ ...BODY_SM, color: 'var(--color-txt)' }}>Chat with support</span>
+              </a>
+              <a
+                href="mailto:support@evolvedvets.com"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '12px 14px',
+                  background: 'rgba(0,0,0,0.01)',
+                  border: '1px solid rgba(0,0,0,0.04)',
+                  borderRadius: '2px',
+                  textDecoration: 'none',
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                <Icon.Mail style={{ width: 16, height: 16, color: 'var(--color-txt-muted)' }} />
+                <span style={{ ...BODY_SM, color: 'var(--color-txt)' }}>Email us</span>
+              </a>
+            </div>
+          </HoverCard>
+        </section>
       </main>
     </div>
   );
