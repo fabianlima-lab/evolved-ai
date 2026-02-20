@@ -84,7 +84,14 @@ export default function ChatPage() {
         },
       ]);
     } catch (err) {
-      setError(t('sendError'));
+      // Show specific error from backend if available, otherwise generic
+      if (err.status === 403) {
+        setError(t('trialExpired'));
+      } else if (err.status === 503) {
+        setError(t('aiUnavailable'));
+      } else {
+        setError(err.message || t('sendError'));
+      }
     } finally {
       setSending(false);
       inputRef.current?.focus();

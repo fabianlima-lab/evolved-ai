@@ -416,6 +416,8 @@
     "emptyHint": "Type a message below or chat on WhatsApp — it all shows up here.",
     "placeholder": "Message {name}...",
     "sendError": "Failed to send. Try again.",
+    "trialExpired": "Your trial has expired. Upgrade to continue chatting.",
+    "aiUnavailable": "AI engine is temporarily unavailable. Try again in a moment.",
     "synced": "Synced with WhatsApp"
   },
   "ControlTower": {

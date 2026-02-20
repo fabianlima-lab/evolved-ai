@@ -6,6 +6,34 @@ import prisma from '../lib/prisma.js';
 
 const MAX_MESSAGE_LENGTH = 4000;
 
+const DEFAULT_AGENT_NAME = 'Your Assistant';
+const DEFAULT_SYSTEM_PROMPT = 'You are a helpful, friendly personal assistant for a busy veterinary professional. Be warm, concise, and proactive.';
+
+/**
+ * Auto-create a default agent for a subscriber who doesn't have one yet.
+ * This ensures the chat always works — no "deploy first" dead end.
+ */
+async function ensureAgent(subscriberId) {
+  let agent = await prisma.agent.findFirst({
+    where: { subscriberId, isActive: true },
+  });
+
+  if (!agent) {
+    agent = await prisma.agent.create({
+      data: {
+        subscriberId,
+        name: DEFAULT_AGENT_NAME,
+        systemPrompt: DEFAULT_SYSTEM_PROMPT,
+        isActive: true,
+        level: 1,
+      },
+    });
+    console.log(`[CHAT] Auto-created default agent ${agent.id} for subscriber ${subscriberId}`);
+  }
+
+  return agent;
+}
+
 async function chatRoutes(app) {
   // POST /api/chat/send — send a message from the dashboard
   app.post('/send', {
@@ -42,15 +70,17 @@ async function chatRoutes(app) {
         return reply.code(403).send({ error: 'Trial expired. Upgrade to continue chatting.' });
       }
 
-      // Get active agent
-      const whereClause = agentId
-        ? { id: agentId, subscriberId, isActive: true }
-        : { subscriberId, isActive: true };
-
-      const agent = await prisma.agent.findFirst({ where: whereClause });
-
-      if (!agent) {
-        return reply.code(404).send({ error: 'No active agent found. Deploy one first.' });
+      // Get active agent (or auto-create one)
+      let agent;
+      if (agentId) {
+        agent = await prisma.agent.findFirst({
+          where: { id: agentId, subscriberId, isActive: true },
+        });
+        if (!agent) {
+          return reply.code(404).send({ error: 'Agent not found' });
+        }
+      } else {
+        agent = await ensureAgent(subscriberId);
       }
 
       // Check OpenClaw
@@ -177,14 +207,16 @@ async function chatRoutes(app) {
     const limit = Math.min(parseInt(request.query.limit || '30', 10), 100);
 
     try {
-      const whereClause = agentId
-        ? { id: agentId, subscriberId, isActive: true }
-        : { subscriberId, isActive: true };
-
-      const agent = await prisma.agent.findFirst({ where: whereClause });
-
-      if (!agent) {
-        return reply.send({ messages: [], agent: null });
+      let agent;
+      if (agentId) {
+        agent = await prisma.agent.findFirst({
+          where: { id: agentId, subscriberId, isActive: true },
+        });
+        if (!agent) {
+          return reply.send({ messages: [], agent: null });
+        }
+      } else {
+        agent = await ensureAgent(subscriberId);
       }
 
       const messages = await prisma.message.findMany({

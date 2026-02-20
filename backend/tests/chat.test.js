@@ -36,6 +36,7 @@ describe('Chat Routes', () => {
   beforeEach(() => {
     mockPrisma.subscriber.findUnique.mockReset();
     mockPrisma.agent.findFirst.mockReset();
+    mockPrisma.agent.create.mockReset();
     mockPrisma.message.create.mockReset();
     mockPrisma.message.findMany.mockReset();
     ocBridge.isOpenClawConfigured.mockResolvedValue(true);
@@ -120,9 +121,19 @@ describe('Chat Routes', () => {
       expect(body.error).toContain('Trial expired');
     });
 
-    it('returns 404 if no active agent', async () => {
+    it('auto-creates default agent if none exists', async () => {
+      const autoCreatedAgent = {
+        id: 'auto-agent-1',
+        subscriberId: 'test-subscriber-id',
+        isActive: true,
+        name: 'Your Assistant',
+        systemPrompt: 'You are a helpful, friendly personal assistant for a busy veterinary professional. Be warm, concise, and proactive.',
+      };
       mockPrisma.subscriber.findUnique.mockResolvedValue(mockSubscriber);
       mockPrisma.agent.findFirst.mockResolvedValue(null);
+      mockPrisma.agent.create.mockResolvedValue(autoCreatedAgent);
+      mockPrisma.message.create.mockResolvedValue({ id: 'msg-1' });
+      mockPrisma.message.findMany.mockResolvedValue([]);
 
       const res = await app.inject({
         method: 'POST',
@@ -130,9 +141,17 @@ describe('Chat Routes', () => {
         headers: { authorization: 'Bearer ' + token },
         payload: { message: 'Hello' },
       });
-      expect(res.statusCode).toBe(404);
-      const body = JSON.parse(res.body);
-      expect(body.error).toContain('agent');
+      expect(res.statusCode).toBe(200);
+      // Verify agent was auto-created
+      expect(mockPrisma.agent.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            subscriberId: 'test-subscriber-id',
+            name: 'Your Assistant',
+            isActive: true,
+          }),
+        }),
+      );
     });
 
     it('returns 503 if OpenClaw not configured', async () => {
@@ -255,8 +274,16 @@ describe('Chat Routes', () => {
       expect(res.statusCode).toBe(401);
     });
 
-    it('returns empty array if no active agent', async () => {
+    it('auto-creates agent and returns empty messages if none exists', async () => {
+      const autoCreatedAgent = {
+        id: 'auto-agent-1',
+        subscriberId: 'test-subscriber-id',
+        isActive: true,
+        name: 'Your Assistant',
+      };
       mockPrisma.agent.findFirst.mockResolvedValue(null);
+      mockPrisma.agent.create.mockResolvedValue(autoCreatedAgent);
+      mockPrisma.message.findMany.mockResolvedValue([]);
 
       const res = await app.inject({
         method: 'GET',
@@ -267,7 +294,10 @@ describe('Chat Routes', () => {
       expect(res.statusCode).toBe(200);
       const body = JSON.parse(res.body);
       expect(body.messages).toEqual([]);
-      expect(body.agent).toBeNull();
+      // Agent should exist now (auto-created)
+      expect(body.agent).toBeDefined();
+      expect(body.agent.name).toBe('Your Assistant');
+      expect(mockPrisma.agent.create).toHaveBeenCalled();
     });
 
     it('returns messages in chronological order', async () => {
