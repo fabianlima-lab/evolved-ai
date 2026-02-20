@@ -116,6 +116,13 @@ function formatUptime(seconds) {
   return `${m}m`;
 }
 
+function formatTokens(n) {
+  if (!n || n === 0) return '0';
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return n.toLocaleString();
+}
+
 function timeAgo(dateStr) {
   if (!dateStr) return 'never';
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -188,7 +195,7 @@ export default function ControlTowerPage() {
     );
   }
 
-  const { pulse, funnel, engagement, system, growth, recent_signups, top_engaged, at_risk } = data || {};
+  const { pulse, funnel, engagement, system, growth, recent_signups, top_engaged, at_risk, ai } = data || {};
   const funnelTotal = (funnel?.trial || 0) + (funnel?.active || 0) + (funnel?.past_due || 0) + (funnel?.cancelled || 0);
 
   return (
@@ -286,7 +293,77 @@ export default function ControlTowerPage() {
         </Card>
       </div>
 
-      {/* Section 4: People — 3-column grid */}
+      {/* Section 4: AI Engine — model + token usage */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="p-6">
+          <h3 className="text-sm font-medium text-txt uppercase tracking-wider mb-4">{t('aiEngine')}</h3>
+          <div className="space-y-2">
+            {[
+              [t('modelRunning'), ai?.models_used?.[0]?.model || '\u2014'],
+              [t('tokensToday'), formatTokens(ai?.tokens_today?.total)],
+              [t('tokens7d'), formatTokens(ai?.tokens_7d?.total)],
+              [t('tokens30d'), formatTokens(ai?.tokens_30d?.total)],
+            ].map(([label, value]) => (
+              <div key={label} className="flex items-center justify-between py-1">
+                <span className="text-xs text-txt-muted">{label}</span>
+                <span className="text-sm text-txt font-medium">{value}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <h3 className="text-sm font-medium text-txt uppercase tracking-wider mb-4">{t('tokenBreakdown')}</h3>
+          <div className="space-y-3">
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-txt-muted">{t('inputTokens')}</span>
+                <span className="text-xs text-txt font-medium">{formatTokens(ai?.tokens_7d?.input)}</span>
+              </div>
+              <div className="h-2 bg-elevated rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-accent rounded-full"
+                  style={{
+                    width: ai?.tokens_7d?.total > 0
+                      ? `${(ai.tokens_7d.input / ai.tokens_7d.total) * 100}%`
+                      : '0%',
+                  }}
+                />
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-txt-muted">{t('outputTokens')}</span>
+                <span className="text-xs text-txt font-medium">{formatTokens(ai?.tokens_7d?.output)}</span>
+              </div>
+              <div className="h-2 bg-elevated rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-mint rounded-full"
+                  style={{
+                    width: ai?.tokens_7d?.total > 0
+                      ? `${(ai.tokens_7d.output / ai.tokens_7d.total) * 100}%`
+                      : '0%',
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+          {ai?.models_used?.length > 1 && (
+            <div className="mt-4 pt-3 border-t border-border/50">
+              <p className="text-[10px] text-txt-dim uppercase tracking-wider mb-2">{t('modelsUsed')}</p>
+              <div className="flex flex-wrap gap-2">
+                {ai.models_used.map(m => (
+                  <span key={m.model} className="text-[11px] px-2 py-0.5 rounded-[var(--radius-card)] bg-accent/10 text-accent">
+                    {m.model} ({m.count})
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </Card>
+      </div>
+
+      {/* Section 5: People — 3-column grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Recent Signups */}
         <Card className="p-5">

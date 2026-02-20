@@ -319,8 +319,13 @@ describe('Admin Routes', () => {
       mockPrisma.message.findFirst.mockResolvedValue(null);
       // Growth sparklines
       mockPrisma.message.findMany.mockResolvedValue([]);
-      // Top engaged
-      mockPrisma.$queryRaw.mockResolvedValue([]);
+      // Top engaged + token stats (5 raw queries: top engaged, tokens today, 7d, 30d, models used)
+      mockPrisma.$queryRaw
+        .mockResolvedValueOnce([])  // top engaged
+        .mockResolvedValueOnce([{ input: 0, output: 0, total: 0 }])  // tokens today
+        .mockResolvedValueOnce([{ input: 0, output: 0, total: 0 }])  // tokens 7d
+        .mockResolvedValueOnce([{ input: 0, output: 0, total: 0 }])  // tokens 30d
+        .mockResolvedValueOnce([]);  // models used
     }
 
     it('returns 401 without auth', async () => {
@@ -356,6 +361,7 @@ describe('Admin Routes', () => {
       expect(body).toHaveProperty('recent_signups');
       expect(body).toHaveProperty('top_engaged');
       expect(body).toHaveProperty('at_risk');
+      expect(body).toHaveProperty('ai');
     });
 
     it('returns correct pulse values', async () => {
@@ -376,7 +382,12 @@ describe('Admin Routes', () => {
       mockPrisma.subscriber.findMany.mockResolvedValue([]);
       mockPrisma.message.findFirst.mockResolvedValue(null);
       mockPrisma.message.findMany.mockResolvedValue([]);
-      mockPrisma.$queryRaw.mockResolvedValue([]);
+      mockPrisma.$queryRaw
+        .mockResolvedValueOnce([])  // top engaged
+        .mockResolvedValueOnce([{ input: 0, output: 0, total: 0 }])
+        .mockResolvedValueOnce([{ input: 0, output: 0, total: 0 }])
+        .mockResolvedValueOnce([{ input: 0, output: 0, total: 0 }])
+        .mockResolvedValueOnce([]);
 
       const res = await app.inject({
         method: 'GET',

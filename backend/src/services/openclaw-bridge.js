@@ -160,13 +160,18 @@ export async function callOpenClaw(message, options = {}) {
 
     const model = data.result?.meta?.agentMeta?.model || 'openclaw';
     const durationMs = data.result?.meta?.durationMs || responseTimeMs;
+    const usage = data.result?.meta?.agentMeta?.usage || {};
 
-    console.log(`[OPENCLAW] ✅ response ok time:${durationMs}ms len:${text.length} model:${model}`);
+    console.log(`[OPENCLAW] ✅ response ok time:${durationMs}ms len:${text.length} model:${model} in:${usage.input || 0} out:${usage.output || 0}`);
 
     return {
       content: text,
       error: null,
       model,
+      inputTokens: usage.input || 0,
+      outputTokens: usage.output || 0,
+      cacheWriteTokens: usage.cacheWrite || 0,
+      totalTokens: usage.total || 0,
       responseTimeMs: durationMs,
       tier: 3, // Tier 3 = OpenClaw
     };

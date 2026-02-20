@@ -83,6 +83,9 @@ model Message {
   role            String    @db.VarChar(20)
   channel         String    @db.VarChar(20)
   content         String
+  model           String?   @db.VarChar(50)
+  inputTokens     Int?      @map("input_tokens")
+  outputTokens    Int?      @map("output_tokens")
   createdAt       DateTime  @default(now()) @map("created_at")
 
   subscriber      Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)

@@ -450,7 +450,16 @@
     "down": "Down",
     "accessDenied": "Access Denied",
     "noData": "No data yet",
-    "messages": "msgs"
+    "messages": "msgs",
+    "aiEngine": "AI Engine",
+    "modelRunning": "Model running",
+    "tokensToday": "Tokens today",
+    "tokens7d": "Tokens (7d)",
+    "tokens30d": "Tokens (30d)",
+    "tokenBreakdown": "Token Breakdown (7d)",
+    "inputTokens": "Input tokens",
+    "outputTokens": "Output tokens",
+    "modelsUsed": "Models used (30d)"
   },
   "Admin": {
     "title": "Admin Dashboard",

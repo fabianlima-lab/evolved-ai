@@ -389,6 +389,45 @@ async function adminRoutes(app) {
         console.error('[ADMIN] control-tower top engaged query failed:', err.message);
       }
 
+      // ── AI model + token usage ──
+      let tokenStats = { tokens_today: { input: 0, output: 0, total: 0 }, tokens_7d: { input: 0, output: 0, total: 0 }, tokens_30d: { input: 0, output: 0, total: 0 }, models_used: [] };
+      try {
+        const [tokensToday, tokens7d, tokens30d, modelsUsed] = await Promise.all([
+          prisma.$queryRaw`
+            SELECT COALESCE(SUM(input_tokens), 0)::int AS input,
+                   COALESCE(SUM(output_tokens), 0)::int AS output,
+                   COALESCE(SUM(input_tokens), 0)::int + COALESCE(SUM(output_tokens), 0)::int AS total
+            FROM messages WHERE created_at >= ${todayStart} AND model IS NOT NULL
+          `,
+          prisma.$queryRaw`
+            SELECT COALESCE(SUM(input_tokens), 0)::int AS input,
+                   COALESCE(SUM(output_tokens), 0)::int AS output,
+                   COALESCE(SUM(input_tokens), 0)::int + COALESCE(SUM(output_tokens), 0)::int AS total
+            FROM messages WHERE created_at >= ${sevenDaysAgo} AND model IS NOT NULL
+          `,
+          prisma.$queryRaw`
+            SELECT COALESCE(SUM(input_tokens), 0)::int AS input,
+                   COALESCE(SUM(output_tokens), 0)::int AS output,
+                   COALESCE(SUM(input_tokens), 0)::int + COALESCE(SUM(output_tokens), 0)::int AS total
+            FROM messages WHERE created_at >= ${thirtyDaysAgo} AND model IS NOT NULL
+          `,
+          prisma.$queryRaw`
+            SELECT model, COUNT(*)::int AS count
+            FROM messages
+            WHERE model IS NOT NULL AND created_at >= ${thirtyDaysAgo}
+            GROUP BY model ORDER BY count DESC
+          `,
+        ]);
+        tokenStats = {
+          tokens_today: tokensToday[0] || { input: 0, output: 0, total: 0 },
+          tokens_7d: tokens7d[0] || { input: 0, output: 0, total: 0 },
+          tokens_30d: tokens30d[0] || { input: 0, output: 0, total: 0 },
+          models_used: modelsUsed.map(m => ({ model: m.model, count: m.count })),
+        };
+      } catch (err) {
+        console.error('[ADMIN] control-tower token stats query failed:', err.message);
+      }
+
       // ── System health ──
       let health;
       try { health = getDetailedHealth(); } catch { health = null; }
@@ -466,6 +505,7 @@ async function adminRoutes(app) {
             trial_ends_at: null,
           })),
         ],
+        ai: tokenStats,
       });
     } catch (error) {
       console.error('[ADMIN] control-tower error:', error.message);

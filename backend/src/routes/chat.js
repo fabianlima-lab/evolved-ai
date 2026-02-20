@@ -138,7 +138,7 @@ async function chatRoutes(app) {
         });
       }
 
-      // Save AI response
+      // Save AI response (with model + token usage)
       await prisma.message.create({
         data: {
           subscriberId,
@@ -146,6 +146,9 @@ async function chatRoutes(app) {
           role: 'assistant',
           channel: 'web',
           content: ocResult.content,
+          model: ocResult.model || null,
+          inputTokens: ocResult.inputTokens || null,
+          outputTokens: ocResult.outputTokens || null,
         },
       });
 
