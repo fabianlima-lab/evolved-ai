@@ -1,23 +1,6 @@
-import { readFile } from 'node:fs/promises';
 import { isTrialExpired, stripHtml } from '../utils/helpers.js';
 import { callOpenClaw, isOpenClawConfigured } from '../services/openclaw-bridge.js';
-import env from '../config/env.js';
 import prisma from '../lib/prisma.js';
-
-const OPENCLAW_WORKSPACE = env.OPENCLAW_WORKSPACE || process.env.HOME + '/clawd';
-
-/**
- * Read the agent name from the OpenClaw workspace IDENTITY.md.
- * Falls back to the DB agent name or 'Luna' if not found.
- */
-async function getAgentNameFromWorkspace(fallback = 'Luna') {
-  try {
-    const identity = await readFile(`${OPENCLAW_WORKSPACE}/IDENTITY.md`, 'utf-8');
-    const match = identity.match(/\*\*Name:\*\*\s*(.+)/);
-    if (match && match[1].trim()) return match[1].trim();
-  } catch { /* ignore */ }
-  return fallback;
-}
 
 const MAX_MESSAGE_LENGTH = 4000;
 
@@ -227,15 +210,11 @@ async function chatRoutes(app) {
 
       messages.reverse();
 
-      // Use the workspace agent name (from IDENTITY.md) for consistency
-      // with WhatsApp — the DB agent name is just a fallback.
-      const agentDisplayName = await getAgentNameFromWorkspace(agent.name);
-
       return reply.send({
         messages,
         agent: {
           id: agent.id,
-          name: agentDisplayName,
+          name: agent.name,
         },
       });
     } catch (error) {
