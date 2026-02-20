@@ -13,6 +13,9 @@
   "Nav": {
     "dashboard": "Dashboard",
     "skillsApps": "Skills & Apps",
+    "meet": "Companion",
+    "integrations": "Integrations",
+    "workflow": "Workflow",
     "settings": "Settings"
   },
   "Auth": {
@@ -292,6 +295,51 @@
     "googleConnecting": "Connecting...",
     "googleDisconnecting": "Disconnecting...",
     "googleError": "Failed to connect Google. Please try again."
+  },
+  "Meet": {
+    "title": "Meet {name}",
+    "subtitle": "Your AI companion grows with you. Every conversation, every connection, every skill — it all adds up.",
+    "level": "Level {level}",
+    "levelLabel1": "Getting Started",
+    "levelLabel2": "Learning You",
+    "levelLabel3": "Trusted Partner",
+    "levelLabel4": "Fully Evolved",
+    "traits": "Traits",
+    "warmth": "Warmth",
+    "knowsYou": "Knows You",
+    "reliability": "Reliability",
+    "growth": "Growth",
+    "journey": "Journey",
+    "noEvents": "No events yet. Start chatting with your assistant to begin the journey.",
+    "skills": "Active Skills",
+    "noSkills": "No skills activated yet.",
+    "integrations": "Connected Integrations",
+    "noIntegrations": "No integrations connected yet.",
+    "stats": "Stats",
+    "totalMessages": "Messages exchanged",
+    "daysTogether": "Days together",
+    "activeSkills": "Active skills",
+    "connectedIntegrations": "Connected integrations"
+  },
+  "Integrations": {
+    "title": "Integrations",
+    "subtitle": "Connect services to unlock new capabilities for your assistant.",
+    "connected": "Connected",
+    "available": "Available",
+    "connect": "Connect",
+    "noIntegrations": "No integrations available yet. Deploy your assistant first.",
+    "benefits": "Benefits"
+  },
+  "Workflow": {
+    "title": "Workflow",
+    "subtitle": "Tasks created and managed by your assistant through WhatsApp conversations.",
+    "backlog": "Backlog",
+    "todo": "To Do",
+    "inProgress": "In Progress",
+    "review": "Review",
+    "done": "Done",
+    "noTasks": "No tasks yet. Your assistant will create tasks as you chat.",
+    "emptyColumn": "No items"
   },
   "TrialBanner": {
     "expired": "Trial expired",

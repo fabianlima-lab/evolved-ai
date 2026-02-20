@@ -37,7 +37,9 @@ export function AppNav({ userEmail }) {
 
   const APP_LINKS = [
     { href: '/dashboard', labelKey: 'dashboard' },
-    { href: '/dashboard/skills', labelKey: 'skillsApps' },
+    { href: '/meet', labelKey: 'meet' },
+    { href: '/integrations', labelKey: 'integrations' },
+    { href: '/workflow', labelKey: 'workflow' },
     { href: '/settings', labelKey: 'settings' },
   ];
 

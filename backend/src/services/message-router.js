@@ -171,6 +171,16 @@ export async function routeIncomingMessage({ channel, channelId, text, senderNam
       sendTypingIndicator(channelId, 'paused').catch(() => {});
     }
 
+    // ── Trait recalculation (fire-and-forget, every ~10 messages) ──
+    try {
+      const msgCount = await prisma.message.count({ where: { subscriberId: subscriber.id } });
+      if (msgCount % 10 === 0) {
+        import('./companion.js').then(({ updateTraits }) => {
+          updateTraits(agent.id, subscriber.id).catch(() => {});
+        });
+      }
+    } catch (_) { /* non-fatal */ }
+
   } catch (error) {
     console.error(`[ERROR] message routing failed: ${error.message}`);
     await sendChannelReply(channel, channelId,
