@@ -1,25 +1,30 @@
 [Unit]
-Description=OpenClaw Gateway (AI Agent)
-After=network.target
+Description=OpenClaw Gateway (AI Agent - Sandboxed)
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=simple
 User=openclaw
 Group=openclaw
 WorkingDirectory=/home/openclaw/clawd
-ExecStart=/usr/local/bin/openclaw gateway run --force
+ExecStart=/usr/bin/openclaw gateway run --force
 Restart=always
 RestartSec=5
+KillMode=process
 
 # Environment
-Environment=PORT=18789
 Environment=HOME=/home/openclaw
+Environment=OPENCLAW_GATEWAY_PORT=18789
+Environment="OPENCLAW_GATEWAY_TOKEN=evo-luna-gw-2026-secret"
+Environment="OPENCLAW_SYSTEMD_UNIT=openclaw-gateway.service"
+Environment=OPENCLAW_SERVICE_MARKER=openclaw
+Environment=OPENCLAW_SERVICE_KIND=gateway
+EnvironmentFile=/home/openclaw/.openclaw/gateway.env
 
 # Filesystem isolation — kernel enforced
 ProtectSystem=strict
-ReadWritePaths=/home/openclaw/clawd /var/www/agent-pages /tmp
-ProtectHome=tmpfs
-PrivateTmp=true
+ReadWritePaths=/home/openclaw /var/www/agent-pages /tmp
 NoNewPrivileges=true
 
 # Logging

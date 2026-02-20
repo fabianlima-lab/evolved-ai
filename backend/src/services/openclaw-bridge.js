@@ -9,9 +9,9 @@ const execFileAsync = promisify(execFile);
 // OpenClaw Bridge (Gateway CLI)
 //
 // Sends messages to the OpenClaw Gateway via the
-// `openclaw agent` CLI command. The Gateway stays warm
-// as a LaunchAgent, so the CLI connects over WebSocket
-// and returns the agent's response as JSON.
+// `openclaw agent` CLI command. The Gateway runs as a
+// sandboxed systemd service (openclaw user), CLI connects
+// over WebSocket and returns the agent's response as JSON.
 //
 // Architecture:
 //   WhatsApp msg → our backend → openclaw agent CLI → Gateway WS → AI
