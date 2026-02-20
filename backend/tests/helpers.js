@@ -25,6 +25,7 @@ const mockPrisma = {
     groupBy: vi.fn(),
   },
   message: {
+    findFirst: vi.fn(),
     findMany: vi.fn(),
     create: vi.fn(),
     deleteMany: vi.fn(),

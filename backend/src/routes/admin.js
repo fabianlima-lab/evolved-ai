@@ -1,6 +1,8 @@
 import adminGuard from '../middleware/adminGuard.js';
 import prisma from '../lib/prisma.js';
 import { pushSkillToAll, pushIntegrationToAll } from '../services/evolution.js';
+import { getDetailedHealth } from '../services/health-monitor.js';
+import { isOpenClawConfigured } from '../services/openclaw-bridge.js';
 
 const VALID_SORT_FIELDS = {
   created_at: 'createdAt',
@@ -278,6 +280,196 @@ async function adminRoutes(app) {
     } catch (error) {
       console.error('[ADMIN] evolution-overview error:', error.message);
       return reply.code(500).send({ error: 'Failed to load evolution overview' });
+    }
+  });
+
+  // ── GET /api/admin/control-tower — single-fetch cockpit for business owner ──
+  app.get('/control-tower', {
+    preHandler: adminPreHandlers,
+    config: { rateLimit: rl },
+  }, async (request, reply) => {
+    try {
+      const now = new Date();
+      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      // ── All parallel queries ──
+      const [
+        totalSubscribers,
+        active7d,
+        active24h,
+        whatsappConnected,
+        agentsDeployed,
+        tierGroups,
+        trialConvertingSoon,
+        messagesToday,
+        messages7d,
+        messages30d,
+        skillsActive,
+        integrationsConnected,
+        googleConnected,
+        intentionsToday,
+        recentSignupsRaw,
+        lastMessageRaw,
+        atRiskTrials,
+        atRiskPastDue,
+        signups7dRaw,
+        messages7dRaw,
+      ] = await Promise.all([
+        // Pulse
+        prisma.subscriber.count(),
+        prisma.subscriber.count({ where: { messages: { some: { createdAt: { gte: sevenDaysAgo } } } } }),
+        prisma.subscriber.count({ where: { messages: { some: { createdAt: { gte: oneDayAgo } } } } }),
+        prisma.subscriber.count({ where: { whatsappJid: { not: null } } }),
+        prisma.agent.count({ where: { isActive: true } }),
+        // Funnel
+        prisma.subscriber.groupBy({ by: ['tier'], _count: { id: true } }),
+        prisma.subscriber.count({ where: { tier: 'trial', trialEndsAt: { lte: fortyEightHoursFromNow, gte: now } } }),
+        // Engagement
+        prisma.message.count({ where: { createdAt: { gte: todayStart } } }),
+        prisma.message.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
+        prisma.message.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
+        prisma.agentSkill.count({ where: { status: 'active' } }),
+        prisma.agentIntegration.count({ where: { status: 'connected' } }),
+        prisma.subscriber.count({ where: { googleAccessToken: { not: null } } }),
+        prisma.dailyIntention.count({ where: { date: todayStart } }),
+        // Recent signups
+        prisma.subscriber.findMany({
+          take: 5,
+          orderBy: { createdAt: 'desc' },
+          select: { email: true, tier: true, createdAt: true, whatsappJid: true },
+        }),
+        // Last message
+        prisma.message.findFirst({ orderBy: { createdAt: 'desc' }, select: { createdAt: true } }),
+        // At risk
+        prisma.subscriber.findMany({
+          where: { tier: 'trial', trialEndsAt: { lte: fortyEightHoursFromNow, gte: now } },
+          select: { email: true, tier: true, trialEndsAt: true },
+          take: 10,
+        }),
+        prisma.subscriber.findMany({
+          where: { tier: 'past_due' },
+          select: { email: true, tier: true },
+          take: 10,
+        }),
+        // Growth sparklines
+        prisma.subscriber.findMany({
+          where: { createdAt: { gte: sevenDaysAgo } },
+          select: { createdAt: true },
+          orderBy: { createdAt: 'asc' },
+        }),
+        prisma.message.findMany({
+          where: { createdAt: { gte: sevenDaysAgo } },
+          select: { createdAt: true },
+          orderBy: { createdAt: 'asc' },
+        }),
+      ]);
+
+      // ── Top engaged (raw SQL — top 5 by message count in 7d) ──
+      let topEngaged = [];
+      try {
+        topEngaged = await prisma.$queryRaw`
+          SELECT
+            s.email,
+            COUNT(m.id)::int AS message_count_7d,
+            a.name AS agent_name,
+            a.level AS agent_level
+          FROM messages m
+          JOIN subscribers s ON s.id = m.subscriber_id
+          LEFT JOIN agents a ON a.subscriber_id = s.id AND a.is_active = true
+          WHERE m.created_at >= ${sevenDaysAgo}
+          GROUP BY s.id, s.email, a.name, a.level
+          ORDER BY COUNT(m.id) DESC
+          LIMIT 5
+        `;
+      } catch (err) {
+        console.error('[ADMIN] control-tower top engaged query failed:', err.message);
+      }
+
+      // ── System health ──
+      let health;
+      try { health = getDetailedHealth(); } catch { health = null; }
+
+      let openclawStatus = 'unknown';
+      try { openclawStatus = (await isOpenClawConfigured()) ? 'ok' : 'down'; } catch { openclawStatus = 'down'; }
+
+      // ── Build funnel map ──
+      const funnelMap = {};
+      for (const t of tierGroups) {
+        funnelMap[t.tier] = t._count.id;
+      }
+
+      // ── Build response ──
+      return reply.send({
+        pulse: {
+          total_subscribers: totalSubscribers,
+          active_7d: active7d,
+          active_24h: active24h,
+          whatsapp_connected: whatsappConnected,
+          agents_deployed: agentsDeployed,
+          openclaw_status: openclawStatus,
+        },
+        funnel: {
+          trial: funnelMap.trial || 0,
+          active: funnelMap.active || 0,
+          past_due: funnelMap.past_due || 0,
+          cancelled: funnelMap.cancelled || 0,
+          trial_converting_soon: trialConvertingSoon,
+        },
+        engagement: {
+          messages_today: messagesToday,
+          messages_7d: messages7d,
+          messages_30d: messages30d,
+          avg_messages_per_active_user_7d: active7d > 0 ? Math.round((messages7d / active7d) * 10) / 10 : 0,
+          skills_activated_total: skillsActive,
+          integrations_connected_total: integrationsConnected,
+          google_connected: googleConnected,
+          daily_intentions_today: intentionsToday,
+        },
+        system: {
+          server_uptime_seconds: health?.uptime || Math.floor(process.uptime()),
+          memory_mb: health?.memory?.rss_mb || Math.round(process.memoryUsage().rss / 1024 / 1024),
+          whatsapp_status: health?.whatsapp?.status === 'open' ? 'connected' : 'disconnected',
+          openclaw_status: openclawStatus,
+          last_message_at: lastMessageRaw?.createdAt || null,
+        },
+        growth: {
+          signups_7d: groupByDate(signups7dRaw),
+          messages_7d: groupByDate(messages7dRaw),
+        },
+        recent_signups: recentSignupsRaw.map(s => ({
+          email: s.email,
+          tier: s.tier,
+          created_at: s.createdAt,
+          whatsapp_connected: !!s.whatsappJid,
+        })),
+        top_engaged: topEngaged.map(t => ({
+          email: t.email,
+          message_count_7d: t.message_count_7d,
+          agent_name: t.agent_name || null,
+          agent_level: t.agent_level || 1,
+        })),
+        at_risk: [
+          ...atRiskTrials.map(s => ({
+            email: s.email,
+            tier: s.tier,
+            reason: 'trial_expiring',
+            trial_ends_at: s.trialEndsAt,
+          })),
+          ...atRiskPastDue.map(s => ({
+            email: s.email,
+            tier: s.tier,
+            reason: 'payment_failed',
+            trial_ends_at: null,
+          })),
+        ],
+      });
+    } catch (error) {
+      console.error('[ADMIN] control-tower error:', error.message);
+      return reply.code(500).send({ error: 'Failed to load control tower' });
     }
   });
 }

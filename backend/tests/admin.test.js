@@ -300,4 +300,165 @@ describe('Admin Routes', () => {
     });
   });
 
+  // ── GET /api/admin/control-tower ──
+  describe('GET /api/admin/control-tower', () => {
+    function mockControlTowerDefaults() {
+      // Pulse
+      mockPrisma.subscriber.count.mockResolvedValue(0);
+      mockPrisma.agent.count.mockResolvedValue(0);
+      // Funnel
+      mockPrisma.subscriber.groupBy.mockResolvedValue([]);
+      // Engagement
+      mockPrisma.message.count.mockResolvedValue(0);
+      mockPrisma.agentSkill.count.mockResolvedValue(0);
+      mockPrisma.agentIntegration.count.mockResolvedValue(0);
+      mockPrisma.dailyIntention.count.mockResolvedValue(0);
+      // Recent signups, at risk
+      mockPrisma.subscriber.findMany.mockResolvedValue([]);
+      // Last message
+      mockPrisma.message.findFirst.mockResolvedValue(null);
+      // Growth sparklines
+      mockPrisma.message.findMany.mockResolvedValue([]);
+      // Top engaged
+      mockPrisma.$queryRaw.mockResolvedValue([]);
+    }
+
+    it('returns 401 without auth', async () => {
+      const res = await app.inject({ method: 'GET', url: '/api/admin/control-tower' });
+      expect(res.statusCode).toBe(401);
+    });
+
+    it('returns 403 for non-admin', async () => {
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/admin/control-tower',
+        headers: { authorization: 'Bearer ' + subscriberToken },
+      });
+      expect(res.statusCode).toBe(403);
+    });
+
+    it('returns all top-level sections', async () => {
+      mockControlTowerDefaults();
+
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/admin/control-tower',
+        headers: { authorization: 'Bearer ' + adminToken },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const body = JSON.parse(res.body);
+      expect(body).toHaveProperty('pulse');
+      expect(body).toHaveProperty('funnel');
+      expect(body).toHaveProperty('engagement');
+      expect(body).toHaveProperty('system');
+      expect(body).toHaveProperty('growth');
+      expect(body).toHaveProperty('recent_signups');
+      expect(body).toHaveProperty('top_engaged');
+      expect(body).toHaveProperty('at_risk');
+    });
+
+    it('returns correct pulse values', async () => {
+      // subscriber.count is called multiple times with different args
+      mockPrisma.subscriber.count
+        .mockResolvedValueOnce(42)   // total
+        .mockResolvedValueOnce(18)   // active 7d
+        .mockResolvedValueOnce(7)    // active 24h
+        .mockResolvedValueOnce(31)   // whatsapp connected
+        .mockResolvedValueOnce(15)   // google connected
+        .mockResolvedValueOnce(0);   // trial converting soon (second call)
+      mockPrisma.agent.count.mockResolvedValue(38);
+      mockPrisma.subscriber.groupBy.mockResolvedValue([]);
+      mockPrisma.message.count.mockResolvedValue(0);
+      mockPrisma.agentSkill.count.mockResolvedValue(0);
+      mockPrisma.agentIntegration.count.mockResolvedValue(0);
+      mockPrisma.dailyIntention.count.mockResolvedValue(0);
+      mockPrisma.subscriber.findMany.mockResolvedValue([]);
+      mockPrisma.message.findFirst.mockResolvedValue(null);
+      mockPrisma.message.findMany.mockResolvedValue([]);
+      mockPrisma.$queryRaw.mockResolvedValue([]);
+
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/admin/control-tower',
+        headers: { authorization: 'Bearer ' + adminToken },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const body = JSON.parse(res.body);
+      expect(body.pulse.total_subscribers).toBe(42);
+      expect(body.pulse.active_7d).toBe(18);
+      expect(body.pulse.active_24h).toBe(7);
+      expect(body.pulse.whatsapp_connected).toBe(31);
+      expect(body.pulse.agents_deployed).toBe(38);
+      expect(body.pulse.openclaw_status).toBeDefined();
+    });
+
+    it('returns funnel tier breakdown', async () => {
+      mockControlTowerDefaults();
+      mockPrisma.subscriber.groupBy.mockResolvedValue([
+        { tier: 'trial', _count: { id: 12 } },
+        { tier: 'active', _count: { id: 22 } },
+        { tier: 'past_due', _count: { id: 3 } },
+        { tier: 'cancelled', _count: { id: 5 } },
+      ]);
+
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/admin/control-tower',
+        headers: { authorization: 'Bearer ' + adminToken },
+      });
+
+      const body = JSON.parse(res.body);
+      expect(body.funnel.trial).toBe(12);
+      expect(body.funnel.active).toBe(22);
+      expect(body.funnel.past_due).toBe(3);
+      expect(body.funnel.cancelled).toBe(5);
+      expect(body.funnel.trial_converting_soon).toBeDefined();
+    });
+
+    it('returns system health data', async () => {
+      mockControlTowerDefaults();
+
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/admin/control-tower',
+        headers: { authorization: 'Bearer ' + adminToken },
+      });
+
+      const body = JSON.parse(res.body);
+      expect(body.system.server_uptime_seconds).toBeGreaterThanOrEqual(0);
+      expect(body.system.memory_mb).toBeGreaterThan(0);
+      expect(body.system).toHaveProperty('whatsapp_status');
+      expect(body.system).toHaveProperty('openclaw_status');
+    });
+
+    it('returns at-risk subscribers', async () => {
+      mockControlTowerDefaults();
+      // Override findMany calls — the route makes multiple findMany calls
+      // Mock findMany to return at-risk data for the at-risk queries
+      mockPrisma.subscriber.findMany
+        .mockResolvedValueOnce([]) // recent signups
+        .mockResolvedValueOnce([   // at risk trials
+          { email: 'jen@test.com', tier: 'trial', trialEndsAt: new Date('2026-02-20') },
+        ])
+        .mockResolvedValueOnce([   // at risk past due
+          { email: 'mark@test.com', tier: 'past_due' },
+        ])
+        .mockResolvedValueOnce([]) // signups 7d
+        ;
+
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/admin/control-tower',
+        headers: { authorization: 'Bearer ' + adminToken },
+      });
+
+      const body = JSON.parse(res.body);
+      expect(body.at_risk).toHaveLength(2);
+      expect(body.at_risk[0].reason).toBe('trial_expiring');
+      expect(body.at_risk[1].reason).toBe('payment_failed');
+    });
+  });
+
 });
