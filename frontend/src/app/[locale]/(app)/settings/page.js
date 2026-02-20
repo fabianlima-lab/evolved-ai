@@ -7,7 +7,7 @@ import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { apiFetch, apiPost } from '@/lib/api';
-import { KAJABI_CHECKOUT_URL } from '@/lib/constants';
+import { KAJABI_CHECKOUT_URL, KAJABI_ACCOUNT_URL } from '@/lib/constants';
 
 function formatDate(dateStr) {
   if (!dateStr) return '--';
@@ -29,6 +29,12 @@ export default function SettingsPage() {
   const [passwordErr, setPasswordErr] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Billing state
+  const [subscriptionStartedAt, setSubscriptionStartedAt] = useState(null);
+  const [subscriptionCancelledAt, setSubscriptionCancelledAt] = useState(null);
+  const [nextBillingDate, setNextBillingDate] = useState(null);
+  const [memberSince, setMemberSince] = useState(null);
+
   // Google integration state
   const [googleConnected, setGoogleConnected] = useState(false);
   const [googleScopes, setGoogleScopes] = useState('');
@@ -45,6 +51,10 @@ export default function SettingsPage() {
         setTier(data.tier || '');
         setTrialEndsAt(data.trial_ends_at || null);
         setTrialDaysRemaining(data.trial_days_remaining ?? null);
+        setSubscriptionStartedAt(data.subscription_started_at || null);
+        setSubscriptionCancelledAt(data.subscription_cancelled_at || null);
+        setNextBillingDate(data.next_billing_date || null);
+        setMemberSince(data.member_since || data.created_at || null);
       })
       .catch(() => {});
   }, []);
@@ -111,7 +121,7 @@ export default function SettingsPage() {
   };
 
   const handleManageSubscription = () => {
-    window.open('https://evolved.ai/account', '_blank');
+    window.open(KAJABI_ACCOUNT_URL, '_blank');
   };
 
   const hasCalendar = googleScopes?.includes('calendar');
@@ -234,18 +244,41 @@ export default function SettingsPage() {
       <Card className="p-6">
         <h3 className="text-sm font-medium text-txt uppercase tracking-wider mb-4">{t('billing')}</h3>
         <div className="space-y-3 mb-5">
+          {/* Status */}
           <div className="flex items-center justify-between py-2 border-b border-border/50">
-            <span className="text-xs text-txt-muted uppercase tracking-wider">{t('currentPlan')}</span>
+            <span className="text-xs text-txt-muted uppercase tracking-wider">{t('status')}</span>
+            <span className="text-sm font-medium flex items-center gap-2">
+              <span className={`inline-block w-2 h-2 rounded-full ${
+                tier === 'active' ? 'bg-success' :
+                tier === 'trial' ? 'bg-brand-teal' :
+                tier === 'past_due' ? 'bg-danger' :
+                'bg-txt-dim'
+              }`} />
+              <span className={
+                tier === 'active' ? 'text-success' :
+                tier === 'trial' ? 'text-brand-teal' :
+                tier === 'past_due' ? 'text-danger' :
+                'text-txt-dim'
+              }>
+                {tier === 'active' ? t('statusActive') :
+                 tier === 'trial' ? t('statusTrial') :
+                 tier === 'past_due' ? t('statusPastDue') :
+                 tier === 'cancelled' ? t('statusCancelled') : '--'}
+              </span>
+            </span>
+          </div>
+
+          {/* Plan */}
+          <div className="flex items-center justify-between py-2 border-b border-border/50">
+            <span className="text-xs text-txt-muted uppercase tracking-wider">{t('plan')}</span>
             <span className="text-sm text-txt font-medium">
-              {tier === 'trial' ? 'Free Trial' : tier === 'active' ? 'Active Plan' : tier || '--'}
+              {tier === 'trial' ? `${t('planName')} — ${t('statusTrial')}` :
+               tier === 'cancelled' ? t('planName') :
+               `${t('planName')} — $49/mo`}
             </span>
           </div>
-          <div className="flex items-center justify-between py-2 border-b border-border/50">
-            <span className="text-xs text-txt-muted uppercase tracking-wider">{t('price')}</span>
-            <span className="text-sm text-txt">
-              {tier === 'trial' ? '$0 (trial)' : '$49/mo'}
-            </span>
-          </div>
+
+          {/* Trial ends (trial only) */}
           {tier === 'trial' && trialEndsAt && (
             <div className="flex items-center justify-between py-2 border-b border-border/50">
               <span className="text-xs text-txt-muted uppercase tracking-wider">{t('trialEnds')}</span>
@@ -255,45 +288,98 @@ export default function SettingsPage() {
               </span>
             </div>
           )}
-          {tier === 'active' && (
+
+          {/* Past due warning */}
+          {tier === 'past_due' && (
             <div className="flex items-center justify-between py-2 border-b border-border/50">
-              <span className="text-xs text-txt-muted uppercase tracking-wider">{t('nextBilling')}</span>
-              <span className="text-sm text-txt">{t('billingMonthly')}</span>
+              <span className="text-xs text-txt-muted uppercase tracking-wider">Issue</span>
+              <span className="text-sm text-danger font-medium">{t('pastDueWarning')}</span>
             </div>
           )}
-          <div className="flex items-center justify-between py-2">
-            <span className="text-xs text-txt-muted uppercase tracking-wider">{t('paymentMethod')}</span>
-            <span className="text-sm text-txt-muted">{t('managedByKajabi')}</span>
-          </div>
+
+          {/* Member since (active, past_due, cancelled) */}
+          {tier !== 'trial' && memberSince && (
+            <div className="flex items-center justify-between py-2 border-b border-border/50">
+              <span className="text-xs text-txt-muted uppercase tracking-wider">{t('memberSince')}</span>
+              <span className="text-sm text-txt">{formatDate(memberSince)}</span>
+            </div>
+          )}
+
+          {/* Subscribed on (active, past_due) */}
+          {(tier === 'active' || tier === 'past_due') && subscriptionStartedAt && (
+            <div className="flex items-center justify-between py-2 border-b border-border/50">
+              <span className="text-xs text-txt-muted uppercase tracking-wider">{t('subscribedOn')}</span>
+              <span className="text-sm text-txt">{formatDate(subscriptionStartedAt)}</span>
+            </div>
+          )}
+
+          {/* Next billing (active only) */}
+          {tier === 'active' && nextBillingDate && (
+            <div className="flex items-center justify-between py-2 border-b border-border/50">
+              <span className="text-xs text-txt-muted uppercase tracking-wider">{t('nextBilling')}</span>
+              <span className="text-sm text-txt font-medium">{formatDate(nextBillingDate)}</span>
+            </div>
+          )}
+
+          {/* Cancelled on (cancelled only) */}
+          {tier === 'cancelled' && subscriptionCancelledAt && (
+            <div className="flex items-center justify-between py-2 border-b border-border/50">
+              <span className="text-xs text-txt-muted uppercase tracking-wider">{t('cancelledOn')}</span>
+              <span className="text-sm text-txt-dim">{formatDate(subscriptionCancelledAt)}</span>
+            </div>
+          )}
+
+          {/* Payment method (active, past_due) */}
+          {(tier === 'active' || tier === 'past_due') && (
+            <div className="flex items-center justify-between py-2">
+              <span className="text-xs text-txt-muted uppercase tracking-wider">{t('paymentMethod')}</span>
+              <span className="text-sm text-txt-muted">{t('managedByKajabi')}</span>
+            </div>
+          )}
         </div>
 
+        {/* CTAs per tier */}
         <div className="flex flex-wrap gap-3">
-          {tier === 'trial' ? (
+          {tier === 'trial' && (
             <Button onClick={() => window.open(KAJABI_CHECKOUT_URL, '_blank')}>
               {t('upgradePlan')}
             </Button>
-          ) : (
-            <Button variant="ghost" onClick={handleManageSubscription}>
-              {t('manageSubscription')}
-            </Button>
           )}
           {tier === 'active' && (
-            <Button
-              variant="ghost"
-              onClick={() => {
-                if (window.confirm(t('cancelConfirm'))) {
-                  handleManageSubscription();
-                }
-              }}
-              className="text-danger"
-            >
-              {t('cancelSubscription')}
+            <>
+              <Button variant="ghost" onClick={handleManageSubscription}>
+                {t('manageOnKajabi')}
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  if (window.confirm(t('cancelConfirm'))) {
+                    handleManageSubscription();
+                  }
+                }}
+                className="text-danger"
+              >
+                {t('cancelSubscription')}
+              </Button>
+            </>
+          )}
+          {tier === 'past_due' && (
+            <Button onClick={handleManageSubscription}>
+              {t('updatePayment')}
+            </Button>
+          )}
+          {tier === 'cancelled' && (
+            <Button onClick={() => window.open(KAJABI_CHECKOUT_URL, '_blank')}>
+              {t('resubscribe')}
             </Button>
           )}
         </div>
 
         <p className="text-xs text-txt-dim mt-4">
-          {t('billingNote')}
+          {tier === 'active' ? t('billingNoteActive') :
+           tier === 'trial' ? t('billingNoteTrial') :
+           tier === 'past_due' ? t('billingNotePastDue') :
+           tier === 'cancelled' ? t('billingNoteCancelled') : ''}
         </p>
       </Card>
 

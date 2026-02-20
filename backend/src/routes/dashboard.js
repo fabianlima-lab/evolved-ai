@@ -1,6 +1,25 @@
 import { isTrialExpired, getFeaturesByTier } from '../utils/helpers.js';
 import prisma from '../lib/prisma.js';
 
+/**
+ * Compute the next monthly billing date from the original purchase date.
+ * Advances month-by-month from kajabiPurchaseDate until we find a date > now.
+ */
+function computeNextBillingDate(subscriber) {
+  if (subscriber.tier !== 'active' || !subscriber.kajabiPurchaseDate) return null;
+
+  const purchase = new Date(subscriber.kajabiPurchaseDate);
+  const now = new Date();
+  const next = new Date(purchase);
+
+  // Advance month by month until we're in the future
+  while (next <= now) {
+    next.setMonth(next.getMonth() + 1);
+  }
+
+  return next.toISOString();
+}
+
 async function dashboardRoutes(app) {
   // GET /api/dashboard/stats
   app.get('/stats', {
@@ -127,6 +146,11 @@ async function dashboardRoutes(app) {
         integrations,
         tuned_score: tunedScore,
         companion: companionPreview,
+        // Billing details
+        subscription_started_at: subscriber.kajabiPurchaseDate || null,
+        subscription_cancelled_at: subscriber.kajabiCancelDate || null,
+        next_billing_date: computeNextBillingDate(subscriber),
+        member_since: subscriber.createdAt,
       });
     } catch (error) {
       console.error('[ERROR] dashboard stats failed:', error.message);
