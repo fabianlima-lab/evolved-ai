@@ -36,12 +36,13 @@ export function AppNav({ userEmail }) {
   const initials = userEmail ? userEmail.slice(0, 2).toUpperCase() : '??';
 
   const APP_LINKS = [
-    { href: '/dashboard', labelKey: 'dashboard' },
-    { href: '/meet', labelKey: 'meet' },
-    { href: '/integrations', labelKey: 'integrations' },
-    { href: '/workflow', labelKey: 'workflow' },
+    { href: '/dashboard', labelKey: 'dashboard', exact: true },
+    { href: '/dashboard/skills', labelKey: 'skillsApps' },
     { href: '/settings', labelKey: 'settings' },
   ];
+
+  const isActive = (link) =>
+    link.exact ? pathname === link.href : pathname.startsWith(link.href);
 
   useEffect(() => {
     const h = () => { if (window.innerWidth >= 768) setMenuOpen(false); };
@@ -62,7 +63,7 @@ export function AppNav({ userEmail }) {
               key={link.href}
               href={link.href}
               className={`text-sm transition-colors ${
-                pathname === link.href
+                isActive(link)
                   ? 'text-txt font-bold'
                   : 'text-txt-muted hover:text-txt'
               }`}
@@ -101,7 +102,7 @@ export function AppNav({ userEmail }) {
               href={link.href}
               onClick={() => setMenuOpen(false)}
               className={`text-sm transition-colors py-2.5 ${
-                pathname === link.href
+                isActive(link)
                   ? 'text-txt font-bold'
                   : 'text-txt-muted hover:text-txt'
               }`}

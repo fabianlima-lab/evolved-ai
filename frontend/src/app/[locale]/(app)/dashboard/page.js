@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter, Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { apiFetch } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
 import { KAJABI_CHECKOUT_URL } from '@/lib/constants';
 
 /* ================================================================
@@ -298,7 +299,7 @@ function Sidebar({ activeSection, onNav, stats, mobileOpen, onCloseMobile }) {
               color: 'var(--color-brand-text-light)',
               marginTop: '2px',
             }}>
-              Control Tower
+              Lighthouse
             </div>
           </div>
         </div>
@@ -558,10 +559,12 @@ function KanbanColumn({ title, cards }) {
 export default function DashboardPage() {
   const t = useTranslations('Dashboard');
   const router = useRouter();
+  const { logout } = useAuth();
 
   const [stats, setStats] = useState(null);
   const [agents, setAgents] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [tasks, setTasks] = useState(null);
   const [activeSection, setActiveSection] = useState('overview');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -578,6 +581,9 @@ export default function DashboardPage() {
         const list = Array.isArray(data) ? data : [];
         setMessages(list);
       })
+      .catch(() => {});
+    apiFetch('/tasks')
+      .then(setTasks)
       .catch(() => {});
   }, []);
 
@@ -689,6 +695,42 @@ export default function DashboardPage() {
         }}>
           {t('upgradeNote')}
         </p>
+
+        <div style={{
+          marginTop: '32px',
+          paddingTop: '24px',
+          borderTop: '1px solid rgba(0,0,0,0.06)',
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '24px',
+        }}>
+          <a
+            href="mailto:support@evolvedvets.com"
+            style={{
+              fontSize: '0.7rem',
+              fontWeight: 400,
+              color: 'var(--color-brand-teal)',
+              textDecoration: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            Contact support
+          </a>
+          <button
+            onClick={logout}
+            style={{
+              fontSize: '0.7rem',
+              fontWeight: 400,
+              color: 'var(--color-txt-dim)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              textDecoration: 'underline',
+            }}
+          >
+            Log out
+          </button>
+        </div>
       </div>
     );
   }
@@ -706,37 +748,25 @@ export default function DashboardPage() {
   const completedSteps = onboardingItems.filter((i) => i.done).length;
   const totalSteps = onboardingItems.length;
 
-  /* ── Placeholder kanban data ── */
+  /* ── Kanban data from real tasks API ── */
+  const PRIORITY_TAG = {
+    high: { tag: 'High', tagColor: 'rgba(212,129,107,0.1)', tagTextColor: 'var(--color-brand-alert)' },
+    medium: { tag: 'Medium', tagColor: 'rgba(139,196,198,0.1)', tagTextColor: 'var(--color-brand-teal-dark)' },
+    low: { tag: 'Low', tagColor: 'rgba(0,0,0,0.03)', tagTextColor: 'var(--color-brand-text-light)' },
+  };
+
+  const taskCols = tasks || { backlog: [], todo: [], in_progress: [], review: [], done: [] };
+  const toCards = (list) => list.map((t) => ({
+    title: t.title,
+    ...(PRIORITY_TAG[t.priority] || {}),
+  }));
+
   const kanbanColumns = [
-    {
-      title: 'Backlog',
-      cards: [
-        { title: 'Research local referral vets', tag: 'Research', tagColor: 'rgba(139,196,198,0.1)', tagTextColor: 'var(--color-brand-teal-dark)' },
-        { title: 'Draft newsletter for March', tag: 'Content' },
-      ],
-    },
-    {
-      title: 'To Do',
-      cards: [
-        { title: 'Follow up on lab results for Bailey', tag: 'Admin', tagColor: 'rgba(212,129,107,0.08)', tagTextColor: 'var(--color-brand-alert)' },
-      ],
-    },
-    {
-      title: 'In Progress',
-      cards: [
-        { title: 'Schedule dental cleaning for Cooper', tag: 'Booking', tagColor: 'rgba(45,139,111,0.08)', tagTextColor: 'var(--color-success)' },
-      ],
-    },
-    {
-      title: 'Review',
-      cards: [],
-    },
-    {
-      title: 'Done',
-      cards: [
-        { title: 'Send vaccination reminder to Jones', tag: 'Complete', tagColor: 'rgba(45,139,111,0.08)', tagTextColor: 'var(--color-success)' },
-      ],
-    },
+    { title: 'Backlog', cards: toCards(taskCols.backlog) },
+    { title: 'To Do', cards: toCards(taskCols.todo) },
+    { title: 'In Progress', cards: toCards(taskCols.in_progress) },
+    { title: 'Review', cards: toCards(taskCols.review) },
+    { title: 'Done', cards: toCards(taskCols.done) },
   ];
 
   /* ── Integration rows ── */
@@ -809,7 +839,7 @@ export default function DashboardPage() {
               fontWeight: 600,
               color: 'var(--color-txt)',
             }}>
-              Control Tower
+              Lighthouse
             </span>
           </div>
           <button
@@ -834,7 +864,7 @@ export default function DashboardPage() {
 
           {/* ─── SECTION: Greeting ─── */}
           <section id="section-overview" style={{ marginBottom: '40px' }}>
-            <div style={EYEBROW}>Control Tower</div>
+            <div style={EYEBROW}>Lighthouse</div>
             <h1 style={{
               fontFamily: 'var(--font-display)',
               fontSize: 'clamp(1.6rem, 4vw, 2.4rem)',
