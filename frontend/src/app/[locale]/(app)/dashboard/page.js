@@ -198,7 +198,7 @@ function HoverCard({ children, style, className, ...rest }) {
    ================================================================ */
 const NAV_MAIN = [
   { id: 'overview', label: 'Overview', icon: Icon.Home },
-  { id: 'about-her', label: 'About Her', icon: Icon.Clock, badge: '10%' },
+  { id: 'about-her', label: 'Companion', icon: Icon.Clock },
   { id: 'about-you', label: 'About You', icon: Icon.Person },
   { id: 'integrations', label: 'Integrations', icon: Icon.Chain, badge: '1/7' },
   { id: 'activity', label: 'Activity Log', icon: Icon.Clock },
@@ -955,10 +955,10 @@ export default function DashboardPage() {
           <section id="section-about-her" style={{ marginBottom: '32px' }}>
             <HoverCard style={{ padding: '28px 32px' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '28px', flexWrap: 'wrap' }}>
-                {/* Ring */}
+                {/* Level ring */}
                 <div style={{ textAlign: 'center', flexShrink: 0 }}>
                   <div style={{ position: 'relative', width: 100, height: 100 }}>
-                    <TunedRing percent={tunedScore} />
+                    <TunedRing percent={stats.companion ? Math.round((stats.companion.traits.warmth + stats.companion.traits.knowsYou + stats.companion.traits.reliability + stats.companion.traits.growth) / 4) : tunedScore} />
                     <div style={{
                       position: 'absolute',
                       inset: 0,
@@ -974,7 +974,7 @@ export default function DashboardPage() {
                         color: 'var(--color-txt)',
                         lineHeight: 1,
                       }}>
-                        {tunedScore}
+                        {stats.companion?.level || 1}
                       </span>
                       <span style={{
                         fontSize: '0.5rem',
@@ -984,7 +984,7 @@ export default function DashboardPage() {
                         color: 'var(--color-brand-teal)',
                         marginTop: '2px',
                       }}>
-                        Tuned
+                        Level
                       </span>
                     </div>
                   </div>
@@ -992,7 +992,7 @@ export default function DashboardPage() {
 
                 {/* Info */}
                 <div style={{ flex: 1, minWidth: 240 }}>
-                  <div style={EYEBROW}>Personalisation</div>
+                  <div style={EYEBROW}>Companion</div>
                   <h2 style={{
                     fontFamily: 'var(--font-display)',
                     fontSize: '1.2rem',
@@ -1003,22 +1003,41 @@ export default function DashboardPage() {
                     {assistantName} is learning you
                   </h2>
                   <p style={{ ...BODY_SM, marginBottom: '16px', maxWidth: 400 }}>
-                    The more context you share through WhatsApp, the better {assistantName} understands your work style, priorities, and preferences.
+                    Every conversation, skill, and integration builds the relationship. {assistantName} evolves with you over time.
                   </p>
 
-                  {/* Status chips */}
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                    <StatusBadge
-                      label={stats.whatsapp_connected ? 'WhatsApp connected' : 'WhatsApp not connected'}
-                      variant={stats.whatsapp_connected ? 'connected' : 'pending'}
-                    />
-                    <StatusBadge
-                      label={stats.google_connected ? 'Calendar connected' : 'Calendar -- asked in chat'}
-                      variant={stats.google_connected ? 'connected' : 'pending'}
-                    />
-                    <StatusBadge label="Priorities -- not shared yet" variant="default" />
-                    <StatusBadge label="Profile -- 10% complete" variant="default" />
-                  </div>
+                  {/* Trait mini bars */}
+                  {stats.companion ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 16px' }}>
+                      {[
+                        { label: 'Warmth', value: stats.companion.traits.warmth },
+                        { label: 'Knows You', value: stats.companion.traits.knowsYou },
+                        { label: 'Reliability', value: stats.companion.traits.reliability },
+                        { label: 'Growth', value: stats.companion.traits.growth },
+                      ].map((trait) => (
+                        <div key={trait.label}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                            <span style={{ fontSize: '0.62rem', fontWeight: 400, color: 'var(--color-brand-text-light)' }}>{trait.label}</span>
+                            <span style={{ fontSize: '0.6rem', fontWeight: 500, color: 'var(--color-brand-teal-dark)' }}>{trait.value}%</span>
+                          </div>
+                          <div style={{ height: '3px', borderRadius: '2px', background: 'rgba(139,196,198,0.12)', overflow: 'hidden' }}>
+                            <div style={{ width: `${trait.value}%`, height: '100%', background: 'var(--color-brand-teal)', borderRadius: '2px', transition: 'width 0.8s ease' }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      <StatusBadge
+                        label={stats.whatsapp_connected ? 'WhatsApp connected' : 'WhatsApp not connected'}
+                        variant={stats.whatsapp_connected ? 'connected' : 'pending'}
+                      />
+                      <StatusBadge
+                        label={stats.google_connected ? 'Calendar connected' : 'Calendar -- not yet'}
+                        variant={stats.google_connected ? 'connected' : 'pending'}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </HoverCard>
