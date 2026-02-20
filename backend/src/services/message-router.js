@@ -2,14 +2,13 @@ import { isTrialExpired, stripHtml } from '../utils/helpers.js';
 import { compileSoulMd } from '../prompts/soul.js';
 import { sendWhatsAppMessage } from './whatsapp.js';
 import { sendTypingIndicator } from './baileys.js';
-import { callAI, isAIConfigured } from './ai-client.js';
 import { callOpenClawWithContext, isOpenClawConfigured } from './openclaw-bridge.js';
 import { buildLiveContext } from './context-builder.js';
 import { parseReminderFromText } from '../utils/reminder-parser.js';
 import { createReminder } from './reminders.js';
 import { parseActions, stripActionTags, hasActions } from '../utils/action-parser.js';
 import { executeAllActions } from './action-executor.js';
-import { estimateTokens, truncateConversation, checkBudget } from '../utils/token-budget.js';
+import { truncateConversation, checkBudget } from '../utils/token-budget.js';
 import { assertTenantAccess } from '../utils/tenant-guard.js';
 import prisma from '../lib/prisma.js';
 
@@ -19,18 +18,13 @@ let openclawEnabled = false;
 
 const MAX_MESSAGE_LENGTH = 4000;
 
-// User-friendly error messages by AI error type
+// User-friendly error messages — OpenClaw only, no fallback
 const ERROR_MESSAGES = {
-  ai_not_configured: "⚙️ My AI connection is being set up. I'll be fully operational soon — check back shortly!",
+  not_available: "⚙️ I'm starting up — give me a minute and try again.",
   timeout: "⏳ I'm thinking extra hard on this one... but I timed out. Could you try again or rephrase?",
   rate_limited: "🛡️ I'm getting a lot of requests right now. Give me a moment and try again.",
-  auth_failed: "🔑 There's an issue with my AI connection. The team has been notified — try again later.",
-  server_error: "⚔️ The AI service is temporarily down. Try again in a few minutes.",
   empty_response: "🤔 I drew a blank on that one. Could you rephrase your question?",
-  empty_content: "🤔 I drew a blank on that one. Could you rephrase your question?",
   unknown: "⚠️ Something went wrong on my end. Try again in a moment.",
-  openclaw_error: "⚠️ Something went wrong on my end. Try again in a moment.",
-  openclaw_tool_error: "⚠️ Something went wrong on my end. Try again in a moment.",
 };
 
 /**
@@ -212,25 +206,23 @@ async function sendChannelReply(channel, channelId, text) {
 }
 
 /**
- * Generate AI response using OpenClaw (primary) or direct AI call (fallback).
+ * Generate AI response via OpenClaw Gateway. No fallback — OpenClaw or nothing.
  *
- * Pipeline:
- *   1. Try OpenClaw agent — Claude Sonnet via OpenClaw Gateway
- *   2. If OpenClaw fails → fallback to direct callAI() (Groq/NVIDIA)
- *   3. If both fail → friendly error message
- *
- * OpenClaw handles: SOUL.md personality, session memory, model routing
- * Our code handles: Live context (calendar/email), action tags, tool execution
+ * OpenClaw handles: SOUL.md personality, session memory, model routing, tools
+ * Our code handles: Live context injection (calendar/email), reminder parsing
  */
 async function generateAIResponse(agent, subscriber, conversationHistory, options = {}) {
   // Check OpenClaw availability once
   if (!openclawChecked) {
     openclawChecked = true;
     openclawEnabled = await isOpenClawConfigured();
-    console.log(`[MSG] OpenClaw engine: ${openclawEnabled ? '✅ enabled' : '❌ disabled (using direct AI)'}`);
+    console.log(`[MSG] OpenClaw engine: ${openclawEnabled ? '✅ online' : '❌ offline'}`);
   }
 
-  const FALLBACK_PROMPT = 'You are a helpful personal assistant. Be concise, friendly, and proactive.';
+  if (!openclawEnabled) {
+    console.error(`[MSG] OpenClaw not available — cannot process message for agent:${agent.id}`);
+    return ERROR_MESSAGES.not_available;
+  }
 
   // Build live context (calendar, email, reminders) — fresh every message
   let liveContext = '';
@@ -240,7 +232,7 @@ async function generateAIResponse(agent, subscriber, conversationHistory, option
     console.error(`[MSG] Live context build failed: ${err.message}`);
   }
 
-  // Compile SOUL.md FRESH on every call (used by both paths)
+  // Compile SOUL.md FRESH on every call
   let systemPrompt;
   try {
     systemPrompt = compileSoulMd({
@@ -251,7 +243,7 @@ async function generateAIResponse(agent, subscriber, conversationHistory, option
     });
   } catch (err) {
     console.error('[MSG] SOUL.md compilation failed, using DB fallback:', err.message);
-    systemPrompt = agent.soulMd || agent.systemPrompt || FALLBACK_PROMPT;
+    systemPrompt = agent.soulMd || agent.systemPrompt || 'You are a helpful personal assistant.';
   }
 
   // Log token budget check
@@ -260,7 +252,7 @@ async function generateAIResponse(agent, subscriber, conversationHistory, option
     console.warn(`[MSG] Token budget: ${budget.totalTokens} tokens (system:${budget.systemTokens} history:${budget.historyTokens})`);
   }
 
-  // Reminder parser still runs as backup for simple "remind me" messages
+  // Reminder parser still runs for simple "remind me" messages
   if (options.userMessage) {
     try {
       const tz = subscriber.profileData?.timezone || 'America/New_York';
@@ -277,47 +269,26 @@ async function generateAIResponse(agent, subscriber, conversationHistory, option
     }
   }
 
-  // ── Try OpenClaw first (if available) ──
-  if (openclawEnabled) {
-    console.log(`[MSG] Trying OpenClaw for agent:${agent.id}`);
-    const ocResult = await callOpenClawWithContext(
-      systemPrompt,
-      conversationHistory,
-      {
-        userMessage: options.userMessage,
-        subscriberPhone: subscriber.whatsappJid?.replace('@s.whatsapp.net', ''),
-        sessionId: `sub-${subscriber.id}`,
-      },
-    );
-
-    if (ocResult.content) {
-      console.log(`[MSG_OUT] agent:${agent.id} engine:openclaw model:${ocResult.model} time:${ocResult.responseTimeMs}ms len:${ocResult.content.length}`);
-      return ocResult.content;
-    }
-
-    // OpenClaw failed — log and fall through to direct AI
-    console.warn(`[MSG] OpenClaw failed: ${ocResult.error}${ocResult.rawError ? ` (${ocResult.rawError})` : ''} — falling back to direct AI`);
-  }
-
-  // ── Fallback: Direct AI call (Anthropic → Groq → NVIDIA) ──
-  if (!isAIConfigured()) {
-    console.log(`[MSG_OUT] AI not configured, using stub for agent:${agent.id}`);
-    return ERROR_MESSAGES.ai_not_configured;
-  }
-
-  const { content, error, tier, model, responseTimeMs } = await callAI(
+  // ── Call OpenClaw ──
+  console.log(`[MSG] Calling OpenClaw for agent:${agent.id}`);
+  const ocResult = await callOpenClawWithContext(
     systemPrompt,
     conversationHistory,
-    { userMessage: options.userMessage },
+    {
+      userMessage: options.userMessage,
+      subscriberPhone: subscriber.whatsappJid?.replace('@s.whatsapp.net', ''),
+      sessionId: `sub-${subscriber.id}`,
+    },
   );
 
-  if (error) {
-    console.error(`[ERROR] AI response error for agent:${agent.id} - ${error} (tier:${tier} model:${model})`);
-    return ERROR_MESSAGES[error] || ERROR_MESSAGES.unknown;
+  if (ocResult.content) {
+    console.log(`[MSG_OUT] agent:${agent.id} engine:openclaw model:${ocResult.model} time:${ocResult.responseTimeMs}ms len:${ocResult.content.length}`);
+    return ocResult.content;
   }
 
-  console.log(`[MSG_OUT] agent:${agent.id} engine:direct tier:${tier} model:${model} time:${responseTimeMs}ms len:${content.length}`);
-  return content;
+  // OpenClaw failed — return error, no fallback
+  console.error(`[MSG] OpenClaw failed: ${ocResult.error}${ocResult.rawError ? ` (${ocResult.rawError})` : ''}`);
+  return ERROR_MESSAGES[ocResult.error] || ERROR_MESSAGES.unknown;
 }
 
 export { findSubscriberByChannel, generateAIResponse };
