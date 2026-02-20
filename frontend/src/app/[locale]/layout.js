@@ -17,8 +17,8 @@ export async function generateMetadata({ params }) {
     description: meta.siteDescription || 'AI-powered personal assistant on WhatsApp. Manages your inbox, calendar, tasks, and more.',
     manifest: '/manifest.json',
     icons: {
-      icon: [{ url: '/icon.png?v=2', type: 'image/png', sizes: '64x64' }],
-      apple: '/apple-icon.png?v=2',
+      icon: [{ url: '/icon.png?v=3', type: 'image/png', sizes: '64x64' }],
+      apple: '/apple-icon.png?v=3',
     },
   };
 }
