@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import { buildTestApp, mockPrisma, getAuthToken } from './helpers.js';
 
-// Get the mocked ai-client so we can control its behavior per-test
-const aiClient = await import('../src/services/ai-client.js');
+// Get the mocked openclaw-bridge so we can control its behavior per-test
+const ocBridge = await import('../src/services/openclaw-bridge.js');
 
 describe('Chat Routes', () => {
   let app;
@@ -38,13 +38,13 @@ describe('Chat Routes', () => {
     mockPrisma.agent.findFirst.mockReset();
     mockPrisma.message.create.mockReset();
     mockPrisma.message.findMany.mockReset();
-    aiClient.isAIConfigured.mockReturnValue(true);
-    aiClient.callAI.mockResolvedValue({
-      content: 'Mock AI response',
+    ocBridge.isOpenClawConfigured.mockResolvedValue(true);
+    ocBridge.callOpenClawWithContext.mockResolvedValue({
+      content: 'Mock OpenClaw response',
       error: null,
-      tier: 1,
-      model: 'test-model',
+      model: 'openclaw',
       responseTimeMs: 100,
+      tier: 3,
     });
   });
 
@@ -135,10 +135,10 @@ describe('Chat Routes', () => {
       expect(body.error).toContain('agent');
     });
 
-    it('returns 503 if AI not configured', async () => {
+    it('returns 503 if OpenClaw not configured', async () => {
       mockPrisma.subscriber.findUnique.mockResolvedValue(mockSubscriber);
       mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
-      aiClient.isAIConfigured.mockReturnValue(false);
+      ocBridge.isOpenClawConfigured.mockResolvedValue(false);
 
       const res = await app.inject({
         method: 'POST',
@@ -149,7 +149,7 @@ describe('Chat Routes', () => {
       expect(res.statusCode).toBe(503);
     });
 
-    it('sends message and returns AI response', async () => {
+    it('sends message and returns OpenClaw response', async () => {
       mockPrisma.subscriber.findUnique.mockResolvedValue(mockSubscriber);
       mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
       mockPrisma.message.create.mockResolvedValue({ id: 'msg-1' });
@@ -164,10 +164,9 @@ describe('Chat Routes', () => {
 
       expect(res.statusCode).toBe(200);
       const body = JSON.parse(res.body);
-      expect(body.response).toBe('Mock AI response');
-      expect(body.tier).toBe(1);
-      expect(body.model).toBe('test-model');
-      expect(body.responseTimeMs).toBe(100);
+      expect(body.response).toBe('Mock OpenClaw response');
+      expect(body.model).toBe('openclaw');
+      expect(body.responseTimeMs).toBeDefined();
 
       // Should save 2 messages (user + AI)
       expect(mockPrisma.message.create).toHaveBeenCalledTimes(2);
@@ -193,16 +192,15 @@ describe('Chat Routes', () => {
       expect(savedContent).not.toContain('<script>');
     });
 
-    it('handles AI errors gracefully', async () => {
+    it('handles OpenClaw errors gracefully', async () => {
       mockPrisma.subscriber.findUnique.mockResolvedValue(mockSubscriber);
       mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
       mockPrisma.message.create.mockResolvedValue({ id: 'msg-1' });
       mockPrisma.message.findMany.mockResolvedValue([]);
-      aiClient.callAI.mockResolvedValue({
+      ocBridge.callOpenClawWithContext.mockResolvedValue({
         content: null,
         error: 'timeout',
-        tier: 1,
-        model: 'test-model',
+        model: 'openclaw',
         responseTimeMs: 15000,
       });
 
@@ -215,8 +213,8 @@ describe('Chat Routes', () => {
 
       expect(res.statusCode).toBe(200);
       const body = JSON.parse(res.body);
-      expect(body.response).toContain('timed out');
-      expect(body.tier).toBe(1);
+      expect(body.response).toContain('Something went wrong');
+      expect(body.model).toBe('openclaw');
     });
 
     it('loads conversation history for context', async () => {
@@ -235,9 +233,9 @@ describe('Chat Routes', () => {
         payload: { message: 'Follow up' },
       });
 
-      // Verify callAI received compiled USER.md + conversation history
-      expect(aiClient.callAI).toHaveBeenCalledWith(
-        expect.stringContaining('# User Profile'),
+      // Verify callOpenClawWithContext received system prompt + conversation history
+      expect(ocBridge.callOpenClawWithContext).toHaveBeenCalledWith(
+        expect.any(String), // compiled USER.md system prompt
         expect.arrayContaining([
           { role: 'user', content: 'Previous user message' },
           { role: 'assistant', content: 'Previous AI response' },
@@ -276,9 +274,9 @@ describe('Chat Routes', () => {
       mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
       // findMany returns DESC order (newest first) — route should reverse to ASC
       mockPrisma.message.findMany.mockResolvedValue([
-        { id: 'msg-3', role: 'assistant', content: 'Third', channel: 'web', createdAt: '2024-01-03T00:00:00Z' },
-        { id: 'msg-2', role: 'user', content: 'Second', channel: 'whatsapp', createdAt: '2024-01-02T00:00:00Z' },
-        { id: 'msg-1', role: 'user', content: 'First', channel: 'web', createdAt: '2024-01-01T00:00:00Z' },
+        { id: 'msg-3', role: 'assistant', content: 'Third', createdAt: '2024-01-03T00:00:00Z' },
+        { id: 'msg-2', role: 'user', content: 'Second', createdAt: '2024-01-02T00:00:00Z' },
+        { id: 'msg-1', role: 'user', content: 'First', createdAt: '2024-01-01T00:00:00Z' },
       ]);
 
       const res = await app.inject({
@@ -340,24 +338,6 @@ describe('Chat Routes', () => {
       expect(mockPrisma.message.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ take: 100 }),
       );
-    });
-
-    it('includes channel field in messages', async () => {
-      mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
-      mockPrisma.message.findMany.mockResolvedValue([
-        { id: 'msg-1', role: 'user', content: 'From web', channel: 'web', createdAt: '2024-01-01T00:00:00Z' },
-        { id: 'msg-2', role: 'user', content: 'From whatsapp', channel: 'whatsapp', createdAt: '2024-01-01T00:00:01Z' },
-      ]);
-
-      const res = await app.inject({
-        method: 'GET',
-        url: '/api/chat/history',
-        headers: { authorization: 'Bearer ' + token },
-      });
-
-      expect(res.statusCode).toBe(200);
-      const body = JSON.parse(res.body);
-      expect(body.messages[0].channel).toBe('msg-1' === body.messages[0].id ? 'web' : 'whatsapp');
     });
   });
 });

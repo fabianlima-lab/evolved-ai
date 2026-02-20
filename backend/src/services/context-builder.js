@@ -1,7 +1,6 @@
 import { getTodaySchedule, formatEventsForContext } from './google-calendar.js';
 import { getEmailSummary, formatEmailsForContext } from './gmail.js';
 import { getPendingReminders, formatRemindersForContext } from './reminders.js';
-import { getMemories, formatMemoriesForContext } from './memory.js';
 
 // ─────────────────────────────────────────────────────
 // Context Builder
@@ -75,17 +74,7 @@ export async function buildLiveContext(subscriber) {
     sections.push('⏳ Reminders: unable to load');
   }
 
-  // ── Long-term Memory (always available — no Google needed) ──
-  try {
-    const memories = await getMemories(subscriber.id);
-    const memoryContext = formatMemoriesForContext(memories);
-    if (memoryContext) {
-      sections.push(memoryContext);
-    }
-  } catch (err) {
-    console.error(`[CONTEXT] Memory error for subscriber:${subscriber.id}: ${err.message}`);
-    sections.push('🧠 Memory: unable to load');
-  }
+  // Note: Long-term memory is handled natively by OpenClaw (MEMORY.md + SQLite FTS)
 
   const context = sections.join('\n\n');
   console.log(`[CONTEXT] Built for subscriber:${subscriber.id} len:${context.length}`);

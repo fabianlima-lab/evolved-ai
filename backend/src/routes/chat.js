@@ -1,26 +1,10 @@
 import { isTrialExpired, stripHtml } from '../utils/helpers.js';
 import { compileSoulMd } from '../prompts/soul.js';
-import { callAI, isAIConfigured } from '../services/ai-client.js';
+import { callOpenClawWithContext, isOpenClawConfigured } from '../services/openclaw-bridge.js';
 import { buildLiveContext } from '../services/context-builder.js';
-import { parseReminderFromText } from '../utils/reminder-parser.js';
-import { createReminder } from '../services/reminders.js';
-import { parseActions, stripActionTags, hasActions } from '../utils/action-parser.js';
-import { executeAllActions } from '../services/action-executor.js';
 import prisma from '../lib/prisma.js';
 
 const MAX_MESSAGE_LENGTH = 4000;
-
-// User-friendly error messages
-const ERROR_MESSAGES = {
-  ai_not_configured: "My AI connection is being set up. Check back shortly!",
-  timeout: "I timed out on that one. Could you try again?",
-  rate_limited: "I'm getting a lot of requests. Give me a moment.",
-  auth_failed: "There's an issue with my connection. Try again later.",
-  server_error: "The AI service is temporarily down. Try again in a few minutes.",
-  empty_response: "I drew a blank. Could you rephrase?",
-  empty_content: "I drew a blank. Could you rephrase?",
-  unknown: "Something went wrong. Try again in a moment.",
-};
 
 async function chatRoutes(app) {
   // POST /api/chat/send — send a message from the dashboard
@@ -58,22 +42,20 @@ async function chatRoutes(app) {
         return reply.code(403).send({ error: 'Trial expired. Upgrade to continue chatting.' });
       }
 
-      // Get active agent (use specified agentId or default to active)
+      // Get active agent
       const whereClause = agentId
         ? { id: agentId, subscriberId, isActive: true }
         : { subscriberId, isActive: true };
 
-      const agent = await prisma.agent.findFirst({
-        where: whereClause,
-      });
+      const agent = await prisma.agent.findFirst({ where: whereClause });
 
       if (!agent) {
         return reply.code(404).send({ error: 'No active agent found. Deploy one first.' });
       }
 
-      // Check AI config
-      if (!isAIConfigured()) {
-        return reply.code(503).send({ error: 'AI not configured' });
+      // Check OpenClaw
+      if (!(await isOpenClawConfigured())) {
+        return reply.code(503).send({ error: 'AI engine not available' });
       }
 
       // Save incoming message
@@ -99,7 +81,7 @@ async function chatRoutes(app) {
         content: m.content,
       }));
 
-      // Build live context (calendar, email, reminders) — fresh every message
+      // Build live context (calendar, email, reminders)
       let liveContext = '';
       try {
         liveContext = await buildLiveContext(subscriber);
@@ -107,9 +89,7 @@ async function chatRoutes(app) {
         console.error(`[CHAT] Live context build failed: ${err.message}`);
       }
 
-      // Compile SOUL.md FRESH from template + subscriber profile + live context
-      // This ensures template updates are immediately reflected
-      const FALLBACK_PROMPT = 'You are a helpful personal assistant. Be concise, friendly, and proactive.';
+      // Compile system prompt (USER.md for OpenClaw)
       let systemPrompt;
       try {
         systemPrompt = compileSoulMd({
@@ -119,36 +99,28 @@ async function chatRoutes(app) {
           liveContext,
         });
       } catch (err) {
-        console.error('[CHAT] SOUL.md compilation failed, using DB fallback:', err.message);
-        systemPrompt = agent.soulMd || agent.systemPrompt || FALLBACK_PROMPT;
+        console.error('[CHAT] SOUL.md compilation failed:', err.message);
+        systemPrompt = 'You are a helpful personal assistant.';
       }
 
-      // Check for reminder intent in user message (background)
-      try {
-        const tz = subscriber.profileData?.timezone || 'America/New_York';
-        const parsed = parseReminderFromText(cleanMessage, tz);
-        if (parsed) {
-          await createReminder(subscriberId, {
-            title: parsed.title,
-            dueAt: parsed.dueAt,
-            agentId: agent.id,
-          });
-        }
-      } catch (err) {
-        console.error(`[CHAT] Reminder parse/create failed: ${err.message}`);
-      }
-
-      const { content, error, tier, model, responseTimeMs } = await callAI(
+      // Call OpenClaw
+      const startTime = Date.now();
+      const ocResult = await callOpenClawWithContext(
         systemPrompt,
         conversationHistory,
-        { userMessage: cleanMessage },
+        {
+          userMessage: cleanMessage,
+          subscriberPhone: subscriber.whatsappJid?.replace('@s.whatsapp.net', ''),
+          sessionId: `sub-${subscriber.id}`,
+        },
       );
 
-      if (error) {
-        console.error(`[ERROR] chat AI failed for agent:${agent.id} - ${error} (tier:${tier})`);
-        const errorMsg = ERROR_MESSAGES[error] || ERROR_MESSAGES.unknown;
+      const responseTimeMs = Date.now() - startTime;
 
-        // Still save the error response so it appears in history
+      if (ocResult.error || !ocResult.content) {
+        const errorMsg = 'Something went wrong. Try again in a moment.';
+        console.error(`[CHAT] OpenClaw failed: ${ocResult.error}`);
+
         await prisma.message.create({
           data: {
             subscriberId,
@@ -161,34 +133,9 @@ async function chatRoutes(app) {
 
         return reply.send({
           response: errorMsg,
-          tier,
-          model,
+          model: 'openclaw',
           responseTimeMs,
         });
-      }
-
-      // Execute any action tags in the AI response
-      let finalContent = content;
-      if (hasActions(content)) {
-        const actions = parseActions(content);
-        console.log(`[CHAT:ACTION] Found ${actions.length} action(s):`, actions.map((a) => a.action));
-
-        const { results } = await executeAllActions(actions, subscriber, { agentId: agent.id });
-
-        // Strip action tags from user-facing message
-        finalContent = stripActionTags(content);
-
-        // Append error messages from failed actions
-        const errors = results.filter((r) => !r.success && r.result);
-        if (errors.length > 0) {
-          finalContent += '\n\n' + errors.map((e) => e.result).join('\n');
-        }
-
-        // Append info results (search results, links, etc.)
-        const infoResults = results.filter((r) => r.success && r.result);
-        if (infoResults.length > 0) {
-          finalContent += '\n\n' + infoResults.map((r) => r.result).join('\n');
-        }
       }
 
       // Save AI response
@@ -198,16 +145,15 @@ async function chatRoutes(app) {
           agentId: agent.id,
           role: 'assistant',
           channel: 'web',
-          content: finalContent,
+          content: ocResult.content,
         },
       });
 
-      console.log(`[CHAT:WEB] agent:${agent.id} tier:${tier} model:${model} time:${responseTimeMs}ms`);
+      console.log(`[CHAT:WEB] agent:${agent.id} model:${ocResult.model} time:${responseTimeMs}ms`);
 
       return reply.send({
-        response: finalContent,
-        tier,
-        model,
+        response: ocResult.content,
+        model: ocResult.model,
         responseTimeMs,
       });
     } catch (error) {
@@ -228,7 +174,6 @@ async function chatRoutes(app) {
     const limit = Math.min(parseInt(request.query.limit || '30', 10), 100);
 
     try {
-      // Get active agent
       const whereClause = agentId
         ? { id: agentId, subscriberId, isActive: true }
         : { subscriberId, isActive: true };
@@ -251,7 +196,6 @@ async function chatRoutes(app) {
         },
       });
 
-      // Reverse to chronological order
       messages.reverse();
 
       return reply.send({

@@ -1,6 +1,5 @@
 import { isTrialExpired, getFeaturesByTier, stripHtml } from '../utils/helpers.js';
 import { compileSoulMd } from '../prompts/soul.js';
-import { seedMemoriesFromProfile } from '../services/memory.js';
 import { seedDefaults } from '../services/evolution.js';
 import prisma from '../lib/prisma.js';
 
@@ -83,14 +82,8 @@ async function agentRoutes(app) {
         },
       });
 
-      // Seed long-term memories from onboarding profile data
-      try {
-        await seedMemoriesFromProfile(subscriberId, subscriber.profileData);
-      } catch (err) {
-        console.error(`[AGENT] Memory seeding failed (non-fatal): ${err.message}`);
-      }
-
       // Seed default skills, integrations, and record milestone event
+      // Note: Long-term memory is now handled by OpenClaw natively (MEMORY.md)
       try {
         await seedDefaults(agent.id, subscriberId, {
           whatsappConnected: !!subscriber.whatsappJid,

@@ -119,16 +119,10 @@ vi.mock('../src/services/whatsapp.js', () => ({
   sendWhatsAppMessage: vi.fn().mockResolvedValue(true),
 }));
 
-vi.mock('../src/services/ai-client.js', () => ({
-  callKimi: vi.fn().mockResolvedValue({ content: 'Mock AI response', error: null }),
-  callAI: vi.fn().mockResolvedValue({ content: 'Mock AI response', error: null, tier: 1, model: 'test-model', responseTimeMs: 100 }),
-  callAIStream: vi.fn(),
-  isAIConfigured: vi.fn().mockReturnValue(false),
-  MODEL_TIERS: { 1: { name: 'Test' }, 2: { name: 'Test' }, 3: { name: 'Test' } },
-}));
-
-vi.mock('../src/services/message-router.js', () => ({
-  routeIncomingMessage: vi.fn().mockResolvedValue(true),
+vi.mock('../src/services/openclaw-bridge.js', () => ({
+  callOpenClaw: vi.fn().mockResolvedValue({ content: 'Mock OpenClaw response', error: null, model: 'openclaw', responseTimeMs: 100, tier: 3 }),
+  callOpenClawWithContext: vi.fn().mockResolvedValue({ content: 'Mock OpenClaw response', error: null, model: 'openclaw', responseTimeMs: 100, tier: 3 }),
+  isOpenClawConfigured: vi.fn().mockResolvedValue(true),
 }));
 
 // Mock email service

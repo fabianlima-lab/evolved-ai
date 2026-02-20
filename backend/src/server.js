@@ -122,20 +122,13 @@ async function start() {
     console.log(`[STARTUP] Server running on port ${env.PORT}`);
     console.log(`[STARTUP] Environment: ${env.NODE_ENV}`);
 
-    // Start Baileys WhatsApp connection (not in test mode)
+    // Start Baileys WhatsApp connection (for connection codes + outbound sends)
     const { initBaileys } = await import('./services/baileys.js');
     await initBaileys();
 
-    // Start background schedulers
-    const { startReminderScheduler } = await import('./services/reminder-scheduler.js');
-    startReminderScheduler();
-
-    const { startBriefingScheduler } = await import('./services/daily-briefings.js');
-    startBriefingScheduler();
-
-    const { startMemoryCleanupScheduler } = await import('./services/memory-scheduler.js');
-    startMemoryCleanupScheduler();
-
+    // Background schedulers
+    // Note: Reminders, briefings, and memory cleanup are handled natively by OpenClaw
+    // (cron scheduler + heartbeat system). Only lifecycle and weekly recap remain here.
     const { startWeeklyRecapScheduler } = await import('./services/weekly-recap.js');
     startWeeklyRecapScheduler();
 

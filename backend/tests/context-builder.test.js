@@ -16,15 +16,9 @@ vi.mock('../src/services/reminders.js', () => ({
   formatRemindersForContext: vi.fn().mockReturnValue('⏳ No upcoming reminders'),
 }));
 
-vi.mock('../src/services/memory.js', () => ({
-  getMemories: vi.fn(),
-  formatMemoriesForContext: vi.fn().mockReturnValue(''),
-}));
-
 import { getTodaySchedule, formatEventsForContext } from '../src/services/google-calendar.js';
 import { getEmailSummary, formatEmailsForContext } from '../src/services/gmail.js';
 import { getPendingReminders, formatRemindersForContext } from '../src/services/reminders.js';
-import { getMemories, formatMemoriesForContext } from '../src/services/memory.js';
 import { buildLiveContext } from '../src/services/context-builder.js';
 
 describe('Context Builder', () => {
@@ -44,8 +38,6 @@ describe('Context Builder', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     getPendingReminders.mockResolvedValue([]);
-    getMemories.mockResolvedValue([]);
-    formatMemoriesForContext.mockReturnValue('');
     formatRemindersForContext.mockReturnValue('⏳ No upcoming reminders');
   });
 
@@ -185,40 +177,10 @@ describe('Context Builder', () => {
     });
   });
 
-  // ── Memory ──
-  describe('Memory', () => {
-    it('fetches memories regardless of Google connection', async () => {
-      await buildLiveContext(baseSubscriber);
-      expect(getMemories).toHaveBeenCalledWith('sub-1');
-    });
-
-    it('includes memory context when available', async () => {
-      formatMemoriesForContext.mockReturnValue('🧠 MEMORY:\n- Mom Linda birthday March 15');
-
-      const context = await buildLiveContext(baseSubscriber);
-      expect(context).toContain('Mom Linda birthday March 15');
-    });
-
-    it('omits memory section when empty', async () => {
-      formatMemoriesForContext.mockReturnValue('');
-
-      const context = await buildLiveContext(baseSubscriber);
-      expect(context).not.toContain('MEMORY');
-    });
-
-    it('handles memory exceptions', async () => {
-      getMemories.mockRejectedValue(new Error('DB error'));
-
-      const context = await buildLiveContext(baseSubscriber);
-      expect(context).toContain('Memory: unable to load');
-    });
-  });
-
   // ── Full context assembly ──
   describe('Full context', () => {
     it('sections are separated by double newlines', async () => {
       const context = await buildLiveContext(baseSubscriber);
-      // Should have sections joined by \n\n
       expect(context).toContain('\n\n');
     });
 
