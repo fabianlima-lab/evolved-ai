@@ -37,7 +37,6 @@ export function AppNav({ userEmail }) {
 
   const APP_LINKS = [
     { href: '/dashboard', labelKey: 'home', exact: true },
-    { href: '/dashboard/chat', labelKey: 'chat' },
     { href: '/settings', labelKey: 'settings' },
   ];
 

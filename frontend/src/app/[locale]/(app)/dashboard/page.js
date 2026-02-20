@@ -577,15 +577,9 @@ export default function DashboardPage() {
             gap: '12px',
           }}>
             <QuickAction
-              icon={Icon.Chat}
-              label="Chat with your assistant"
-              description="Open the web chat"
-              href="/dashboard/chat"
-            />
-            <QuickAction
               icon={Icon.WhatsApp}
               label="Chat on WhatsApp"
-              description="Continue in WhatsApp"
+              description="Message your assistant"
               onClick={() => window.open('https://wa.me/', '_blank')}
             />
             <QuickAction
@@ -854,27 +848,9 @@ export default function DashboardPage() {
         {/* ─── Recent Activity ─── */}
         <section style={{ marginBottom: '24px' }}>
           <HoverCard style={{ padding: '24px 28px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <div>
-                <div style={EYEBROW}>Activity</div>
-                <h3 style={{ ...CARD_HEADING, marginBottom: 0 }}>Recent Messages</h3>
-              </div>
-              <Link
-                href="/dashboard/chat"
-                style={{
-                  fontSize: '0.65rem',
-                  fontWeight: 500,
-                  color: 'var(--color-brand-teal)',
-                  textDecoration: 'none',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                }}
-              >
-                View all <Icon.ArrowRight style={{ width: 12, height: 12 }} />
-              </Link>
+            <div style={{ marginBottom: '16px' }}>
+              <div style={EYEBROW}>Activity</div>
+              <h3 style={{ ...CARD_HEADING, marginBottom: 0 }}>Recent Messages</h3>
             </div>
             {messages.length > 0 ? (
               <div>
