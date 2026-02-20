@@ -22,6 +22,7 @@ const OPENCLAW_BIN = process.env.OPENCLAW_BIN || 'openclaw';
 const AGENT_ID = process.env.OPENCLAW_AGENT_ID || 'main';
 const DEFAULT_TIMEOUT_S = 120; // 120s for complex agent turns (builds pages, etc.)
 const OPENCLAW_WORKSPACE = env.OPENCLAW_WORKSPACE || process.env.HOME + '/clawd';
+const OPENCLAW_HOME = OPENCLAW_WORKSPACE.replace(/\/clawd$/, '') || process.env.HOME;
 const USER_MD_PATH = OPENCLAW_WORKSPACE + '/USER.md';
 
 // Rate limit cooldown: skip OpenClaw for 5 minutes after a rate limit hit
@@ -40,7 +41,7 @@ export async function isOpenClawConfigured() {
   try {
     const { stdout } = await execFileAsync(OPENCLAW_BIN, ['health', '--json'], {
       timeout: 8000,
-      env: { ...process.env, NO_COLOR: '1' },
+      env: { ...process.env, NO_COLOR: '1', HOME: OPENCLAW_HOME },
     });
 
     const data = JSON.parse(stdout);
@@ -109,7 +110,7 @@ export async function callOpenClaw(message, options = {}) {
   try {
     const { stdout, stderr } = await execFileAsync(OPENCLAW_BIN, args, {
       timeout: (DEFAULT_TIMEOUT_S + 10) * 1000, // CLI timeout + 10s buffer
-      env: { ...process.env, NO_COLOR: '1' },
+      env: { ...process.env, NO_COLOR: '1', HOME: OPENCLAW_HOME },
       maxBuffer: 1024 * 1024, // 1MB for large responses (pages, dashboards)
     });
 
