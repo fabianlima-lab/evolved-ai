@@ -294,7 +294,9 @@
     "disconnectConfirm": "This will remove your assistant's access to your calendar and email. You can reconnect anytime.",
     "googleConnecting": "Connecting...",
     "googleDisconnecting": "Disconnecting...",
-    "googleError": "Failed to connect Google. Please try again."
+    "googleError": "Failed to connect Google. Please try again.",
+    "logOut": "Log Out",
+    "logOutDesc": "Sign out of your account on this device."
   },
   "Meet": {
     "title": "Meet {name}",

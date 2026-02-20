@@ -565,6 +565,7 @@ export default function DashboardPage() {
   const [agents, setAgents] = useState([]);
   const [messages, setMessages] = useState([]);
   const [tasks, setTasks] = useState(null);
+  const [apiIntegrations, setApiIntegrations] = useState(null);
   const [activeSection, setActiveSection] = useState('overview');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -584,6 +585,9 @@ export default function DashboardPage() {
       .catch(() => {});
     apiFetch('/tasks')
       .then(setTasks)
+      .catch(() => {});
+    apiFetch('/integrations')
+      .then((data) => setApiIntegrations(Array.isArray(data) ? data : []))
       .catch(() => {});
   }, []);
 
@@ -736,13 +740,14 @@ export default function DashboardPage() {
   }
 
   /* ── Onboarding checklist states ── */
+  const profileData = stats.profile_data || {};
   const onboardingItems = [
-    { label: 'Created account', done: true },
+    { label: 'Created account', done: !!stats.email },
     { label: 'Connected WhatsApp', done: stats.whatsapp_connected },
     { label: 'Name your assistant', done: agents.length > 0 },
-    { label: 'Share what drains you most', done: !!stats.goals },
+    { label: 'Share what drains you most', done: !!stats.goals || !!profileData.drains },
     { label: 'Connect Google Calendar', done: stats.google_connected },
-    { label: 'Set your top 3 priorities', done: false },
+    { label: 'Set your top 3 priorities', done: !!(profileData.priorities && profileData.priorities.length > 0) },
   ];
 
   const completedSteps = onboardingItems.filter((i) => i.done).length;
@@ -769,14 +774,20 @@ export default function DashboardPage() {
     { title: 'Done', cards: toCards(taskCols.done) },
   ];
 
-  /* ── Integration rows ── */
-  const integrations = [
-    { name: 'WhatsApp', icon: Icon.WhatsApp, connected: stats.whatsapp_connected, status: stats.whatsapp_connected ? 'Connected' : 'Not yet' },
-    { name: 'Google Calendar', icon: Icon.Calendar, connected: stats.google_connected, status: stats.google_connected ? 'Connected' : 'Asked in chat' },
-    { name: 'Gmail', icon: Icon.Mail, connected: false, status: 'Not yet' },
-    { name: 'Google Drive', icon: Icon.Drive, connected: false, status: 'Not yet' },
-    { name: 'Oura Ring', icon: Icon.Ring, connected: false, status: 'Coming soon', comingSoon: true },
-  ];
+  /* ── Integration rows (from real API, fallback to stats) ── */
+  const ICON_MAP = { whatsapp: Icon.WhatsApp, 'google-calendar': Icon.Calendar, gmail: Icon.Mail, 'google-drive': Icon.Drive, 'oura-ring': Icon.Ring };
+  const integrations = apiIntegrations
+    ? apiIntegrations.map((i) => ({
+        name: i.name,
+        icon: ICON_MAP[i.slug] || Icon.Chain,
+        connected: i.status === 'connected',
+        status: i.status === 'connected' ? 'Connected' : i.status === 'coming_soon' ? 'Coming soon' : 'Not yet',
+        comingSoon: i.status === 'coming_soon',
+      }))
+    : [
+        { name: 'WhatsApp', icon: Icon.WhatsApp, connected: stats.whatsapp_connected, status: stats.whatsapp_connected ? 'Connected' : 'Not yet' },
+        { name: 'Google Calendar', icon: Icon.Calendar, connected: stats.google_connected, status: stats.google_connected ? 'Connected' : 'Not yet' },
+      ];
 
   /* ──────────────────────────────────────────────
      RENDER

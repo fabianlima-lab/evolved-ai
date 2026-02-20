@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { useAuth } from '@/lib/auth';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
@@ -9,6 +10,7 @@ import { apiFetch, apiPost } from '@/lib/api';
 
 export default function SettingsPage() {
   const t = useTranslations('Settings');
+  const { logout } = useAuth();
   const [email, setEmail] = useState('');
   const [authProvider, setAuthProvider] = useState('email');
   const [currentPassword, setCurrentPassword] = useState('');
@@ -224,6 +226,17 @@ export default function SettingsPage() {
         </p>
         <Button variant="ghost" onClick={handleManageSubscription}>
           {t('manageSubscription')}
+        </Button>
+      </Card>
+
+      {/* Log Out */}
+      <Card className="p-6">
+        <h3 className="text-sm font-medium text-txt uppercase tracking-wider mb-4">{t('logOut')}</h3>
+        <p className="text-sm text-txt-muted mb-4">
+          {t('logOutDesc')}
+        </p>
+        <Button variant="ghost" onClick={logout}>
+          {t('logOut')}
         </Button>
       </Card>
 
