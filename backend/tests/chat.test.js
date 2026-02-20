@@ -233,7 +233,7 @@ describe('Chat Routes', () => {
       expect(body.model).toBe('openclaw');
     });
 
-    it('routes to WhatsApp session via phone number', async () => {
+    it('routes to isolated web session via session-id', async () => {
       mockPrisma.subscriber.findUnique.mockResolvedValue(mockSubscriber);
       mockPrisma.agent.findFirst.mockResolvedValue(mockAgent);
       mockPrisma.message.create.mockResolvedValue({ id: 'msg-1' });
@@ -245,11 +245,11 @@ describe('Chat Routes', () => {
         payload: { message: 'Hello' },
       });
 
-      // Verify callOpenClaw was called with the phone number for session routing
+      // Verify callOpenClaw uses a web-specific session ID (not phone)
       expect(ocBridge.callOpenClaw).toHaveBeenCalledWith(
         'Hello',
         expect.objectContaining({
-          subscriberPhone: '1234567890',
+          sessionId: 'web-test-subscriber-id',
         }),
       );
     });

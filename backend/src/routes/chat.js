@@ -97,29 +97,12 @@ async function chatRoutes(app) {
         },
       });
 
-      // ── Route to the SAME OpenClaw session as WhatsApp ──
-      // Find the WhatsApp-connected phone number. This ensures the web
-      // chat talks to the exact same agent session (same memory, same
-      // conversation history) as WhatsApp messages.
-      let subscriberPhone = subscriber.whatsappJid?.replace('@s.whatsapp.net', '');
-
-      // If this subscriber doesn't have WhatsApp linked, look for the
-      // connected phone on any subscriber (single-tenant: one phone serves all)
-      if (!subscriberPhone) {
-        const waSubscriber = await prisma.subscriber.findFirst({
-          where: { whatsappJid: { not: null } },
-          select: { whatsappJid: true },
-        });
-        subscriberPhone = waSubscriber?.whatsappJid?.replace('@s.whatsapp.net', '') || null;
-      }
-
-      // Call OpenClaw directly — no USER.md overwrite.
-      // The OpenClaw workspace already has SOUL.md, IDENTITY.md, USER.md
-      // managed by the gateway. We just route to the right session.
+      // Call OpenClaw with a web-specific session.
+      // WhatsApp is handled directly by the OpenClaw Gateway — we keep
+      // the web chat on its own session to avoid interfering with it.
       const startTime = Date.now();
       const ocResult = await callOpenClaw(cleanMessage, {
-        subscriberPhone,
-        sessionId: subscriberPhone ? undefined : `sub-${subscriber.id}`,
+        sessionId: `web-${subscriber.id}`,
       });
 
       const responseTimeMs = Date.now() - startTime;
