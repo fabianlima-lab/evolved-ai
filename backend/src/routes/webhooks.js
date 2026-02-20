@@ -1,5 +1,6 @@
 import { sendWhatsAppMessage } from '../services/whatsapp.js';
 import { pendingConnections } from './channels.js';
+import { addWhatsAppBinding } from '../services/openclaw-provisioner.js';
 import prisma from '../lib/prisma.js';
 
 // Regex to match a 6-digit connection code
@@ -93,6 +94,19 @@ async function handleConnectionCode(whatsappJid, code) {
         select: { assistantName: true },
       }),
     ]);
+
+    // If agent has an OpenClaw workspace, add WhatsApp binding so
+    // OpenClaw routes this phone's messages to their isolated agent
+    if (agent?.openclawAgentId) {
+      try {
+        const phone = whatsappJid.replace('@s.whatsapp.net', '');
+        const e164 = phone.startsWith('+') ? phone : `+${phone}`;
+        await addWhatsAppBinding(pending.subscriberId, e164);
+        console.log(`[CHANNEL] OpenClaw binding added: ${e164} → ${agent.openclawAgentId}`);
+      } catch (err) {
+        console.error(`[CHANNEL] OpenClaw binding failed (non-fatal): ${err.message}`);
+      }
+    }
 
     if (agent) {
       const name = subscriber?.assistantName || agent.name;

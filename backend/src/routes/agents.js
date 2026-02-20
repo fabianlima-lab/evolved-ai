@@ -1,6 +1,7 @@
 import { isTrialExpired, getFeaturesByTier, stripHtml } from '../utils/helpers.js';
 import { compileSoulMd } from '../prompts/soul.js';
 import { seedDefaults } from '../services/evolution.js';
+import { provisionWorkspace, updateUserContext, deprovisionWorkspace } from '../services/openclaw-provisioner.js';
 import prisma from '../lib/prisma.js';
 
 async function agentRoutes(app) {
@@ -65,6 +66,15 @@ async function agentRoutes(app) {
           data: { name: cleanName, systemPrompt, soulMd: soulMd || FALLBACK_PROMPT, isActive: true },
         });
 
+        // Refresh USER.md in existing OpenClaw workspace
+        if (updated.openclawAgentId) {
+          try {
+            await updateUserContext(subscriberId, soulMd || FALLBACK_PROMPT);
+          } catch (err) {
+            console.error(`[AGENT] OpenClaw context refresh failed (non-fatal): ${err.message}`);
+          }
+        }
+
         console.log(`[AGENT] updated: ${updated.id} (${cleanName}) for subscriber:${subscriberId}`);
 
         return reply.send({
@@ -81,6 +91,31 @@ async function agentRoutes(app) {
           soulMd: soulMd || FALLBACK_PROMPT,
         },
       });
+
+      // Provision isolated OpenClaw workspace for this subscriber
+      try {
+        // Convert JID to E.164 phone if available
+        let phone = null;
+        if (subscriber.whatsappJid) {
+          const num = subscriber.whatsappJid.replace('@s.whatsapp.net', '');
+          phone = num.startsWith('+') ? num : `+${num}`;
+        }
+
+        const openclawAgentId = await provisionWorkspace(subscriberId, {
+          assistantName: cleanName,
+          soulMd: soulMd || FALLBACK_PROMPT,
+          whatsappPhone: phone,
+        });
+
+        await prisma.agent.update({
+          where: { id: agent.id },
+          data: { openclawAgentId },
+        });
+
+        console.log(`[AGENT] OpenClaw workspace provisioned: ${openclawAgentId}`);
+      } catch (err) {
+        console.error(`[AGENT] OpenClaw provisioning failed (non-fatal): ${err.message}`);
+      }
 
       // Seed default skills, integrations, and record milestone event
       // Note: Long-term memory is now handled by OpenClaw natively (MEMORY.md)
@@ -226,6 +261,15 @@ async function agentRoutes(app) {
         where: { id },
         data: { isActive: false },
       });
+
+      // Clean up OpenClaw workspace
+      if (agent.openclawAgentId) {
+        try {
+          await deprovisionWorkspace(subscriberId);
+        } catch (err) {
+          console.error(`[AGENT] OpenClaw deprovisioning failed (non-fatal): ${err.message}`);
+        }
+      }
 
       console.log(`[AGENT] deactivated: ${id} for subscriber:${subscriberId}`);
 

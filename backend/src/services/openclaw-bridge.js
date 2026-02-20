@@ -1,4 +1,3 @@
-import { writeFile } from 'node:fs/promises';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import env from '../config/env.js';
@@ -23,7 +22,6 @@ const AGENT_ID = process.env.OPENCLAW_AGENT_ID || 'main';
 const DEFAULT_TIMEOUT_S = 120; // 120s for complex agent turns (builds pages, etc.)
 const OPENCLAW_WORKSPACE = env.OPENCLAW_WORKSPACE || process.env.HOME + '/clawd';
 const OPENCLAW_HOME = OPENCLAW_WORKSPACE.replace(/\/clawd$/, '') || process.env.HOME;
-const USER_MD_PATH = OPENCLAW_WORKSPACE + '/USER.md';
 
 // Rate limit cooldown: skip OpenClaw for 5 minutes after a rate limit hit
 let rateLimitedUntil = 0;
@@ -196,13 +194,14 @@ export async function callOpenClaw(message, options = {}) {
 }
 
 /**
- * Call OpenClaw with full context injection.
+ * Call OpenClaw with context.
  *
- * Main entry point from message router. Writes our compiled system prompt
- * (SOUL.md + live context) into the workspace USER.md before calling the
- * Gateway via CLI.
+ * Main entry point from message router. Each subscriber now has their own
+ * isolated OpenClaw workspace with their own USER.md (written by the
+ * provisioner at deploy/update time). OpenClaw reads it automatically
+ * via the agent's workspace binding — no shared file write needed here.
  *
- * @param {string} systemPrompt - Pre-compiled SOUL.md with live context
+ * @param {string} systemPrompt - Pre-compiled SOUL.md with live context (kept for API compat)
  * @param {Array<{role: string, content: string}>} conversationHistory - Recent messages
  * @param {object} options
  * @returns {Promise<{content: string, error: string|null, model: string, responseTimeMs: number, tier: number}>}
@@ -216,13 +215,8 @@ export async function callOpenClawWithContext(systemPrompt, conversationHistory,
     return { content: null, error: 'empty_message', model: null, responseTimeMs: 0, tier: 0 };
   }
 
-  // Inject our compiled system prompt into USER.md so OpenClaw picks it up.
-  // OpenClaw reads SOUL.md (personality) + USER.md (per-user context) on each call.
-  try {
-    await writeFile(USER_MD_PATH, systemPrompt, 'utf-8');
-  } catch (err) {
-    console.error(`[OPENCLAW] Failed to write USER.md: ${err.message}`);
-  }
+  // USER.md is now per-subscriber, managed by openclaw-provisioner.js
+  // OpenClaw reads it from the agent's workspace via bindings routing.
 
   return callOpenClaw(userMessage, {
     sessionId: options.sessionId,
