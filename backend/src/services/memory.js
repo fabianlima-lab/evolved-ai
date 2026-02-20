@@ -3,7 +3,7 @@ import prisma from '../lib/prisma.js';
 // ─────────────────────────────────────────────────────
 // Memory Service
 //
-// Long-term memory for Luna. Stores structured facts
+// Long-term memory service. Stores structured facts
 // about each subscriber across all conversations.
 //
 // The AI emits [ACTION:memory_save category="..." fact="..."]

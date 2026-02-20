@@ -96,7 +96,7 @@ async function checkAndSendRecaps() {
 async function buildRecap(subscriber, agent) {
   const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
   const name = subscriber.profileData?.name || subscriber.name || 'there';
-  const assistantName = agent.name || 'Luna';
+  const assistantName = agent.name || 'your assistant';
 
   // Count messages this week
   const messageCount = await prisma.message.count({

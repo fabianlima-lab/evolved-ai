@@ -47,6 +47,9 @@ const env = {
   // Admin
   ADMIN_EMAILS: (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean),
 
+  // OpenClaw
+  OPENCLAW_WORKSPACE: process.env.OPENCLAW_WORKSPACE || '',
+
   // App
   APP_URL: process.env.APP_URL || 'http://localhost:3000',
   NODE_ENV: process.env.NODE_ENV || 'development',

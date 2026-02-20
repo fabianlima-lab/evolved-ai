@@ -19,7 +19,7 @@ async function dashboardRoutes(app) {
 
       const agent = await prisma.agent.findFirst({
         where: { subscriberId, isActive: true },
-        select: { name: true },
+        select: { id: true, name: true, level: true, traitWarmth: true, traitKnowsYou: true, traitReliability: true, traitGrowth: true },
       });
 
       const today = new Date();
@@ -81,6 +81,27 @@ async function dashboardRoutes(app) {
       if (subscriber.onboardingStep === 'complete') tunedScore += 10;
       if (totalMessages > 10) tunedScore += 10;
 
+      // Companion preview for dashboard
+      let companionPreview = null;
+      if (agent?.id) {
+        const [activeSkills, connectedIntegrations] = await Promise.all([
+          prisma.agentSkill.count({ where: { agentId: agent.id, status: 'active' } }),
+          prisma.agentIntegration.count({ where: { agentId: agent.id, status: 'connected' } }),
+        ]);
+
+        companionPreview = {
+          level: agent.level,
+          traits: {
+            warmth: agent.traitWarmth,
+            knowsYou: agent.traitKnowsYou,
+            reliability: agent.traitReliability,
+            growth: agent.traitGrowth,
+          },
+          active_skills: activeSkills,
+          connected_integrations: connectedIntegrations,
+        };
+      }
+
       return reply.send({
         email: subscriber.email,
         goals: subscriber.goals,
@@ -105,6 +126,7 @@ async function dashboardRoutes(app) {
         created_at: subscriber.createdAt,
         integrations,
         tuned_score: tunedScore,
+        companion: companionPreview,
       });
     } catch (error) {
       console.error('[ERROR] dashboard stats failed:', error.message);

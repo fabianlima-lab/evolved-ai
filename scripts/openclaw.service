@@ -1,0 +1,31 @@
+[Unit]
+Description=OpenClaw Gateway (AI Agent)
+After=network.target
+
+[Service]
+Type=simple
+User=openclaw
+Group=openclaw
+WorkingDirectory=/home/openclaw/clawd
+ExecStart=/usr/local/bin/openclaw gateway run --force
+Restart=always
+RestartSec=5
+
+# Environment
+Environment=PORT=18789
+Environment=HOME=/home/openclaw
+
+# Filesystem isolation — kernel enforced
+ProtectSystem=strict
+ReadWritePaths=/home/openclaw/clawd /var/www/agent-pages /tmp
+ProtectHome=tmpfs
+PrivateTmp=true
+NoNewPrivileges=true
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=openclaw-gateway
+
+[Install]
+WantedBy=multi-user.target

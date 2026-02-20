@@ -91,7 +91,7 @@ describe('Agent Routes', () => {
         method: 'POST',
         url: '/api/agents/deploy',
         headers: { authorization: 'Bearer ' + token },
-        payload: { name: 'Luna', systemPrompt: 'test prompt' },
+        payload: { name: 'TestBot', systemPrompt: 'test prompt' },
       });
 
       expect(res.statusCode).toBe(201);

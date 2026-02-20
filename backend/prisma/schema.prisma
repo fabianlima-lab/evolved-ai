@@ -40,6 +40,12 @@ model Subscriber {
   reminders                Reminder[]
   memories                 Memory[]
   expenses                 Expense[]
+  agentSkills              AgentSkill[]
+  agentIntegrations        AgentIntegration[]
+  agentPages               AgentPage[]
+  agentEvents              AgentEvent[]
+  dailyIntentions          DailyIntention[]
+  tasks                    Task[]
 
   @@map("subscribers")
 }
@@ -51,10 +57,21 @@ model Agent {
   systemPrompt    String    @map("system_prompt")
   soulMd          String?   @map("soul_md")
   isActive        Boolean   @default(true) @map("is_active")
+  personality     String?   @db.VarChar(500)
+  level           Int       @default(1)
+  traitWarmth     Int       @default(0) @map("trait_warmth")
+  traitKnowsYou   Int       @default(0) @map("trait_knows_you")
+  traitReliability Int      @default(0) @map("trait_reliability")
+  traitGrowth     Int       @default(0) @map("trait_growth")
   createdAt       DateTime  @default(now()) @map("created_at")
 
   subscriber      Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
   messages        Message[]
+  skills          AgentSkill[]
+  integrations    AgentIntegration[]
+  pages           AgentPage[]
+  events          AgentEvent[]
+  tasks           Task[]
 
   @@map("agents")
 }
@@ -121,4 +138,127 @@ model Expense {
   @@index([subscriberId, date])
   @@index([subscriberId, category])
   @@map("expenses")
+}
+
+// ─── Agent Evolution Models ───
+
+model AgentSkill {
+  id                  String    @id @default(uuid()) @db.Uuid
+  agentId             String    @map("agent_id") @db.Uuid
+  subscriberId        String    @map("subscriber_id") @db.Uuid
+  slug                String    @db.VarChar(50)
+  name                String    @db.VarChar(100)
+  description         String?   @db.VarChar(500)
+  icon                String?   @db.VarChar(50)
+  category            String    @default("productivity") @db.VarChar(30)
+  status              String    @default("available") @db.VarChar(20)
+  requiredIntegration String?   @map("required_integration") @db.VarChar(50)
+  source              String    @default("admin") @db.VarChar(20)
+  installedBy         String    @default("admin") @map("installed_by") @db.VarChar(20)
+  activatedAt         DateTime? @map("activated_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+
+  agent               Agent      @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  subscriber          Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  @@unique([agentId, slug])
+  @@index([subscriberId])
+  @@map("agent_skills")
+}
+
+model AgentIntegration {
+  id            String    @id @default(uuid()) @db.Uuid
+  agentId       String    @map("agent_id") @db.Uuid
+  subscriberId  String    @map("subscriber_id") @db.Uuid
+  slug          String    @db.VarChar(50)
+  name          String    @db.VarChar(100)
+  description   String?   @db.VarChar(500)
+  icon          String?   @db.VarChar(50)
+  benefits      Json?
+  setupPrompt   String?   @map("setup_prompt") @db.VarChar(500)
+  status        String    @default("available") @db.VarChar(20)
+  connectedAt   DateTime? @map("connected_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  agent         Agent      @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  subscriber    Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  @@unique([agentId, slug])
+  @@index([subscriberId])
+  @@map("agent_integrations")
+}
+
+model AgentPage {
+  id            String    @id @default(uuid()) @db.Uuid
+  agentId       String    @map("agent_id") @db.Uuid
+  subscriberId  String    @map("subscriber_id") @db.Uuid
+  title         String    @db.VarChar(200)
+  path          String    @db.VarChar(500)
+  pageType      String    @default("html") @map("page_type") @db.VarChar(30)
+  status        String    @default("published") @db.VarChar(20)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  agent         Agent      @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  subscriber    Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  @@index([subscriberId])
+  @@index([agentId])
+  @@map("agent_pages")
+}
+
+model AgentEvent {
+  id            String    @id @default(uuid()) @db.Uuid
+  agentId       String    @map("agent_id") @db.Uuid
+  subscriberId  String    @map("subscriber_id") @db.Uuid
+  eventType     String    @map("event_type") @db.VarChar(50)
+  title         String    @db.VarChar(200)
+  description   String?   @db.VarChar(500)
+  metadata      Json?
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  agent         Agent      @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  subscriber    Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  @@index([agentId, createdAt])
+  @@index([subscriberId, createdAt])
+  @@index([eventType])
+  @@map("agent_events")
+}
+
+model DailyIntention {
+  id              String    @id @default(uuid()) @db.Uuid
+  subscriberId    String    @map("subscriber_id") @db.Uuid
+  date            DateTime  @db.Date
+  feeling         String    @db.VarChar(200)
+  source          String    @default("morning_briefing") @db.VarChar(20)
+  optionsOffered  Json?     @map("options_offered")
+  wasCustom       Boolean   @default(false) @map("was_custom")
+  setAt           DateTime  @default(now()) @map("set_at")
+
+  subscriber      Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  @@unique([subscriberId, date])
+  @@index([subscriberId, date])
+  @@map("daily_intentions")
+}
+
+model Task {
+  id            String    @id @default(uuid()) @db.Uuid
+  subscriberId  String    @map("subscriber_id") @db.Uuid
+  agentId       String    @map("agent_id") @db.Uuid
+  title         String    @db.VarChar(300)
+  description   String?   @db.VarChar(1000)
+  column        String    @default("backlog") @db.VarChar(20)
+  priority      String    @default("medium") @db.VarChar(10)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  movedAt       DateTime  @default(now()) @map("moved_at")
+  completedAt   DateTime? @map("completed_at")
+
+  subscriber    Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+  agent         Agent      @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([subscriberId, column])
+  @@index([agentId, column])
+  @@map("tasks")
 }

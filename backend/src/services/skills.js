@@ -1,8 +1,8 @@
 // ─────────────────────────────────────────────────────
-// MCP Skills — External tool integrations for Luna
+// MCP Skills — External tool integrations for the AI agent
 //
-// Skills are capabilities that Luna can invoke via
-// [ACTION:skill_name ...] tags. They extend her beyond
+// Skills are capabilities the agent can invoke via
+// [ACTION:skill_name ...] tags. They extend it beyond
 // calendar/email into web search, weather, news, etc.
 //
 // Each skill:

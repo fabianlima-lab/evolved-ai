@@ -1,5 +1,6 @@
 import adminGuard from '../middleware/adminGuard.js';
 import prisma from '../lib/prisma.js';
+import { pushSkillToAll, pushIntegrationToAll } from '../services/evolution.js';
 
 const VALID_SORT_FIELDS = {
   created_at: 'createdAt',
@@ -210,6 +211,73 @@ async function adminRoutes(app) {
     } catch (error) {
       console.error('[ADMIN] popular-agents error:', error.message);
       return reply.code(500).send({ error: 'Failed to load popular agents' });
+    }
+  });
+
+  // ── POST /api/admin/push-skill — deploy skill to ALL agents ──
+  app.post('/push-skill', {
+    preHandler: adminPreHandlers,
+    config: { rateLimit: rl },
+  }, async (request, reply) => {
+    const { slug, name, description, icon, category } = request.body || {};
+
+    if (!slug || !name) {
+      return reply.code(400).send({ error: 'slug and name are required' });
+    }
+
+    try {
+      const count = await pushSkillToAll({ slug, name, description, icon, category });
+      return reply.send({ pushed_to: count, slug, name });
+    } catch (error) {
+      console.error('[ADMIN] push-skill error:', error.message);
+      return reply.code(500).send({ error: 'Failed to push skill' });
+    }
+  });
+
+  // ── POST /api/admin/push-integration — deploy integration to ALL agents ──
+  app.post('/push-integration', {
+    preHandler: adminPreHandlers,
+    config: { rateLimit: rl },
+  }, async (request, reply) => {
+    const { slug, name, description, icon, benefits, setupPrompt } = request.body || {};
+
+    if (!slug || !name) {
+      return reply.code(400).send({ error: 'slug and name are required' });
+    }
+
+    try {
+      const count = await pushIntegrationToAll({ slug, name, description, icon, benefits, setupPrompt });
+      return reply.send({ pushed_to: count, slug, name });
+    } catch (error) {
+      console.error('[ADMIN] push-integration error:', error.message);
+      return reply.code(500).send({ error: 'Failed to push integration' });
+    }
+  });
+
+  // ── GET /api/admin/evolution-overview — global evolution stats ──
+  app.get('/evolution-overview', {
+    preHandler: adminPreHandlers,
+    config: { rateLimit: rl },
+  }, async (request, reply) => {
+    try {
+      const [totalSkills, activeSkills, totalIntegrations, connectedIntegrations, totalEvents] = await Promise.all([
+        prisma.agentSkill.count(),
+        prisma.agentSkill.count({ where: { status: 'active' } }),
+        prisma.agentIntegration.count(),
+        prisma.agentIntegration.count({ where: { status: 'connected' } }),
+        prisma.agentEvent.count(),
+      ]);
+
+      return reply.send({
+        total_skills: totalSkills,
+        active_skills: activeSkills,
+        total_integrations: totalIntegrations,
+        connected_integrations: connectedIntegrations,
+        total_events: totalEvents,
+      });
+    } catch (error) {
+      console.error('[ADMIN] evolution-overview error:', error.message);
+      return reply.code(500).send({ error: 'Failed to load evolution overview' });
     }
   });
 }

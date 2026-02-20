@@ -205,7 +205,7 @@ async function sendChannelReply(channel, channelId, text) {
  * Generate AI response using OpenClaw (primary) or direct AI call (fallback).
  *
  * Pipeline:
- *   1. Try OpenClaw agent (Luna) — Groq/Llama 3.3 70B via OpenClaw CLI
+ *   1. Try OpenClaw agent — Claude Sonnet via OpenClaw Gateway
  *   2. If OpenClaw fails → fallback to direct callAI() (Groq/NVIDIA)
  *   3. If both fail → friendly error message
  *

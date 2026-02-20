@@ -1,6 +1,7 @@
 import { isTrialExpired, getFeaturesByTier, stripHtml } from '../utils/helpers.js';
 import { compileSoulMd } from '../prompts/soul.js';
 import { seedMemoriesFromProfile } from '../services/memory.js';
+import { seedDefaults } from '../services/evolution.js';
 import prisma from '../lib/prisma.js';
 
 async function agentRoutes(app) {
@@ -87,6 +88,15 @@ async function agentRoutes(app) {
         await seedMemoriesFromProfile(subscriberId, subscriber.profileData);
       } catch (err) {
         console.error(`[AGENT] Memory seeding failed (non-fatal): ${err.message}`);
+      }
+
+      // Seed default skills, integrations, and record milestone event
+      try {
+        await seedDefaults(agent.id, subscriberId, {
+          whatsappConnected: !!subscriber.whatsappJid,
+        });
+      } catch (err) {
+        console.error(`[AGENT] Evolution seeding failed (non-fatal): ${err.message}`);
       }
 
       console.log(`[AGENT] deployed: ${agent.id} (${cleanName}) for subscriber:${subscriberId}`);

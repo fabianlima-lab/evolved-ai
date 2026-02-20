@@ -14,6 +14,11 @@ import subscriberRoutes from './routes/subscribers.js';
 import chatRoutes from './routes/chat.js';
 import adminRoutes from './routes/admin.js';
 import whatsappAdminRoutes from './routes/whatsapp-admin.js';
+import companionRoutes from './routes/companion.js';
+import evolutionRoutes from './routes/evolution.js';
+import integrationsRoutes from './routes/integrations.js';
+import tasksRoutes from './routes/tasks.js';
+import intentionsRoutes from './routes/intentions.js';
 
 async function build() {
   const app = Fastify({
@@ -100,6 +105,11 @@ async function build() {
   app.register(chatRoutes, { prefix: '/api/chat' });
   app.register(adminRoutes, { prefix: '/api/admin' });
   app.register(whatsappAdminRoutes, { prefix: '/api/whatsapp' });
+  app.register(companionRoutes, { prefix: '/api/companion' });
+  app.register(evolutionRoutes, { prefix: '/api/evolution' });
+  app.register(integrationsRoutes, { prefix: '/api/integrations' });
+  app.register(tasksRoutes, { prefix: '/api/tasks' });
+  app.register(intentionsRoutes, { prefix: '/api/intention' });
 
   return app;
 }

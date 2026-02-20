@@ -15,10 +15,10 @@ import env from '../config/env.js';
 // ─────────────────────────────────────────────────────
 
 const GATEWAY_URL = 'http://127.0.0.1:18789/v1/chat/completions';
-const GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN || 'evo-luna-gw-2026-secret';
+const GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN || 'evo-gw-2026-secret';
 const AGENT_ID = 'main';
 const DEFAULT_TIMEOUT_MS = 45000; // 45s for Claude Sonnet responses
-const OPENCLAW_WORKSPACE = process.env.HOME + '/clawd';
+const OPENCLAW_WORKSPACE = env.OPENCLAW_WORKSPACE || process.env.HOME + '/clawd';
 const USER_MD_PATH = OPENCLAW_WORKSPACE + '/USER.md';
 
 // Rate limit cooldown: skip OpenClaw for 5 minutes after a rate limit hit
@@ -77,7 +77,7 @@ export async function isOpenClawConfigured() {
 }
 
 /**
- * Call the Luna agent via OpenClaw Gateway HTTP API.
+ * Call the AI agent via OpenClaw Gateway HTTP API.
  *
  * Uses the OpenAI-compatible /v1/chat/completions endpoint.
  * The Gateway stays warm so there's no process spawn overhead.

@@ -46,7 +46,7 @@ describe('USER.md Generator (soul.js)', () => {
   describe('compileSoulMd()', () => {
     it('replaces user name from profileData', () => {
       const result = compileSoulMd({
-        assistantName: 'Luna',
+        assistantName: 'TestBot',
         profileData: { name: 'Sarah' },
       });
       expect(result).toContain('Sarah');
@@ -55,20 +55,20 @@ describe('USER.md Generator (soul.js)', () => {
 
     it('falls back to subscriber name when profileData has no name', () => {
       const result = compileSoulMd({
-        assistantName: 'Luna',
+        assistantName: 'TestBot',
         subscriber: { name: 'Jane' },
       });
       expect(result).toContain('Jane');
     });
 
     it('defaults to "there" when no name provided', () => {
-      const result = compileSoulMd({ assistantName: 'Luna' });
+      const result = compileSoulMd({ assistantName: 'TestBot' });
       expect(result).toContain('there');
     });
 
     it('replaces user role from profileData', () => {
       const result = compileSoulMd({
-        assistantName: 'Luna',
+        assistantName: 'TestBot',
         profileData: { role: 'Veterinarian' },
       });
       expect(result).toContain('Veterinarian');
@@ -76,13 +76,13 @@ describe('USER.md Generator (soul.js)', () => {
     });
 
     it('defaults role to "Not specified yet"', () => {
-      const result = compileSoulMd({ assistantName: 'Luna' });
+      const result = compileSoulMd({ assistantName: 'TestBot' });
       expect(result).toContain('Role: Not specified yet');
     });
 
     it('replaces drains from profileData array', () => {
       const result = compileSoulMd({
-        assistantName: 'Luna',
+        assistantName: 'TestBot',
         profileData: { drains: ['schedule_chaos', 'admin_overload'] },
       });
       expect(result).toContain('Schedule chaos');
@@ -91,13 +91,13 @@ describe('USER.md Generator (soul.js)', () => {
     });
 
     it('defaults drains to "Not shared yet"', () => {
-      const result = compileSoulMd({ assistantName: 'Luna' });
+      const result = compileSoulMd({ assistantName: 'TestBot' });
       expect(result).toContain('Biggest drains: Not shared yet');
     });
 
     it('handles unknown drain IDs gracefully', () => {
       const result = compileSoulMd({
-        assistantName: 'Luna',
+        assistantName: 'TestBot',
         profileData: { drains: ['unknown_drain'] },
       });
       expect(result).toContain('unknown_drain');
@@ -105,7 +105,7 @@ describe('USER.md Generator (soul.js)', () => {
 
     it('replaces priorities from profileData array', () => {
       const result = compileSoulMd({
-        assistantName: 'Luna',
+        assistantName: 'TestBot',
         profileData: { priorities: ['Work-life balance', 'Client management'] },
       });
       expect(result).toContain('Work-life balance, Client management');
@@ -113,7 +113,7 @@ describe('USER.md Generator (soul.js)', () => {
 
     it('replaces priorities from profileData string', () => {
       const result = compileSoulMd({
-        assistantName: 'Luna',
+        assistantName: 'TestBot',
         profileData: { priorities: 'Scale the business' },
       });
       expect(result).toContain('Scale the business');
@@ -121,7 +121,7 @@ describe('USER.md Generator (soul.js)', () => {
 
     it('replaces timezone from profileData', () => {
       const result = compileSoulMd({
-        assistantName: 'Luna',
+        assistantName: 'TestBot',
         profileData: { timezone: 'America/Chicago' },
       });
       expect(result).toContain('America/Chicago');
@@ -130,7 +130,7 @@ describe('USER.md Generator (soul.js)', () => {
 
     it('replaces desired feeling from profileData', () => {
       const result = compileSoulMd({
-        assistantName: 'Luna',
+        assistantName: 'TestBot',
         profileData: { desiredFeeling: 'Calm and in control' },
       });
       expect(result).toContain('Calm and in control');
@@ -138,7 +138,7 @@ describe('USER.md Generator (soul.js)', () => {
 
     it('replaces briefing and wrap times', () => {
       const result = compileSoulMd({
-        assistantName: 'Luna',
+        assistantName: 'TestBot',
         profileData: { briefingTime: '6:30 AM', wrapTime: '9:00 PM' },
       });
       expect(result).toContain('6:30 AM');
@@ -147,7 +147,7 @@ describe('USER.md Generator (soul.js)', () => {
 
     it('injects live context', () => {
       const result = compileSoulMd({
-        assistantName: 'Luna',
+        assistantName: 'TestBot',
         liveContext: 'RIGHT NOW: Tuesday, February 18, 2026\nCalendar: 2 events today',
       });
       expect(result).toContain('RIGHT NOW: Tuesday, February 18, 2026');
@@ -156,13 +156,13 @@ describe('USER.md Generator (soul.js)', () => {
     });
 
     it('shows fallback when no live context', () => {
-      const result = compileSoulMd({ assistantName: 'Luna' });
+      const result = compileSoulMd({ assistantName: 'TestBot' });
       expect(result).toContain('No live data available');
     });
 
     it('has no remaining template placeholders when fully compiled', () => {
       const result = compileSoulMd({
-        assistantName: 'Luna',
+        assistantName: 'TestBot',
         profileData: {
           name: 'Dr. Emily Chen',
           role: 'Veterinary Surgeon',
@@ -181,7 +181,7 @@ describe('USER.md Generator (soul.js)', () => {
 
     it('builds complete profile with all fields', () => {
       const result = compileSoulMd({
-        assistantName: 'Luna',
+        assistantName: 'TestBot',
         profileData: {
           name: 'Dr. Emily Chen',
           role: 'Veterinary Surgeon',
@@ -208,7 +208,7 @@ describe('USER.md Generator (soul.js)', () => {
     });
 
     it('uses default values for missing profile fields', () => {
-      const result = compileSoulMd({ assistantName: 'Luna' });
+      const result = compileSoulMd({ assistantName: 'TestBot' });
       expect(result).toContain('Not specified yet'); // role, priorities
       expect(result).toContain('Not shared yet'); // drains, desired feeling
       expect(result).toContain('None yet'); // preferences

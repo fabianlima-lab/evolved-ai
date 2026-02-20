@@ -4,7 +4,7 @@ import { sendWhatsAppMessage } from './whatsapp.js';
 // ─────────────────────────────────────────────────────
 // Subscription Lifecycle Service
 //
-// Handles lifecycle messages that make Luna feel alive:
+// Handles lifecycle messages for the AI assistant:
 //   - Day 2 check-in during trial
 //   - Trial → paid conversion congrats
 //   - Payment failed (grace period)
@@ -60,7 +60,7 @@ async function checkTrialLifecycle() {
 
   for (const sub of trialSubscribers) {
     if (!sub.agent || !sub.agent.isActive) continue;
-    const agentName = sub.agent.name || sub.assistantName || 'Luna';
+    const agentName = sub.agent.name || sub.assistantName || 'your assistant';
     const name = sub.profileData?.name || sub.name || 'there';
 
     // ── Day 2 check-in ──
