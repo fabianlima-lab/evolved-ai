@@ -34,9 +34,11 @@ const RATE_LIMIT_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
  * Probes via `openclaw health --json`.
  */
 let openclawAvailable = null;
+let lastHealthCheck = 0;
+const HEALTH_CACHE_MS = 60 * 1000; // Re-check every 60s
 
 export async function isOpenClawConfigured() {
-  if (openclawAvailable !== null) return openclawAvailable;
+  if (openclawAvailable !== null && (Date.now() - lastHealthCheck) < HEALTH_CACHE_MS) return openclawAvailable;
 
   try {
     const { stdout } = await execFileAsync(OPENCLAW_BIN, ['health', '--json'], {
@@ -45,7 +47,8 @@ export async function isOpenClawConfigured() {
     });
 
     const data = JSON.parse(stdout);
-    openclawAvailable = data.status === 'ok' || data.healthy === true;
+    openclawAvailable = data.ok === true || data.status === 'ok' || data.healthy === true;
+    lastHealthCheck = Date.now();
     console.log(`[OPENCLAW] Gateway ${openclawAvailable ? '✅ online' : '❌ offline'} (CLI mode)`);
     return openclawAvailable;
   } catch (err) {
@@ -58,11 +61,13 @@ export async function isOpenClawConfigured() {
 
       // Any response means the gateway is running
       openclawAvailable = res.status < 500;
+      lastHealthCheck = Date.now();
       console.log(`[OPENCLAW] Gateway ${openclawAvailable ? '✅ online' : '❌ offline'} (HTTP probe)`);
       return openclawAvailable;
     } catch {
       console.warn(`[OPENCLAW] Gateway not available: ${err.message}`);
       openclawAvailable = false;
+      lastHealthCheck = Date.now();
       return false;
     }
   }
