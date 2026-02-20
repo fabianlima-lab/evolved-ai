@@ -48,12 +48,12 @@ async function checkAndSendRecaps() {
       tier: { in: ['trial', 'active', 'past_due'] },
     },
     include: {
-      agents: { where: { isActive: true }, take: 1 },
+      agent: true,
     },
   });
 
   for (const sub of subscribers) {
-    if (!sub.agents[0]) continue;
+    if (!sub.agent || !sub.agent.isActive) continue;
 
     const tz = sub.profileData?.timezone || 'America/New_York';
 
@@ -72,7 +72,7 @@ async function checkAndSendRecaps() {
     sentRecaps.set(weekKey, Date.now());
 
     try {
-      const recap = await buildRecap(sub, sub.agents[0]);
+      const recap = await buildRecap(sub, sub.agent);
       if (recap) {
         await sendWhatsAppMessage(sub.whatsappJid, recap);
         console.log(`[WEEKLY-RECAP] Sent recap to subscriber:${sub.id} (tz:${tz})`);
