@@ -4,6 +4,8 @@ import { OAuth2Client } from 'google-auth-library';
 import env from '../config/env.js';
 import { sendPasswordResetEmail } from '../services/email.js';
 import { stripHtml } from '../utils/helpers.js';
+import { compileSoulMd, buildLiveContext } from '../prompts/soul.js';
+import { updateUserContext } from '../services/openclaw-provisioner.js';
 import prisma from '../lib/prisma.js';
 
 // Initialize Google OAuth client (null if not configured)
@@ -318,6 +320,21 @@ async function authRoutes(app) {
 
       console.log(`[AUTH] google-oauth-scopes: ${subscriber.id} (scopes: ${updateData.googleScopes})`);
 
+      // Recompile USER.md so the AI knows Google is now connected
+      try {
+        const freshSub = await prisma.subscriber.findUnique({ where: { id: subscriberId } });
+        const userMd = compileSoulMd({
+          assistantName: freshSub.name || 'Luna',
+          profileData: freshSub.profileData,
+          subscriber: freshSub,
+          liveContext: buildLiveContext(freshSub),
+        });
+        await updateUserContext(subscriberId, userMd);
+        console.log(`[AUTH] USER.md refreshed after Google connect: ${subscriberId}`);
+      } catch (ctxErr) {
+        console.error(`[AUTH] USER.md refresh failed (non-fatal): ${ctxErr.message}`);
+      }
+
       return reply.send({
         success: true,
         scopes: updateData.googleScopes,
@@ -505,6 +522,22 @@ async function authRoutes(app) {
       });
 
       console.log(`[AUTH] google-disconnect: ${subscriberId}`);
+
+      // Recompile USER.md so the AI knows Google is now disconnected
+      try {
+        const freshSub = await prisma.subscriber.findUnique({ where: { id: subscriberId } });
+        const userMd = compileSoulMd({
+          assistantName: freshSub.name || 'Luna',
+          profileData: freshSub.profileData,
+          subscriber: freshSub,
+          liveContext: buildLiveContext(freshSub),
+        });
+        await updateUserContext(subscriberId, userMd);
+        console.log(`[AUTH] USER.md refreshed after Google disconnect: ${subscriberId}`);
+      } catch (ctxErr) {
+        console.error(`[AUTH] USER.md refresh failed (non-fatal): ${ctxErr.message}`);
+      }
+
       return reply.send({ success: true });
     } catch (err) {
       console.error('[ERROR] google disconnect failed:', err.message);

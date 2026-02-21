@@ -1,5 +1,5 @@
 import { isTrialExpired, getFeaturesByTier, stripHtml } from '../utils/helpers.js';
-import { compileSoulMd } from '../prompts/soul.js';
+import { compileSoulMd, buildLiveContext } from '../prompts/soul.js';
 import { seedDefaults } from '../services/evolution.js';
 import { provisionWorkspace, updateUserContext, deprovisionWorkspace } from '../services/openclaw-provisioner.js';
 import prisma from '../lib/prisma.js';
@@ -51,6 +51,7 @@ async function agentRoutes(app) {
           assistantName: cleanName,
           profileData: subscriber.profileData,
           subscriber,
+          liveContext: buildLiveContext(subscriber),
         });
       } catch (err) {
         console.error('[AGENT] SOUL.md compilation failed, using fallback:', err.message);
