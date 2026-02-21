@@ -103,8 +103,10 @@ export async function callOpenClaw(message, options = {}) {
     args.push('--session-id', options.sessionId);
   }
 
-  // Use specific agent if not default
-  if (AGENT_ID && AGENT_ID !== 'main') {
+  // Use per-subscriber agent if provided, otherwise fall back to global default
+  if (options.agentId) {
+    args.push('--agent', options.agentId);
+  } else if (AGENT_ID && AGENT_ID !== 'main') {
     args.push('--agent', AGENT_ID);
   }
 
@@ -221,6 +223,7 @@ export async function callOpenClawWithContext(systemPrompt, conversationHistory,
   return callOpenClaw(userMessage, {
     sessionId: options.sessionId,
     subscriberPhone: options.subscriberPhone,
+    agentId: options.agentId,
   });
 }
 

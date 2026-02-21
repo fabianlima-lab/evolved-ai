@@ -103,6 +103,7 @@ async function chatRoutes(app) {
       const startTime = Date.now();
       const ocResult = await callOpenClaw(cleanMessage, {
         sessionId: `web-${subscriber.id}`,
+        agentId: agent.openclawAgentId || undefined,
       });
 
       const responseTimeMs = Date.now() - startTime;
