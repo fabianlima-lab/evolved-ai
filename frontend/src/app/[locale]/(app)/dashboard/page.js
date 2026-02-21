@@ -929,25 +929,6 @@ export default function DashboardPage() {
             <h3 style={CARD_HEADING}>Support</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
               <a
-                href="https://wa.me/17373303234"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: '12px 14px',
-                  background: 'rgba(37,211,102,0.04)',
-                  border: '1px solid rgba(37,211,102,0.1)',
-                  borderRadius: '2px',
-                  textDecoration: 'none',
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                <Icon.WhatsApp style={{ width: 16, height: 16, color: '#25D366' }} />
-                <span style={{ ...BODY_SM, color: 'var(--color-txt)' }}>Chat with support</span>
-              </a>
-              <a
                 href="mailto:hello@evolvedvets.com"
                 style={{
                   display: 'flex',
