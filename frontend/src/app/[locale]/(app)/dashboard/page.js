@@ -438,7 +438,7 @@ export default function DashboardPage() {
           gap: '24px',
         }}>
           <a
-            href="mailto:support@evolvedvets.com"
+            href="mailto:hello@evolvedvets.com"
             style={{
               fontSize: '0.7rem',
               fontWeight: 400,
@@ -929,7 +929,7 @@ export default function DashboardPage() {
             <h3 style={CARD_HEADING}>Support</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
               <a
-                href="https://wa.me/message/evolvedai"
+                href="https://wa.me/17373303234"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
@@ -948,7 +948,7 @@ export default function DashboardPage() {
                 <span style={{ ...BODY_SM, color: 'var(--color-txt)' }}>Chat with support</span>
               </a>
               <a
-                href="mailto:support@evolvedvets.com"
+                href="mailto:hello@evolvedvets.com"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
