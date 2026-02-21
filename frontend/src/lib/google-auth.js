@@ -6,12 +6,18 @@ import { apiPost, apiFetch } from './api';
 
 /**
  * Determines where to send a user after auth based on their progress:
+ * - Has a deployed agent or WhatsApp connected → /dashboard
  * - Onboarding never completed → /onboarding
- * - Onboarding complete (even if agent is down) → /dashboard
+ * - API error → /dashboard (safe default for returning users)
  */
 export async function resolveDestination() {
   try {
     const stats = await apiFetch('/dashboard/stats');
+
+    // If they have an agent or WhatsApp, they're past onboarding
+    if (stats.whatsapp_connected || stats.active_agents > 0) {
+      return '/dashboard';
+    }
 
     // Only send to onboarding if they've never completed it
     if (stats.onboarding_step && stats.onboarding_step !== 'complete') {
@@ -20,8 +26,8 @@ export async function resolveDestination() {
 
     return '/dashboard';
   } catch {
-    // If stats fail, safest default is onboarding
-    return '/onboarding';
+    // If stats fail, safest default is dashboard (not onboarding)
+    return '/dashboard';
   }
 }
 
