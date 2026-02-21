@@ -28,6 +28,11 @@ async function agentRoutes(app) {
     try {
       const subscriber = await prisma.subscriber.findUnique({ where: { id: subscriberId } });
 
+      // Require WhatsApp connection before deployment
+      if (!subscriber.whatsappJid) {
+        return reply.code(400).send({ error: 'Connect WhatsApp before deploying your assistant.' });
+      }
+
       // Check trial expiry
       if (isTrialExpired(subscriber)) {
         return reply.code(403).send({ error: 'Trial expired. Upgrade to continue.' });

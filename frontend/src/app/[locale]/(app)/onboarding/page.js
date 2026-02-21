@@ -1177,7 +1177,7 @@ function StepWhatsApp({ connectionCode, connected, whatsappNumber, onSkip, onCon
       )}
 
       {/* Skip / Continue */}
-      {connected ? (
+      {connected && (
         <button
           type="button"
           onClick={onConnect}
@@ -1199,24 +1199,6 @@ function StepWhatsApp({ connectionCode, connected, whatsappNumber, onSkip, onCon
           }}
         >
           Continue
-        </button>
-      ) : (
-        <button
-          type="button"
-          onClick={onSkip}
-          style={{
-            background: 'none',
-            border: 'none',
-            fontSize: '13px',
-            color: 'var(--color-txt-dim)',
-            cursor: 'pointer',
-            marginTop: '16px',
-            fontFamily: 'var(--font-body)',
-            textDecoration: 'underline',
-            textUnderlineOffset: '3px',
-          }}
-        >
-          Skip for now — I&apos;ll connect later
         </button>
       )}
     </div>
