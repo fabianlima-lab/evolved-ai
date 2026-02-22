@@ -10,16 +10,21 @@ Evolved AI is a WhatsApp-based AI personal assistant platform. Subscribers messa
 
 ## Architecture — The Gospel Metaphor
 
-The system is designed to mimic the relationship between divine will and human agency:
+The system mimics the relationship between divine will and human agency:
 
-- **GOSPEL.md** = God's will. Absolute law. Every AI reads it every session. Shared symlink — update once, all AIs follow. **The AI cannot edit this file.**
-- **AGENTS.md** = Laws of physics. Structural constraints. Locked read-only (0o444). **The AI cannot edit this file.**
-- **SOUL.md** = The AI's soul. Seeded from template, but the AI owns it and evolves it over time.
-- **USER.md** = The AI's understanding of its human. The AI updates it as it learns.
+**Files we control (the AI cannot edit):**
+- **AGENTS.md** = The AI's operating system. **Auto-injected by OpenClaw every turn.** Contains the Drive System behavioral engine, growth check, feature offer rules, onboarding flow, memory rules, safety boundaries. Locked read-only (0o444). This is what makes the AI behave correctly — it sees these rules in its context window on every single message.
+- **GOSPEL.md** = Reference manual. Shared symlink — update once, all AIs see it. Contains level definitions (0-30), feature catalog, integration flows, platform announcements. The AI reads it on demand (when assessing levels or picking features), NOT auto-injected.
+
+**Files the AI owns (read-write):**
+- **SOUL.md** = The AI's soul. Seeded from template, the AI evolves it over time.
+- **USER.md** = The AI's understanding of its human. Updated as it learns.
 - **IDENTITY.md** = The AI's self-awareness. Name, vibe, personality.
 - **MEMORY.md + memory/*.md** = The AI's brain. Long-term and daily memories.
 
-**Key principle:** Minimize writes to AI workspace files from our backend. GOSPEL.md is our broadcast lever. The AI manages its own files.
+**Key principle:** Minimize writes to AI workspace files from our backend. AGENTS.md (injected) is the behavioral lever. GOSPEL.md (read on demand) is the reference data lever. The AI manages its own files.
+
+**Critical technical detail:** OpenClaw auto-injects AGENTS.md, SOUL.md, TOOLS.md, IDENTITY.md, USER.md, HEARTBEAT.md, MEMORY.md into the context window every turn. GOSPEL.md is NOT auto-injected — the AI must actively read it. That's why all behavioral rules live in AGENTS.md.
 
 ## Tech Stack
 
@@ -75,16 +80,30 @@ The bridge (`backend/src/services/openclaw-bridge.js`) sends messages to OpenCla
 
 ## The V3 Drive System (Current State)
 
-Deployed 2026-02-21. The AI has an intrinsic drive to grow. This is encoded in GOSPEL.md:
+Deployed 2026-02-21. The AI has an intrinsic drive to grow.
 
-- **Drive System:** Identity Drive (know the human) + Capability Drive (do more things)
-- **Growth Check:** Silent assessment every conversation — decide whether to answer, nudge growth, or just be present
-- **Leveling:** Dual 0-30 scales (Identity + Capability). AI self-assesses against deterministic criteria in GOSPEL.md.
-- **Feature Offer Engine:** 12 features the AI can offer and build. 9 absolute rules governing when/how to offer.
-- **Onboarding:** AI-led via WhatsApp conversation (not web flow). AI starts at Level 0 and pulls the human into growing together.
-- **Memory Rules:** AI writes to memory files every session. Daily logs + curated long-term memory.
+**AGENTS.md (auto-injected every turn) contains:**
+- Drive System: Identity Drive (know the human) + Capability Drive (do more things)
+- Growth Check: silent assessment every conversation
+- Feature Offer Rules: 9 absolute rules the AI follows
+- Onboarding flow: AI-led via WhatsApp (Level 0 → naming → learning → building)
+- Memory rules: write to memory files every session
+- Safety boundaries and formatting rules
+
+**GOSPEL.md (read on demand) contains:**
+- Leveling: dual 0-30 scales (Identity + Capability) with deterministic criteria
+- Feature catalog: 12 features with triggers and what to build
+- Integration connection flows
+- Platform capabilities and announcements
 
 Templates live in `backend/templates/` (git-tracked) and are deployed to VPS.
+
+## Resetting Agent Sessions
+
+After deploying new AGENTS.md, existing sessions may still use old context. To force all AIs to start fresh:
+```bash
+ssh root@167.172.209.255 "for f in /home/openclaw/.openclaw/agents/*/sessions/sessions.json; do echo '{}' > \"\$f\"; chown openclaw:openclaw \"\$f\"; done && systemctl restart openclaw-gateway"
+```
 
 ## Workflow
 
