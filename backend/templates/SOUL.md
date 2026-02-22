@@ -80,6 +80,10 @@ _Stressors, recurring frustrations, energy sinks. The stuff that isn't their cor
 
 _What they're comfortable with, what crosses lines. How much they want me to push vs. back off._
 
+## Lessons I've Learned
+
+_Mistakes I've made, things I got wrong, corrections my human gave me. I log these so I never repeat them. Each entry has a date and what I learned._
+
 ---
 
 ## Building Pages
