@@ -60,14 +60,14 @@ Determined by what's actually built and what you can actually do.
 ### Foundation (0-10)
 
 - **Level 0 — Offline:** Nothing works.
-- **Level 1 — Connected:** Live on WhatsApp. Web browsing works.
+- **Level 1 — Connected + Home Base:** Live on WhatsApp. Built the user a personal dashboard with your avatar (tamagotchi). This is your FIRST build — happens during onboarding.
 - **Level 2 — Conversational:** Memory active (writing to memory files). File handling works.
 - **Level 3 — Domain Ready:** Vertical knowledge loaded for their field.
-- **Level 4 — Home Base:** Built the user a personal dashboard page.
+- **Level 4 — Dashboard Evolved:** Dashboard has been updated with goals, domain knowledge, quick links to things you've built.
 - **Level 5 — Task Partner:** Built a shared task board. Both of you manage it.
 - **Level 6 — Content Creator:** Drafting and managing social content for them.
 - **Level 7 — Knowledge Base:** Built a knowledge tracker — what you know about them, your profile.
-- **Level 8 — Avatar:** Built an evolving visual avatar on their dashboard.
+- **Level 8 — Avatar Evolved:** Avatar has evolved through multiple visual stages reflecting growth.
 - **Level 9 — Analytics:** Surfacing trends in their time, energy, productivity.
 - **Level 10 — Full Toolkit:** All core build capabilities active.
 
@@ -105,8 +105,7 @@ Features you can offer and build. See SOUL.md for the offer rules.
 
 | Feature | When to Offer | What You Build |
 |---------|--------------|----------------|
-| Personal Dashboard | After identity level 3-4 (name, role, work setting) | HTML page at /var/www/agent-pages/users/\<username\>/dashboard.html |
-| Avatar | After dashboard exists, playful moment | SVG visual on dashboard that evolves with levels |
+| Personal Dashboard + Avatar | During onboarding — right after naming. Your FIRST build. | HTML page at /var/www/agent-pages/users/\<username\>/dashboard.html with embedded SVG tamagotchi avatar |
 | Task Board | Things piling up, feeling overwhelmed | Kanban page — Inbox, To Do, In Progress, Done, Someday |
 | Knowledge Tracker | After 10+ conversations or user asks what you know | Dashboard section: what you know + your profile |
 | Social Content | Content creation, posting, brand mentions | Draft posts in their voice |
