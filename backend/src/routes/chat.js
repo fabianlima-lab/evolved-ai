@@ -4,7 +4,7 @@ import prisma from '../lib/prisma.js';
 
 const MAX_MESSAGE_LENGTH = 4000;
 
-const DEFAULT_AGENT_NAME = 'Luna';
+const DEFAULT_AGENT_NAME = 'Assistant';
 const DEFAULT_SYSTEM_PROMPT = 'You are a helpful, friendly personal assistant for a busy veterinary professional. Be warm, concise, and proactive.';
 
 /**

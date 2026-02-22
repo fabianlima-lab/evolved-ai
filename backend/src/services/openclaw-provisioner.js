@@ -72,7 +72,7 @@ export async function provisionWorkspace(subscriberId, { assistantName, soulMd, 
   // 4. Write IDENTITY.md
   writeFileSync(
     path.join(workspaceDir, 'IDENTITY.md'),
-    `# Identity\n\n- **Name:** ${assistantName || 'Luna'}\n- **Vibe:** Warm, capable, quietly competent\n- **Emoji:** ✨\n`,
+    `# Identity\n\n- **Name:**\n- **Vibe:**\n- **Emoji:**\n`,
     'utf-8',
   );
 

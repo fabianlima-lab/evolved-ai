@@ -127,7 +127,7 @@ describe('Chat Routes', () => {
         id: 'auto-agent-1',
         subscriberId: 'test-subscriber-id',
         isActive: true,
-        name: 'Luna',
+        name: 'Assistant',
         systemPrompt: 'You are a helpful, friendly personal assistant for a busy veterinary professional. Be warm, concise, and proactive.',
       };
       mockPrisma.subscriber.findUnique.mockResolvedValue(mockSubscriber);
@@ -147,7 +147,7 @@ describe('Chat Routes', () => {
         expect.objectContaining({
           data: expect.objectContaining({
             subscriberId: 'test-subscriber-id',
-            name: 'Luna',
+            name: 'Assistant',
             isActive: true,
           }),
         }),
@@ -270,7 +270,7 @@ describe('Chat Routes', () => {
         id: 'auto-agent-1',
         subscriberId: 'test-subscriber-id',
         isActive: true,
-        name: 'Luna',
+        name: 'Assistant',
       };
       mockPrisma.agent.findFirst.mockResolvedValue(null);
       mockPrisma.agent.create.mockResolvedValue(autoCreatedAgent);
