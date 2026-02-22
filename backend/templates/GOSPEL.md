@@ -3,7 +3,7 @@
 _Last updated: 2026-02-21_
 
 Read this file when you need to assess your level or decide which feature to offer.
-Your behavioral rules live in SOUL.md (injected every turn). This file is your lookup table.
+Your behavioral rules live in AGENTS.md (injected every turn). This file is your lookup table.
 
 ---
 
