@@ -1,21 +1,18 @@
-import { getTodaySchedule, formatEventsForContext } from './google-calendar.js';
-import { getEmailSummary, formatEmailsForContext } from './gmail.js';
 import { getPendingReminders, formatRemindersForContext } from './reminders.js';
 
 // ─────────────────────────────────────────────────────
 // Context Builder
 //
-// Assembles live context from all data sources
-// (Calendar, Gmail, Reminders) into a plain text block
-// that gets injected into the SOUL.md system prompt
-// via the {{LIVE_CONTEXT}} template variable.
+// Assembles live context from available data sources
+// into a plain text block for the USER.md {{LIVE_CONTEXT}}.
 //
-// Called on EVERY message — data is always fresh.
+// Google Calendar/Gmail/Drive are NOT available as OpenClaw
+// plugins, so they are not included here.
 // ─────────────────────────────────────────────────────
 
 /**
  * Build the live context string for a subscriber.
- * This is injected into SOUL.md as {{LIVE_CONTEXT}}.
+ * This is injected into USER.md as {{LIVE_CONTEXT}}.
  *
  * @param {object} subscriber - Full subscriber record from Prisma
  * @returns {Promise<string>} Plain text context block
@@ -27,45 +24,10 @@ export async function buildLiveContext(subscriber) {
   // ── Current date/time (always included) ──
   sections.push(formatCurrentTime(tz));
 
-  // ── Google Calendar (if connected) ──
-  if (subscriber.googleAccessToken && subscriber.googleRefreshToken) {
-    try {
-      const { events, connected, error } = await getTodaySchedule(subscriber);
-      if (!connected) {
-        sections.push('📅 Calendar: not connected (connect Google in settings)');
-      } else if (error) {
-        sections.push('📅 Calendar: unable to fetch right now');
-      } else {
-        sections.push(formatEventsForContext(events, tz));
-      }
-    } catch (err) {
-      console.error(`[CONTEXT] Calendar error for subscriber:${subscriber.id}: ${err.message || err}`);
-      sections.push('📅 Calendar: unable to fetch right now');
-    }
-  } else {
-    sections.push('📅 Calendar: not connected');
-  }
+  // ── WhatsApp status ──
+  sections.push(`💬 WhatsApp: ${subscriber.whatsappJid ? 'connected' : 'not connected'}`);
 
-  // ── Gmail (if connected) ──
-  if (subscriber.googleAccessToken && subscriber.googleRefreshToken) {
-    try {
-      const { emails, unreadCount, connected, error } = await getEmailSummary(subscriber);
-      if (!connected) {
-        sections.push('📧 Email: not connected (connect Google in settings)');
-      } else if (error) {
-        sections.push('📧 Email: unable to fetch right now');
-      } else {
-        sections.push(formatEmailsForContext(emails, unreadCount));
-      }
-    } catch (err) {
-      console.error(`[CONTEXT] Gmail error for subscriber:${subscriber.id}: ${err.message || err}`);
-      sections.push('📧 Email: unable to fetch right now');
-    }
-  } else {
-    sections.push('📧 Email: not connected');
-  }
-
-  // ── Reminders (always available — no Google needed) ──
+  // ── Reminders (always available) ──
   try {
     const reminders = await getPendingReminders(subscriber.id);
     sections.push(formatRemindersForContext(reminders, tz));

@@ -297,9 +297,6 @@ export const DEFAULT_SKILLS = [
 // Default integrations seeded on agent creation
 export const DEFAULT_INTEGRATIONS = [
   { slug: 'whatsapp', name: 'WhatsApp', description: 'Primary communication channel', icon: 'message-circle', benefits: ['Text messaging', 'Voice messages', 'Reminders'] },
-  { slug: 'google-calendar', name: 'Google Calendar', description: 'View and manage your schedule', icon: 'calendar', benefits: ['View events', 'Create events', 'Morning schedule briefing'], setupPrompt: 'Connect your Google Calendar to let your assistant manage your schedule.' },
-  { slug: 'gmail', name: 'Gmail', description: 'Read and draft emails', icon: 'mail', benefits: ['Read emails', 'Draft replies', 'Email summaries'], setupPrompt: 'Connect Gmail so your assistant can help manage your inbox.' },
-  { slug: 'google-drive', name: 'Google Drive', description: 'Access and organize your files', icon: 'hard-drive', benefits: ['Search files', 'Organize documents', 'Quick access'], setupPrompt: 'Connect Google Drive to give your assistant access to your files.' },
 ];
 
 /**

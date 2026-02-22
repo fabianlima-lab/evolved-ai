@@ -344,13 +344,11 @@ export default function DashboardPage() {
 
   const tunedScore = useMemo(() => {
     if (!stats) return 0;
-    let score = 0;
-    if (stats.whatsapp_connected) score += 25;
-    if (stats.google_connected) score += 25;
-    if (stats.goals) score += 15;
-    if (stats.onboarding_step === 'complete') score += 10;
-    if (agents.length > 0) score += 15;
-    score += 10;
+    let score = 10; // base score for having an account
+    if (stats.whatsapp_connected) score += 30;
+    if (stats.onboarding_step === 'complete') score += 20;
+    if (agents.length > 0) score += 20;
+    if (stats.total_messages > 0) score += 20;
     return Math.min(score, 100);
   }, [stats, agents]);
 
@@ -469,14 +467,10 @@ export default function DashboardPage() {
   }
 
   /* ── Onboarding checklist states ── */
-  const profileData = stats.profile_data || {};
   const onboardingItems = [
     { label: 'Created account', done: !!stats.email },
     { label: 'Connected WhatsApp', done: stats.whatsapp_connected },
-    { label: 'Name your assistant', done: agents.length > 0 },
-    { label: 'Share what drains you most', done: !!stats.goals || !!profileData.drains },
-    { label: 'Connect Google Calendar', done: stats.google_connected },
-    { label: 'Set your top 3 priorities', done: !!(profileData.priorities && profileData.priorities.length > 0) },
+    { label: 'Send your first message', done: stats.total_messages > 0 || agents.length > 0 },
   ];
 
   const completedSteps = onboardingItems.filter((i) => i.done).length;
@@ -484,7 +478,7 @@ export default function DashboardPage() {
   const allComplete = completedSteps === totalSteps;
 
   /* ── Integration rows ── */
-  const ICON_MAP = { whatsapp: Icon.WhatsApp, 'google-calendar': Icon.Calendar, gmail: Icon.Mail, 'google-drive': Icon.Drive, 'oura-ring': Icon.Ring };
+  const ICON_MAP = { whatsapp: Icon.WhatsApp };
   const integrations = apiIntegrations
     ? apiIntegrations.map((i) => ({
         name: i.name,
@@ -495,7 +489,6 @@ export default function DashboardPage() {
       }))
     : [
         { name: 'WhatsApp', icon: Icon.WhatsApp, connected: stats.whatsapp_connected, status: stats.whatsapp_connected ? 'Connected' : 'Not yet' },
-        { name: 'Google Calendar', icon: Icon.Calendar, connected: stats.google_connected, status: stats.google_connected ? 'Connected' : 'Not yet' },
       ];
 
   /* ──────────────────────────────────────────────
@@ -583,9 +576,9 @@ export default function DashboardPage() {
               onClick={() => window.open('https://wa.me/7373303234', '_blank')}
             />
             <QuickAction
-              icon={Icon.Calendar}
-              label="Connect Google"
-              description={stats.google_connected ? 'Calendar & email synced' : 'Calendar, email & drive'}
+              icon={Icon.Person}
+              label="Account Settings"
+              description="Manage your subscription"
               href="/settings"
             />
           </div>
@@ -671,10 +664,6 @@ export default function DashboardPage() {
                     <StatusBadge
                       label={stats.whatsapp_connected ? 'WhatsApp connected' : 'WhatsApp not connected'}
                       variant={stats.whatsapp_connected ? 'connected' : 'pending'}
-                    />
-                    <StatusBadge
-                      label={stats.google_connected ? 'Calendar connected' : 'Calendar -- not yet'}
-                      variant={stats.google_connected ? 'connected' : 'pending'}
                     />
                   </div>
                 )}

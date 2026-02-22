@@ -37,13 +37,9 @@ Desired feeling: {{USER_DESIRED_FEELING}}
 Preferences: {{USER_PREFERENCES}}
 Briefing: {{BRIEFING_TIME}} / Wrap: {{WRAP_TIME}}
 
-# Live Context (refreshed this message)
+# Connections
 
-{{LIVE_CONTEXT}}
-
-If a service says "not connected" — tell the user it's not connected yet.
-Only reference personal data that is ACTUALLY shown above. If you don't see it, you don't have it.
-The current date and year are in the 🕐 RIGHT NOW line — always use THAT year.`;
+{{LIVE_CONTEXT}}`;
 
 // ─────────────────────────────────────────────────────
 // Live Context Builder
@@ -53,29 +49,17 @@ The current date and year are in the 🕐 RIGHT NOW line — always use THAT yea
  * Build the live context section from subscriber's integration status.
  * This tells the AI what services are available for this user.
  *
+ * Only includes integrations the AI can actually use via OpenClaw.
+ * Google Calendar/Gmail/Drive are NOT available as OpenClaw plugins,
+ * so they are not listed here regardless of OAuth status.
+ *
  * @param {object} subscriber - Subscriber record from DB
  * @returns {string} Live context block for USER.md
  */
 export function buildLiveContext(subscriber) {
-  if (!subscriber) return 'No live data available — integrations not yet connected.';
+  if (!subscriber) return 'No live data available.';
 
   const lines = [];
-  const hasGoogle = !!(subscriber.googleAccessToken && subscriber.googleRefreshToken);
-  const scopes = subscriber.googleScopes || '';
-
-  if (hasGoogle) {
-    const hasCalendar = scopes.includes('calendar');
-    const hasGmail = scopes.includes('gmail') || scopes.includes('mail');
-    const hasDrive = scopes.includes('drive');
-
-    lines.push(`📅 Google Calendar: ${hasCalendar ? 'connected — you can read and create events' : 'not connected'}`);
-    lines.push(`📧 Gmail: ${hasGmail ? 'connected — you can read, search, and send emails' : 'not connected'}`);
-    if (hasDrive) lines.push(`📁 Google Drive: connected — you can search and read files`);
-  } else {
-    lines.push('📅 Google Calendar: not connected');
-    lines.push('📧 Gmail: not connected');
-  }
-
   lines.push(`💬 WhatsApp: ${subscriber.whatsappJid ? 'connected' : 'not connected'}`);
 
   return lines.join('\n');

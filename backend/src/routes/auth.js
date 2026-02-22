@@ -4,32 +4,12 @@ import { OAuth2Client } from 'google-auth-library';
 import env from '../config/env.js';
 import { sendPasswordResetEmail } from '../services/email.js';
 import { stripHtml } from '../utils/helpers.js';
-import { compileSoulMd, buildLiveContext } from '../prompts/soul.js';
-import { updateUserContext } from '../services/openclaw-provisioner.js';
 import prisma from '../lib/prisma.js';
 
-// Initialize Google OAuth client (null if not configured)
+// Initialize Google OAuth client for sign-in only (null if not configured)
 const googleClient = env.GOOGLE_CLIENT_ID
   ? new OAuth2Client(env.GOOGLE_CLIENT_ID)
   : null;
-
-// OAuth2 client for authorization code flow (needs client secret)
-const googleOAuth2 = (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET)
-  ? new OAuth2Client(env.GOOGLE_CLIENT_ID, env.GOOGLE_CLIENT_SECRET, env.GOOGLE_REDIRECT_URI)
-  : null;
-
-// Scopes required for Evolved AI Google API integration
-const GOOGLE_SCOPES = [
-  'openid',
-  'email',
-  'profile',
-  'https://www.googleapis.com/auth/gmail.modify',
-  'https://www.googleapis.com/auth/calendar.events',
-  'https://www.googleapis.com/auth/contacts.readonly',
-  'https://www.googleapis.com/auth/drive.file',           // Create/access files created by the app
-  'https://www.googleapis.com/auth/documents',             // Google Docs read/write
-  'https://www.googleapis.com/auth/spreadsheets',          // Google Sheets read/write
-];
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -230,125 +210,6 @@ async function authRoutes(app) {
     }
   });
 
-  // ─────────────────────────────────────────────
-  // GET /api/auth/google/url
-  // Returns the Google OAuth consent URL with expanded scopes.
-  // The frontend redirects the user to this URL during onboarding.
-  // ─────────────────────────────────────────────
-  app.get('/google/url', {
-    preHandler: [app.authenticate],
-    config: {
-      rateLimit: { max: 10, timeWindow: '1 minute' },
-    },
-  }, async (request, reply) => {
-    if (!googleOAuth2) {
-      return reply.code(503).send({ error: 'Google OAuth is not fully configured (missing client secret or redirect URI)' });
-    }
-
-    const subscriberId = request.user.userId;
-
-    // Generate consent URL with required scopes
-    const url = googleOAuth2.generateAuthUrl({
-      access_type: 'offline',       // Get refresh token
-      prompt: 'consent',             // Force consent to always get refresh token
-      scope: GOOGLE_SCOPES,
-      state: subscriberId,           // Pass subscriber ID through OAuth flow
-      include_granted_scopes: true,
-    });
-
-    return reply.send({ url });
-  });
-
-  // ─────────────────────────────────────────────
-  // POST /api/auth/google/callback
-  // Exchanges an authorization code for access + refresh tokens.
-  // Called by the frontend after Google redirects back.
-  // Stores tokens and granted scopes on the subscriber.
-  // ─────────────────────────────────────────────
-  app.post('/google/callback', {
-    preHandler: [app.authenticate],
-    config: {
-      rateLimit: { max: 10, timeWindow: '1 minute' },
-    },
-  }, async (request, reply) => {
-    const { code } = request.body || {};
-    const subscriberId = request.user.userId;
-
-    if (!code) {
-      return reply.code(400).send({ error: 'Authorization code is required' });
-    }
-
-    if (!googleOAuth2) {
-      return reply.code(503).send({ error: 'Google OAuth is not fully configured' });
-    }
-
-    try {
-      // Exchange authorization code for tokens
-      const { tokens } = await googleOAuth2.getToken(code);
-
-      if (!tokens.access_token) {
-        return reply.code(400).send({ error: 'Failed to obtain access token from Google' });
-      }
-
-      // Verify the ID token to get user info
-      googleOAuth2.setCredentials(tokens);
-      const tokenInfo = await googleOAuth2.verifyIdToken({
-        idToken: tokens.id_token,
-        audience: env.GOOGLE_CLIENT_ID,
-      });
-      const googlePayload = tokenInfo.getPayload();
-      const { sub: googleId, email } = googlePayload;
-
-      // Build update data
-      const updateData = {
-        googleId,
-        googleAccessToken: tokens.access_token,
-        googleRefreshToken: tokens.refresh_token || undefined, // Only update if provided
-        googleScopes: tokens.scope || GOOGLE_SCOPES.join(' '),
-        authProvider: 'google',
-      };
-
-      if (tokens.expiry_date) {
-        updateData.googleAccessTokenExpiry = new Date(tokens.expiry_date);
-      }
-
-      // Update subscriber with tokens
-      const subscriber = await prisma.subscriber.update({
-        where: { id: subscriberId },
-        data: updateData,
-      });
-
-      console.log(`[AUTH] google-oauth-scopes: ${subscriber.id} (scopes: ${updateData.googleScopes})`);
-
-      // Recompile USER.md so the AI knows Google is now connected
-      try {
-        const freshSub = await prisma.subscriber.findUnique({ where: { id: subscriberId } });
-        const userMd = compileSoulMd({
-          assistantName: freshSub.name || 'Luna',
-          profileData: freshSub.profileData,
-          subscriber: freshSub,
-          liveContext: buildLiveContext(freshSub),
-        });
-        await updateUserContext(subscriberId, userMd);
-        console.log(`[AUTH] USER.md refreshed after Google connect: ${subscriberId}`);
-      } catch (ctxErr) {
-        console.error(`[AUTH] USER.md refresh failed (non-fatal): ${ctxErr.message}`);
-      }
-
-      return reply.send({
-        success: true,
-        scopes: updateData.googleScopes,
-        email,
-      });
-    } catch (error) {
-      console.error('[ERROR] google callback failed:', error.message);
-      if (error.message?.includes('invalid_grant')) {
-        return reply.code(400).send({ error: 'Authorization code expired or already used. Please try again.' });
-      }
-      return reply.code(500).send({ error: 'Something went wrong. Try again in a moment.' });
-    }
-  });
-
   // POST /api/auth/forgot-password
   app.post('/forgot-password', {
     config: {
@@ -497,53 +358,6 @@ async function authRoutes(app) {
     }
   });
 
-  // ─────────────────────────────────────────────
-  // POST /api/auth/google/disconnect
-  // Removes Google API tokens (Calendar/Gmail access).
-  // Does NOT remove the Google login link (googleId stays).
-  // ─────────────────────────────────────────────
-  app.post('/google/disconnect', {
-    preHandler: [app.authenticate],
-    config: {
-      rateLimit: { max: 5, timeWindow: '1 minute' },
-    },
-  }, async (request, reply) => {
-    const subscriberId = request.user.userId;
-
-    try {
-      await prisma.subscriber.update({
-        where: { id: subscriberId },
-        data: {
-          googleAccessToken: null,
-          googleRefreshToken: null,
-          googleAccessTokenExpiry: null,
-          googleScopes: null,
-        },
-      });
-
-      console.log(`[AUTH] google-disconnect: ${subscriberId}`);
-
-      // Recompile USER.md so the AI knows Google is now disconnected
-      try {
-        const freshSub = await prisma.subscriber.findUnique({ where: { id: subscriberId } });
-        const userMd = compileSoulMd({
-          assistantName: freshSub.name || 'Luna',
-          profileData: freshSub.profileData,
-          subscriber: freshSub,
-          liveContext: buildLiveContext(freshSub),
-        });
-        await updateUserContext(subscriberId, userMd);
-        console.log(`[AUTH] USER.md refreshed after Google disconnect: ${subscriberId}`);
-      } catch (ctxErr) {
-        console.error(`[AUTH] USER.md refresh failed (non-fatal): ${ctxErr.message}`);
-      }
-
-      return reply.send({ success: true });
-    } catch (err) {
-      console.error('[ERROR] google disconnect failed:', err.message);
-      return reply.code(500).send({ error: 'Something went wrong. Try again in a moment.' });
-    }
-  });
 }
 
 export default authRoutes;

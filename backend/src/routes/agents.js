@@ -17,11 +17,8 @@ async function agentRoutes(app) {
     const { name, systemPrompt: providedPrompt } = request.body || {};
     const subscriberId = request.user.userId;
 
-    if (!name) {
-      return reply.code(400).send({ error: 'name is required' });
-    }
-
-    const cleanName = stripHtml(String(name)).slice(0, 100);
+    // Default name to "Luna" — the AI will ask the user to name it via WhatsApp
+    const cleanName = stripHtml(String(name || 'Luna')).slice(0, 100);
 
     const FALLBACK_PROMPT = 'You are a helpful personal assistant. Be concise, friendly, and proactive.';
 

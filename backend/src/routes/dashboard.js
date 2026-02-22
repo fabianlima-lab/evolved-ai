@@ -67,37 +67,21 @@ async function dashboardRoutes(app) {
       const features = getFeaturesByTier(subscriber.tier);
 
       const whatsappConnected = !!subscriber.whatsappJid;
-      const googleConnected = !!(subscriber.googleAccessToken && subscriber.googleRefreshToken);
-      const scopes = subscriber.googleScopes || '';
       const assistantName = agent?.name || null;
       const profileData = subscriber.profileData || null;
 
-      // Build integrations status
+      // Build integrations status (WhatsApp only)
       const integrations = {
         whatsapp: { connected: whatsappConnected, label: 'WhatsApp' },
-        google_calendar: {
-          connected: googleConnected && scopes.includes('calendar'),
-          label: 'Google Calendar',
-        },
-        gmail: {
-          connected: googleConnected && scopes.includes('gmail'),
-          label: 'Gmail',
-        },
-        google_drive: {
-          connected: googleConnected && scopes.includes('drive'),
-          label: 'Google Drive',
-        },
-        oura: { connected: false, label: 'Oura Ring', coming_soon: true },
       };
 
       // Calculate tuned score (max 100)
       let tunedScore = 0;
-      if (whatsappConnected) tunedScore += 20;
-      if (assistantName) tunedScore += 15;
+      if (whatsappConnected) tunedScore += 25;
+      if (assistantName) tunedScore += 20;
       if (profileData?.drains) tunedScore += 15;
-      if (googleConnected) tunedScore += 20;
-      if (subscriber.name) tunedScore += 10;
-      if (subscriber.onboardingStep === 'complete') tunedScore += 10;
+      if (subscriber.name) tunedScore += 15;
+      if (subscriber.onboardingStep === 'complete') tunedScore += 15;
       if (totalMessages > 10) tunedScore += 10;
 
       // Companion preview for dashboard
@@ -135,8 +119,6 @@ async function dashboardRoutes(app) {
         messages_this_month: messagesThisMonth,
         total_messages: totalMessages,
         whatsapp_connected: whatsappConnected,
-        google_connected: googleConnected,
-        google_scopes: subscriber.googleScopes || null,
         onboarding_step: subscriber.onboardingStep || 'pending',
         features,
         assistant_name: assistantName,

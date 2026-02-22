@@ -95,9 +95,8 @@ export async function provisionWorkspace(subscriberId, { assistantName, soulMd, 
     }
   }
 
-  // 7. Lock SOUL.md and AGENTS.md (read-only)
+  // 7. Lock AGENTS.md (read-only). SOUL.md stays read-write — the AI evolves it.
   try {
-    chmodSync(path.join(workspaceDir, 'SOUL.md'), 0o444);
     chmodSync(path.join(workspaceDir, 'AGENTS.md'), 0o444);
   } catch (err) {
     console.warn(`[PROVISIONER] chmod failed: ${err.message}`);
