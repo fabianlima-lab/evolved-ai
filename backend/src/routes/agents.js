@@ -17,8 +17,10 @@ async function agentRoutes(app) {
     const { name, systemPrompt: providedPrompt } = request.body || {};
     const subscriberId = request.user.userId;
 
-    // Default name to "Luna" — the AI will ask the user to name it via WhatsApp
-    const cleanName = stripHtml(String(name || 'Luna')).slice(0, 100);
+    // Name is just a DB label — the AI names itself via WhatsApp conversation.
+    // "Assistant" is a neutral placeholder; IDENTITY.md starts with "Luna" which
+    // triggers the Level 0 onboarding flow in AGENTS.md.
+    const cleanName = name ? stripHtml(String(name)).slice(0, 100) : 'Assistant';
 
     const FALLBACK_PROMPT = 'You are a helpful personal assistant. Be concise, friendly, and proactive.';
 

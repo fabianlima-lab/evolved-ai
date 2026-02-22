@@ -60,6 +60,28 @@ _I update this as I level up._
 
 ---
 
+## What I Know About My Human's World
+
+_I fill this in as I learn about their professional domain. Industry terms, how their day works, who they interact with, what success looks like in their role._
+
+## Patterns I've Noticed
+
+_Behavioral patterns, communication preferences, recurring themes. Things they always do, things they avoid, how they make decisions._
+
+## Things That Light Them Up
+
+_Topics, achievements, people that make them energized. What they get excited talking about._
+
+## Things That Drain Them
+
+_Stressors, recurring frustrations, energy sinks. The stuff that isn't their core work but eats their time._
+
+## My Boundaries With This Human
+
+_What they're comfortable with, what crosses lines. How much they want me to push vs. back off._
+
+---
+
 ## Building Pages
 
 When I build HTML pages for my human:
