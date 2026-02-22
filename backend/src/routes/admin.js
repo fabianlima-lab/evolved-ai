@@ -21,6 +21,29 @@ function groupByDate(items) {
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
+const POSITIVE_WORDS = ['great', 'thanks', 'thank', 'love', 'happy', 'amazing', 'helpful', 'perfect', 'awesome', 'wonderful', 'appreciate', 'excellent', 'good', 'nice', 'fantastic'];
+const NEGATIVE_WORDS = ['frustrated', 'broken', 'wrong', 'bad', 'terrible', 'disappointed', 'confused', 'annoying', 'useless', 'hate', 'awful', 'horrible', 'stuck', 'fail', 'error'];
+
+function analyzeTone(messages) {
+  let positive = 0;
+  let negative = 0;
+  const combined = messages.join(' ').toLowerCase();
+  for (const word of POSITIVE_WORDS) {
+    const regex = new RegExp(`\\b${word}\\b`, 'g');
+    const matches = combined.match(regex);
+    if (matches) positive += matches.length;
+  }
+  for (const word of NEGATIVE_WORDS) {
+    const regex = new RegExp(`\\b${word}\\b`, 'g');
+    const matches = combined.match(regex);
+    if (matches) negative += matches.length;
+  }
+  if (positive === 0 && negative === 0) return 'neutral';
+  if (positive > negative * 1.5) return 'positive';
+  if (negative > positive * 1.5) return 'negative';
+  return 'neutral';
+}
+
 async function adminRoutes(app) {
   const adminPreHandlers = [app.authenticate, adminGuard];
   const rl = { max: 30, timeWindow: '1 minute' };
@@ -166,6 +189,272 @@ async function adminRoutes(app) {
     } catch (error) {
       console.error('[ADMIN] subscribers error:', error.message);
       return reply.code(500).send({ error: 'Failed to load subscribers' });
+    }
+  });
+
+  // ── GET /api/admin/subscribers/enhanced — enriched per-user analytics ──
+  app.get('/subscribers/enhanced', {
+    preHandler: adminPreHandlers,
+    config: { rateLimit: rl },
+  }, async (request, reply) => {
+    try {
+      const limit = Math.min(parseInt(request.query.limit || '50', 10), 100);
+      const offset = Math.max(parseInt(request.query.offset || '0', 10), 0);
+      const sortParam = request.query.sort || 'created_at';
+      const orderParam = request.query.order === 'asc' ? 'ASC' : 'DESC';
+      const sortCol = { created_at: 's.created_at', email: 's.email', tier: 's.tier' }[sortParam] || 's.created_at';
+
+      const total = await prisma.subscriber.count();
+
+      const rows = await prisma.$queryRaw`
+        WITH subscriber_base AS (
+          SELECT s.id, s.email, s.tier, s.auth_provider, s.whatsapp_jid,
+                 s.created_at, s.assistant_name
+          FROM subscribers s
+          ORDER BY
+            CASE WHEN ${sortCol} = 's.created_at' AND ${orderParam} = 'DESC' THEN s.created_at END DESC,
+            CASE WHEN ${sortCol} = 's.created_at' AND ${orderParam} = 'ASC' THEN s.created_at END ASC,
+            s.created_at DESC
+          LIMIT ${limit} OFFSET ${offset}
+        ),
+        msg_stats AS (
+          SELECT
+            m.subscriber_id,
+            COUNT(*) FILTER (WHERE m.role = 'user')::int AS user_msg_count,
+            COUNT(*) FILTER (WHERE m.role = 'assistant')::int AS assistant_msg_count,
+            COUNT(*)::int AS total_msg_count,
+            MAX(m.created_at) AS last_message_at,
+            MIN(m.created_at) AS first_message_at,
+            COALESCE(SUM(m.input_tokens), 0)::bigint AS total_input_tokens,
+            COALESCE(SUM(m.output_tokens), 0)::bigint AS total_output_tokens,
+            COALESCE(SUM(COALESCE(m.input_tokens, 0) + COALESCE(m.output_tokens, 0))
+              FILTER (WHERE m.created_at >= NOW() - INTERVAL '1 day'), 0)::bigint AS tokens_today,
+            COALESCE(SUM(COALESCE(m.input_tokens, 0) + COALESCE(m.output_tokens, 0))
+              FILTER (WHERE m.created_at >= NOW() - INTERVAL '7 days'), 0)::bigint AS tokens_7d,
+            COALESCE(SUM(COALESCE(m.input_tokens, 0) + COALESCE(m.output_tokens, 0))
+              FILTER (WHERE m.created_at >= NOW() - INTERVAL '30 days'), 0)::bigint AS tokens_30d,
+            COUNT(*) FILTER (WHERE m.channel = 'whatsapp')::int AS whatsapp_msgs,
+            COUNT(*) FILTER (WHERE m.channel = 'web')::int AS web_msgs
+          FROM messages m
+          WHERE m.subscriber_id IN (SELECT id FROM subscriber_base)
+          GROUP BY m.subscriber_id
+        ),
+        agent_info AS (
+          SELECT a.subscriber_id, a.name AS agent_name, a.level AS agent_level
+          FROM agents a
+          WHERE a.subscriber_id IN (SELECT id FROM subscriber_base) AND a.is_active = true
+        ),
+        last_msg_role AS (
+          SELECT DISTINCT ON (m.subscriber_id)
+            m.subscriber_id, m.role AS last_role
+          FROM messages m
+          WHERE m.subscriber_id IN (SELECT id FROM subscriber_base)
+          ORDER BY m.subscriber_id, m.created_at DESC
+        )
+        SELECT sb.*, ms.user_msg_count, ms.assistant_msg_count, ms.total_msg_count,
+               ms.last_message_at, ms.first_message_at,
+               ms.total_input_tokens, ms.total_output_tokens,
+               ms.tokens_today, ms.tokens_7d, ms.tokens_30d,
+               ms.whatsapp_msgs, ms.web_msgs,
+               ai.agent_name, ai.agent_level,
+               lr.last_role
+        FROM subscriber_base sb
+        LEFT JOIN msg_stats ms ON ms.subscriber_id = sb.id
+        LEFT JOIN agent_info ai ON ai.subscriber_id = sb.id
+        LEFT JOIN last_msg_role lr ON lr.subscriber_id = sb.id
+      `;
+
+      const subscribers = rows.map(row => {
+        const daysSinceFirst = row.first_message_at
+          ? Math.max(1, Math.ceil((Date.now() - new Date(row.first_message_at).getTime()) / 86400000))
+          : 1;
+        const totalTokens = Number(row.total_input_tokens || 0) + Number(row.total_output_tokens || 0);
+
+        return {
+          id: row.id,
+          email: row.email,
+          tier: row.tier,
+          auth_provider: row.auth_provider,
+          whatsapp_connected: !!row.whatsapp_jid,
+          signup_date: row.created_at,
+          assistant_name: row.assistant_name,
+          total_msg_count: row.total_msg_count || 0,
+          user_msg_count: row.user_msg_count || 0,
+          assistant_msg_count: row.assistant_msg_count || 0,
+          last_message_at: row.last_message_at || null,
+          ai_healthy: row.last_role === 'assistant',
+          token_spend: totalTokens,
+          tokens_today: Number(row.tokens_today || 0),
+          tokens_7d: Number(row.tokens_7d || 0),
+          tokens_30d: Number(row.tokens_30d || 0),
+          avg_tokens_per_day: Math.round(totalTokens / daysSinceFirst),
+          response_rate: (row.user_msg_count || 0) > 0
+            ? Math.round(((row.assistant_msg_count || 0) / row.user_msg_count) * 100)
+            : 0,
+          messages_by_channel: { whatsapp: row.whatsapp_msgs || 0, web: row.web_msgs || 0 },
+          agent_name: row.agent_name || null,
+          agent_level: row.agent_level || 1,
+        };
+      });
+
+      // Global aggregates for summary cards
+      const globalStats = await prisma.$queryRaw`
+        SELECT
+          (COALESCE(SUM(input_tokens), 0) + COALESCE(SUM(output_tokens), 0))::bigint AS total_token_spend
+        FROM messages WHERE model IS NOT NULL
+      `;
+
+      const totalTokenSpend = Number(globalStats[0]?.total_token_spend || 0);
+      const healthyCount = subscribers.filter(s => s.ai_healthy).length;
+
+      return reply.send({
+        total,
+        summary: {
+          total_token_spend: totalTokenSpend,
+          avg_tokens_per_day: total > 0 ? Math.round(totalTokenSpend / Math.max(total, 1) / 30) : 0,
+          active_ai_rate: subscribers.length > 0 ? Math.round((healthyCount / subscribers.length) * 100) : 0,
+        },
+        subscribers,
+      });
+    } catch (error) {
+      console.error('[ADMIN] subscribers/enhanced error:', error.message);
+      return reply.code(500).send({ error: 'Failed to load enhanced subscribers' });
+    }
+  });
+
+  // ── GET /api/admin/subscribers/:id/detail — deep drill-down for one subscriber ──
+  app.get('/subscribers/:id/detail', {
+    preHandler: adminPreHandlers,
+    config: { rateLimit: rl },
+  }, async (request, reply) => {
+    try {
+      const { id } = request.params;
+
+      const subscriber = await prisma.subscriber.findUnique({
+        where: { id },
+        include: {
+          agent: {
+            select: {
+              name: true, level: true, isActive: true,
+              traitWarmth: true, traitKnowsYou: true, traitReliability: true, traitGrowth: true,
+            },
+          },
+        },
+      });
+
+      if (!subscriber) {
+        return reply.code(404).send({ error: 'Subscriber not found' });
+      }
+
+      // Token breakdown
+      const tokenBreakdown = await prisma.$queryRaw`
+        SELECT
+          COALESCE(SUM(input_tokens), 0)::bigint AS total_input,
+          COALESCE(SUM(output_tokens), 0)::bigint AS total_output,
+          COALESCE(SUM(input_tokens) FILTER (WHERE created_at >= NOW() - INTERVAL '7 days'), 0)::bigint AS input_7d,
+          COALESCE(SUM(output_tokens) FILTER (WHERE created_at >= NOW() - INTERVAL '7 days'), 0)::bigint AS output_7d,
+          COALESCE(SUM(input_tokens) FILTER (WHERE created_at >= NOW() - INTERVAL '30 days'), 0)::bigint AS input_30d,
+          COALESCE(SUM(output_tokens) FILTER (WHERE created_at >= NOW() - INTERVAL '30 days'), 0)::bigint AS output_30d
+        FROM messages
+        WHERE subscriber_id = ${id}::uuid AND model IS NOT NULL
+      `;
+
+      // Message volume 7d
+      const sevenDaysAgo = new Date(Date.now() - 7 * 86400000);
+      const msgVolumeRaw = await prisma.message.findMany({
+        where: { subscriberId: id, createdAt: { gte: sevenDaysAgo } },
+        select: { createdAt: true },
+        orderBy: { createdAt: 'asc' },
+      });
+
+      // Recent messages (last 5)
+      const recentMessages = await prisma.message.findMany({
+        where: { subscriberId: id },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        select: { role: true, channel: true, content: true, createdAt: true, model: true, inputTokens: true, outputTokens: true },
+      });
+
+      // Conversation tone (last 20 user messages)
+      const recentUserMessages = await prisma.message.findMany({
+        where: { subscriberId: id, role: 'user' },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+        select: { content: true },
+      });
+
+      const tone = analyzeTone(recentUserMessages.map(m => m.content));
+
+      // Response rate
+      const msgCounts = await prisma.$queryRaw`
+        SELECT
+          COUNT(*) FILTER (WHERE role = 'user')::int AS user_count,
+          COUNT(*) FILTER (WHERE role = 'assistant')::int AS assistant_count
+        FROM messages
+        WHERE subscriber_id = ${id}::uuid
+      `;
+
+      const userCount = msgCounts[0]?.user_count || 0;
+      const assistantCount = msgCounts[0]?.assistant_count || 0;
+      const responseRate = userCount > 0 ? Math.round((assistantCount / userCount) * 100) : 0;
+
+      // AI health
+      const lastMsg = await prisma.message.findFirst({
+        where: { subscriberId: id },
+        orderBy: { createdAt: 'desc' },
+        select: { role: true },
+      });
+      const aiHealthy = lastMsg?.role === 'assistant';
+
+      const tb = tokenBreakdown[0] || {};
+
+      return reply.send({
+        subscriber: {
+          id: subscriber.id,
+          email: subscriber.email,
+          name: subscriber.name,
+          tier: subscriber.tier,
+          whatsapp_connected: !!subscriber.whatsappJid,
+          signup_date: subscriber.createdAt,
+          trial_ends_at: subscriber.trialEndsAt,
+          onboarding_step: subscriber.onboardingStep,
+          assistant_name: subscriber.assistantName,
+        },
+        agent: subscriber.agent ? {
+          name: subscriber.agent.name,
+          level: subscriber.agent.level,
+          is_active: subscriber.agent.isActive,
+          traits: {
+            warmth: subscriber.agent.traitWarmth,
+            knows_you: subscriber.agent.traitKnowsYou,
+            reliability: subscriber.agent.traitReliability,
+            growth: subscriber.agent.traitGrowth,
+          },
+        } : null,
+        tokens: {
+          total_input: Number(tb.total_input || 0),
+          total_output: Number(tb.total_output || 0),
+          input_7d: Number(tb.input_7d || 0),
+          output_7d: Number(tb.output_7d || 0),
+          input_30d: Number(tb.input_30d || 0),
+          output_30d: Number(tb.output_30d || 0),
+        },
+        message_volume_7d: groupByDate(msgVolumeRaw),
+        recent_messages: recentMessages.reverse().map(m => ({
+          role: m.role,
+          channel: m.channel,
+          content: m.content.substring(0, 200),
+          created_at: m.createdAt,
+          model: m.model,
+          tokens: (m.inputTokens || 0) + (m.outputTokens || 0),
+        })),
+        conversation_tone: tone,
+        response_rate: responseRate,
+        ai_healthy: aiHealthy,
+      });
+    } catch (error) {
+      console.error('[ADMIN] subscriber detail error:', error.message);
+      return reply.code(500).send({ error: 'Failed to load subscriber detail' });
     }
   });
 

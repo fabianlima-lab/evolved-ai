@@ -4,7 +4,7 @@ Read this file completely before doing anything. This is your operating context.
 
 ## What This Project Is
 
-Evolved AI is a WhatsApp-based AI personal assistant platform. Subscribers message an AI companion via WhatsApp. The AI learns about them, grows over time, and builds things for them (dashboards, task boards, analytics pages).
+Evolved AI is a WhatsApp-first AI personal assistant platform for high-achieving veterinary professionals. Built by Dr. Bethany Weinheimer / The Evolved Vets. Subscribers message an AI companion via WhatsApp. The AI learns about them, grows over time, and builds things for them (dashboards, task boards, analytics pages). The web dashboard is a secondary channel.
 
 **The product runs on OpenClaw.** OpenClaw is the AI engine. We do not modify OpenClaw code. Our job is to configure it, provision workspaces, and stay out of the way.
 
@@ -28,10 +28,43 @@ The system mimics the relationship between divine will and human agency:
 
 ## Tech Stack
 
-- **Backend:** Node.js + Fastify 5.7, PostgreSQL 16 + Prisma (auth/billing only), Baileys (WhatsApp)
+- **Backend:** Node.js + Fastify 5.7 (ES Modules only, no CommonJS), PostgreSQL 16 + Prisma 6 (auth/billing only), Baileys (WhatsApp)
 - **Frontend:** Next.js 16 + React 19, Tailwind CSS v4
-- **AI Engine:** OpenClaw v2026.2.17 (systemd service, port 18789)
-- **Infra:** DigitalOcean VPS, PM2, Nginx, Kajabi (billing)
+- **AI Engine:** OpenClaw v2026.2.17 (systemd service, port 18789) → OpenRouter (Grok 4.1 Fast primary, DeepSeek V3.2 + Llama 4 Maverick fallbacks)
+- **Voice:** Whisper (via Groq API)
+- **i18n:** next-intl (English only, but all strings go through translations)
+- **Auth:** JWT (7-day expiry) + Google OAuth; admin access via ADMIN_EMAILS env var
+- **Billing:** Kajabi webhooks ($49/mo)
+- **Infra:** DigitalOcean VPS, PM2, Nginx
+
+## Project Structure
+```
+evolved-ai/
+  backend/
+    src/
+      config/env.js          — Environment variables
+      lib/prisma.js           — Prisma singleton
+      middleware/              — adminGuard.js, auth
+      routes/                 — Fastify route files (admin, auth, agents, chat, channels, webhooks, etc.)
+      services/               — Business logic (baileys, openclaw-bridge, evolution, health-monitor, etc.)
+      prompts/soul.js         — Agent personality compilation
+    prisma/schema.prisma      — Database schema
+    prisma/migrations/        — Migration history
+    templates/                — GOSPEL.md, AGENTS.md, SOUL.md (deployed to VPS)
+  frontend/
+    src/
+      app/[locale]/(app)/     — Authenticated pages (admin, dashboard, control-tower, settings, etc.)
+      app/[locale]/(auth)/    — Auth pages (login, signup, password-reset)
+      app/[locale]/page.js    — Landing page
+      components/ui/          — Shared UI components (Card, Button, SectionLabel, Input)
+      components/landing/     — Marketing page sections
+      lib/api.js              — API fetch helper (apiFetch)
+      lib/auth.js             — Auth context (AuthProvider)
+    messages/en.json          — All translation strings
+  scripts/                    — Deployment & setup scripts
+  deploy.sh                   — Production deployment script
+  ecosystem.config.cjs        — PM2 configuration
+```
 
 ## VPS Access
 
@@ -67,6 +100,7 @@ OpenClaw runs as a gateway service. Our backend talks to it via the `openclaw` C
 
 ```
 WhatsApp msg → Baileys → our backend → `openclaw agent --message "..." --to "+1..." --agent "sub-<uuid>"` → Gateway → AI response → our backend → WhatsApp
+Web Chat → POST /api/chat/send → OpenClaw Gateway CLI → AI → Response JSON
 ```
 
 Each subscriber gets:
@@ -98,6 +132,26 @@ Deployed 2026-02-21. The AI has an intrinsic drive to grow.
 
 Templates live in `backend/templates/` (git-tracked) and are deployed to VPS.
 
+## Key Conventions
+
+### Backend
+- All routes use Fastify plugin pattern: `async function routeName(app) { ... }`
+- Routes registered in `server.js` with prefix (e.g., `prefix: '/api/admin'`)
+- Admin routes use `preHandler: [app.authenticate, adminGuard]`
+- Raw SQL via `prisma.$queryRaw` for complex aggregations; Prisma ORM for simple queries
+- ES Modules only — `import/export`, never `require()`
+
+### Frontend
+- `apiFetch('/path')` prepends `NEXT_PUBLIC_API_URL` and includes Bearer token from `localStorage.eai_token`
+- All user-facing strings use next-intl: `const t = useTranslations('Section'); t('keyName')`
+- Translation keys in `messages/en.json` grouped by page/section
+- CSS: Tailwind v4 with CSS variables (see `globals.css`)
+- Brand colors: teal `#2A7C7B` (accent), cream `#F7F4EE` (bg), warm charcoal `#222` (text), mint `#B8D8D0`
+- Border radius: 2px (`--radius-card`) — sharp rectangles, luxury feel
+- Fonts: Cormorant (display headings), DM Sans (body)
+- UI components defined inline in page files (no shared admin component library)
+- All pages under `(app)/` are `'use client'` components
+
 ## Resetting Agent Sessions
 
 After deploying new AGENTS.md, existing sessions may still use old context. To force all AIs to start fresh:
@@ -114,6 +168,27 @@ ssh root@167.172.209.255 "for f in /home/openclaw/.openclaw/agents/*/sessions/se
 3. Deploy to VPS (either `git pull` on VPS or direct file deploy via SSH)
 
 Always commit and push. The VPS should match GitHub.
+
+## Key Commands
+```bash
+# Backend
+cd backend && npm install
+cd backend && npx prisma generate
+cd backend && npx prisma migrate deploy
+cd backend && npm run dev          # Dev server on :3001
+cd backend && npm test             # Vitest
+
+# Frontend
+cd frontend && npm install
+cd frontend && npm run dev         # Dev server on :3000
+cd frontend && npm run build       # Production build
+
+# Deploy to production (on VPS)
+./deploy.sh   # git pull → install → migrate → build → pm2 restart
+
+# Database
+cd backend && npx prisma studio    # Visual DB browser
+```
 
 ## What PostgreSQL Is For
 
@@ -163,6 +238,11 @@ To update SOUL.md template (only affects NEW workspaces — existing AIs own the
 ```bash
 cat backend/templates/SOUL.md | ssh root@167.172.209.255 "cat > /home/openclaw/templates/SOUL.md && chown openclaw:openclaw /home/openclaw/templates/SOUL.md"
 ```
+
+## Admin Access
+- Admin pages: `/admin` (dashboard with per-user analytics), `/control-tower` (real-time cockpit)
+- Access controlled by `ADMIN_EMAILS` env var (comma-separated email allowlist)
+- Admin guard: JWT auth + email whitelist check → 403 if not admin
 
 ## Current Subscribers (4 active)
 
