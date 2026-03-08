@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WOMEN RISING — A Campaign for Women in Medicine</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --charcoal: #282828;
+  --black: #1a1a1a;
+  --white: #ffffff;
+  --off-white: #f8f7f4;
+  --cream: #f0ede6;
+  --hunter: #2d5a27;
+  --hunter-light: #3a7232;
+  --teal: #3d8b8b;
+  --warm-gray: #a09890;
+  --light-gray: #e8e5e0;
+  --gold: #c49a6c;
+  --alert: #b85c38;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; font-size:16px; }
+body { font-family:var(--font-body); color:var(--charcoal); background:var(--off-white); overflow-x:hidden; -webkit-font-smoothing:antialiased; }
+.container { max-width:1100px; margin:0 auto; padding:0 40px; }
+.fade-in { opacity:0; transform:translateY(28px); transition:opacity 0.8s ease, transform 0.8s ease; }
+.fade-in.visible { opacity:1; transform:translateY(0); }
+.fade-in-delay-1 { transition-delay:.15s; }
+.fade-in-delay-2 { transition-delay:.3s; }
+.fade-in-delay-3 { transition-delay:.45s; }
+.section { padding:100px 0; }
+.section-label { font-size:11px; font-weight:600; letter-spacing:4px; text-transform:uppercase; color:var(--hunter); margin-bottom:20px; }
+.section-title { font-family:var(--font-display); font-size:clamp(28px,4vw,42px); font-weight:600; color:var(--charcoal); line-height:1.25; margin-bottom:24px; }
+.section-body { font-size:16px; line-height:1.8; color:#555; max-width:680px; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+/* HERO */
+.hero { min-height:100vh; background:var(--charcoal); display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+.hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 20% 50%,rgba(45,90,39,.15) 0%,transparent 60%),radial-gradient(ellipse at 80% 30%,rgba(61,139,139,.1) 0%,transparent 50%); pointer-events:none; }
+.hero-content { text-align:center; position:relative; z-index:2; padding:60px 40px; }
+.hero-label { font-size:11px; font-weight:600; letter-spacing:4px; text-transform:uppercase; color:var(--gold); margin-bottom:40px; opacity:0; animation:fadeUp 1s ease .3s forwards; }
+.hero-title { font-family:var(--font-display); font-size:clamp(48px,8vw,96px); font-weight:700; color:var(--white); letter-spacing:-1px; line-height:1; margin-bottom:28px; opacity:0; animation:fadeUp 1s ease .6s forwards; }
+.hero-subtitle { font-family:var(--font-display); font-size:clamp(18px,2.5vw,26px); font-weight:400; font-style:italic; color:var(--teal); line-height:1.5; margin-bottom:50px; opacity:0; animation:fadeUp 1s ease .9s forwards; }
+.hero-meta { font-size:13px; color:var(--warm-gray); letter-spacing:1px; line-height:2; opacity:0; animation:fadeUp 1s ease 1.2s forwards; }
+.hero-meta span { color:var(--light-gray); font-weight:500; }
+.hero-divider { width:60px; height:1px; background:var(--hunter); margin:30px auto; opacity:0; animation:fadeUp 1s ease 1s forwards; }
+.scroll-indicator { position:absolute; bottom:40px; left:50%; transform:translateX(-50%); opacity:0; animation:fadeUp 1s ease 1.5s forwards; }
+.scroll-indicator::after { content:''; display:block; width:1px; height:40px; background:linear-gradient(to bottom,var(--teal),transparent); margin:0 auto; animation:scrollPulse 2s ease infinite; }
+@keyframes scrollPulse { 0%,100%{opacity:.3;transform:scaleY(.6)} 50%{opacity:1;transform:scaleY(1)} }
+
+/* REFRAME SECTION */
+.reframe-section { background:var(--white); padding:100px 0; border-bottom:1px solid var(--light-gray); }
+.reframe-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:28px; margin-top:50px; }
+.reframe-card { padding:36px; border:1px solid var(--light-gray); border-radius:2px; transition:transform .3s ease, box-shadow .3s ease; }
+.reframe-card:hover { transform:translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,.06); }
+.reframe-myth { font-family:var(--font-display); font-size:17px; font-style:italic; color:var(--alert); margin-bottom:16px; line-height:1.4; }
+.reframe-truth { font-size:14px; line-height:1.7; color:var(--charcoal); }
+.reframe-truth strong { color:var(--hunter); }
+
+/* MULTI-BAR CHART */
+.bars-section { background:var(--charcoal); padding:100px 0; }
+.bars-section .section-label { color:var(--gold); }
+.bars-section .section-title { color:var(--white); max-width:700px; }
+.bars-section .section-body { color:var(--warm-gray); margin-bottom:10px; }
+.field-row { display:grid; grid-template-columns:160px 1fr 1fr; gap:0; align-items:end; margin-bottom:2px; min-height:72px; }
+.field-label { font-size:13px; font-weight:600; color:var(--white); padding:16px 0; letter-spacing:.5px; display:flex; align-items:center; }
+.bar-cell { padding:8px 4px; display:flex; align-items:center; gap:8px; }
+.bar-track { height:32px; border-radius:2px; position:relative; transition:width 1.5s cubic-bezier(.25,.46,.45,.94); width:0; }
+.bar-track.workforce { background:linear-gradient(to right,var(--hunter),var(--hunter-light)); }
+.bar-track.leadership { background:linear-gradient(to right,var(--gold),#d4aa7c); }
+.bar-pct { font-family:var(--font-display); font-size:18px; font-weight:700; color:var(--white); min-width:50px; white-space:nowrap; }
+.bar-legend { display:flex; gap:32px; margin-top:36px; padding-top:24px; border-top:1px solid rgba(255,255,255,.1); }
+.legend-item { display:flex; align-items:center; gap:10px; font-size:13px; color:var(--warm-gray); }
+.legend-swatch { width:24px; height:12px; border-radius:2px; }
+.legend-swatch.w { background:var(--hunter); }
+.legend-swatch.l { background:var(--gold); }
+.bars-header { display:grid; grid-template-columns:160px 1fr 1fr; gap:0; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,.1); }
+.bars-header span { font-size:11px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,.4); }
+.bars-sources { margin-top:28px; font-size:11px; color:rgba(255,255,255,.25); line-height:1.8; }
+
+/* STORYBOARD */
+.storyboard-section { padding:100px 0; background:var(--off-white); }
+.acts-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:50px; }
+.act-card { background:var(--white); border:1px solid var(--light-gray); border-radius:2px; overflow:hidden; transition:transform .3s ease,box-shadow .3s ease; }
+.act-card:hover { transform:translateY(-4px); box-shadow:0 20px 60px rgba(0,0,0,.08); }
+.act-header { padding:28px 28px 20px; border-bottom:1px solid var(--light-gray); }
+.act-number { font-size:11px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--hunter); margin-bottom:8px; }
+.act-title { font-family:var(--font-display); font-size:22px; font-weight:600; color:var(--charcoal); }
+.act-time { font-size:12px; color:var(--warm-gray); margin-top:4px; }
+.act-body { padding:24px 28px 28px; }
+.act-beat { margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid var(--light-gray); }
+.act-beat:last-child { margin-bottom:0; padding-bottom:0; border-bottom:none; }
+.beat-text-screen { font-family:var(--font-display); font-size:16px; font-style:italic; color:var(--charcoal); line-height:1.5; margin-bottom:8px; }
+.beat-visual { font-size:13px; line-height:1.7; color:#777; }
+
+/* VALUE GRID */
+.value-section { background:var(--white); padding:100px 0; border-top:1px solid var(--light-gray); }
+.value-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:40px; margin-top:50px; }
+.value-item { padding:36px; border:1px solid var(--light-gray); border-radius:2px; transition:border-color .3s ease; }
+.value-item:hover { border-color:var(--hunter); }
+.value-icon { width:32px; height:32px; display:flex; align-items:center; justify-content:center; margin-bottom:20px; }
+.value-icon svg { width:24px; height:24px; stroke:var(--hunter); fill:none; stroke-width:1.5; }
+.value-title { font-family:var(--font-display); font-size:18px; font-weight:600; color:var(--charcoal); margin-bottom:10px; }
+.value-desc { font-size:14px; line-height:1.7; color:#666; }
+
+/* ABOUT */
+.about-section { background:var(--cream); padding:100px 0; }
+.about-grid { display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:start; margin-top:40px; }
+.about-card { padding:40px; background:var(--white); border:1px solid var(--light-gray); border-radius:2px; }
+.about-card-label { font-size:11px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--hunter); margin-bottom:16px; }
+.about-card-title { font-family:var(--font-display); font-size:22px; font-weight:600; color:var(--charcoal); margin-bottom:16px; }
+.about-card-body { font-size:14px; line-height:1.8; color:#555; }
+.credential-list { list-style:none; margin-top:20px; }
+.credential-list li { font-size:14px; line-height:1.6; color:#555; padding:8px 0; border-bottom:1px solid var(--light-gray); display:flex; align-items:baseline; gap:10px; }
+.credential-list li::before { content:''; width:6px; height:6px; background:var(--hunter); border-radius:50%; flex-shrink:0; margin-top:6px; }
+.credential-list li:last-child { border-bottom:none; }
+
+/* PHASES */
+.phase-section { padding:100px 0; background:var(--off-white); }
+.phase-timeline { margin-top:50px; position:relative; padding-left:40px; }
+.phase-timeline::before { content:''; position:absolute; left:12px; top:8px; bottom:8px; width:1px; background:var(--light-gray); }
+.phase-item { position:relative; margin-bottom:40px; padding-left:20px; }
+.phase-item::before { content:''; position:absolute; left:-33px; top:8px; width:10px; height:10px; border-radius:50%; background:var(--hunter); border:2px solid var(--off-white); }
+.phase-label { font-size:11px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--hunter); margin-bottom:6px; }
+.phase-title { font-family:var(--font-display); font-size:20px; font-weight:600; color:var(--charcoal); margin-bottom:8px; }
+.phase-desc { font-size:14px; line-height:1.7; color:#666; max-width:600px; }
+
+/* VOICES */
+.voices-section { background:var(--cream); padding:100px 0 120px; position:relative; }
+.voices-section::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:var(--light-gray); }
+.voices-intro { font-size:16px; line-height:1.8; color:#555; max-width:700px; margin-bottom:50px; }
+.voices-tabs { display:flex; gap:4px; margin-bottom:40px; }
+.voices-tab { padding:12px 28px; font-family:var(--font-body); font-size:12px; font-weight:600; letter-spacing:2px; text-transform:uppercase; background:transparent; border:1px solid var(--light-gray); color:var(--warm-gray); cursor:pointer; transition:all .3s ease; }
+.voices-tab:hover { border-color:var(--hunter); color:var(--charcoal); }
+.voices-tab.active { background:var(--hunter); border-color:var(--hunter); color:var(--white); }
+.voices-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:24px; }
+.voice-card { background:var(--white); border:1px solid var(--light-gray); border-radius:2px; padding:36px; position:relative; transition:transform .3s ease,box-shadow .3s ease; }
+.voice-card:hover { transform:translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,.06); }
+.voice-card::before { content:'\201C'; position:absolute; top:20px; left:28px; font-family:var(--font-display); font-size:60px; color:var(--light-gray); line-height:1; pointer-events:none; }
+.voice-quote { font-family:var(--font-display); font-size:16px; font-style:italic; line-height:1.7; color:var(--charcoal); margin-bottom:20px; padding-top:20px; position:relative; z-index:1; }
+.voice-author { display:flex; align-items:center; gap:12px; }
+.voice-avatar { width:40px; height:40px; border-radius:50%; background:var(--hunter); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.voice-avatar span { font-size:14px; font-weight:600; color:var(--white); }
+.voice-name { font-size:14px; font-weight:600; color:var(--charcoal); }
+.voice-role { font-size:12px; color:var(--warm-gray); margin-top:2px; }
+.voice-tag { display:inline-block; margin-top:16px; padding:4px 12px; font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; border-radius:2px; }
+.voice-tag.win { background:rgba(45,90,39,.08); color:var(--hunter); }
+.voice-tag.challenge { background:rgba(196,154,108,.12); color:var(--gold); }
+.voices-cta { text-align:center; margin-top:50px; padding-top:40px; border-top:1px solid var(--light-gray); }
+.voices-disclaimer { display:inline-block; margin-bottom:32px; padding:10px 20px; background:rgba(45,90,39,.06); border:1px solid rgba(45,90,39,.15); border-radius:2px; font-size:12px; font-weight:500; color:var(--hunter); letter-spacing:.5px; }
+.voices-disclaimer strong { font-weight:700; }
+.voices-cta-text { font-family:var(--font-display); font-size:20px; font-style:italic; color:var(--charcoal); margin-bottom:8px; }
+.voices-cta-sub { font-size:14px; color:var(--warm-gray); }
+
+/* CTA */
+.cta-section { background:var(--charcoal); padding:120px 0; text-align:center; position:relative; overflow:hidden; }
+.cta-section::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 50%,rgba(45,90,39,.12) 0%,transparent 70%); pointer-events:none; }
+.cta-content { position:relative; z-index:2; }
+.cta-title { font-family:var(--font-display); font-size:clamp(28px,4vw,44px); font-weight:600; color:var(--white); line-height:1.3; margin-bottom:20px; max-width:700px; margin-left:auto; margin-right:auto; }
+.cta-subtitle { font-family:var(--font-display); font-size:18px; font-style:italic; color:var(--teal); margin-bottom:50px; }
+.cta-button { display:inline-block; padding:18px 48px; background:var(--hunter); color:var(--white); font-size:13px; font-weight:600; letter-spacing:2px; text-transform:uppercase; text-decoration:none; transition:all .3s ease; }
+.cta-button:hover { background:var(--hunter-light); transform:translateY(-2px); box-shadow:0 8px 30px rgba(45,90,39,.3); }
+.cta-brands { margin-top:60px; display:flex; align-items:center; justify-content:center; gap:40px; }
+.cta-brand-name { font-size:14px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:rgba(255,255,255,.5); }
+.cta-brand-divider { width:30px; height:1px; background:rgba(255,255,255,.2); }
+.cta-sponsor { font-size:13px; color:var(--warm-gray); margin-top:24px; font-style:italic; }
+
+/* RESPONSIVE */
+@media(max-width:768px) {
+.container { padding:0 24px; }
+.section { padding:70px 0; }
+.reframe-grid,.acts-grid,.value-grid,.about-grid,.voices-grid { grid-template-columns:1fr; }
+.field-row { grid-template-columns:100px 1fr 1fr; }
+.field-label { font-size:11px; }
+.bar-pct { font-size:14px; }
+.voices-tabs { flex-wrap:wrap; }
+.cta-brands { flex-direction:column; gap:16px; }
+.cta-brand-divider { width:1px; height:20px; }
+}
+</style>
+
+</head>
+<body>
+
+<!-- HERO -->
+
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-label">Campaign Proposal</div>
+    <h1 class="hero-title">WOMEN RISING</h1>
+    <p class="hero-subtitle">Women in Medicine Don't Just Show Up.<br>They Lead.</p>
+    <div class="hero-divider"></div>
+    <div class="hero-meta">
+      A social media campaign for women in medicine<br>
+      Created by <span>The Evolved Vets</span> &nbsp;&middot;&nbsp; Proposed brand partner: <span>FIGS</span><br>
+      Prepared by <span>Dr. Bethany Weinheimer</span> &nbsp;&middot;&nbsp; @drbeththevet
+    </div>
+  </div>
+  <div class="scroll-indicator"></div>
+</section>
+
+<!-- THE PROBLEM -->
+
+<section class="section">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">The Problem</div>
+      <h2 class="section-title">The majority built medicine.<br>The minority still runs it.</h2>
+    </div>
+    <div class="fade-in fade-in-delay-1">
+      <p class="section-body">Women are the backbone of healthcare. We are the majority of veterinarians, nurses, pharmacists, physician assistants, and increasingly of physicians. We run the ER at 3am. We perform open-chest CPR on a critical patient while the room falls apart around us. We hold the line between life and death every single day.</p>
+    </div>
+    <br>
+    <div class="fade-in fade-in-delay-2">
+      <p class="section-body">But when the leadership table opens, the seats still don't look like the floor. The data is clear, cross-discipline, and getting harder to ignore.</p>
+    </div>
+  </div>
+</section>
+
+<!-- REFRAME: THEY SAY / THE TRUTH -->
+
+<section class="reframe-section">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">The Reframe</div>
+      <h2 class="section-title">What They Say vs. What's Actually True</h2>
+      <p class="section-body" style="margin-bottom:10px;">These are the narratives used to keep women out of leadership seats in medicine. Here's the reality.</p>
+    </div>
+    <div class="reframe-grid">
+      <div class="reframe-card fade-in">
+        <div class="reframe-myth">"She's too emotional."</div>
+        <div class="reframe-truth"><strong>The truth:</strong> Our emotional intelligence gives us empathy — the foundation of exceptional patient care, team leadership, and clinical outcomes. Studies consistently show that patients treated by female physicians have lower mortality and readmission rates.</div>
+      </div>
+      <div class="reframe-card fade-in fade-in-delay-1">
+        <div class="reframe-myth">"She's too much of a perfectionist."</div>
+        <div class="reframe-truth"><strong>The truth:</strong> Our attention to detail produces the best patient outcomes. Precision isn't a flaw — it's the reason a missed diagnosis gets caught, a dosage error gets flagged, and a patient goes home alive.</div>
+      </div>
+      <div class="reframe-card fade-in">
+        <div class="reframe-myth">"She cares too much."</div>
+        <div class="reframe-truth"><strong>The truth:</strong> Caring is the job. It's why women physicians spend more time with patients, why nurse-led units have higher satisfaction scores, and why the profession runs on the backs of people who refuse to stop caring. Leadership needs more of that, not less.</div>
+      </div>
+      <div class="reframe-card fade-in fade-in-delay-1">
+        <div class="reframe-myth">"She's too soft to lead."</div>
+        <div class="reframe-truth"><strong>The truth:</strong> Collaborative, empathetic leadership isn't soft — it's what modern evidence-based management calls transformational leadership, and it outperforms authoritarian models across every metric: team retention, patient safety, and organizational performance.</div>
+      </div>
+      <div class="reframe-card fade-in">
+        <div class="reframe-myth">"She's not assertive enough."</div>
+        <div class="reframe-truth"><strong>The truth:</strong> Women in medicine make life-and-death decisions every shift. We run codes, deliver critical news, and manage teams under impossible pressure. Assertiveness isn't missing — it's just being measured by someone else's definition.</div>
+      </div>
+      <div class="reframe-card fade-in fade-in-delay-1">
+        <div class="reframe-myth">"She'll just leave to have kids."</div>
+        <div class="reframe-truth"><strong>The truth:</strong> This same argument was used to bar women from veterinary schools, medical schools, and pharmacy programs for decades. Women didn't leave. They became the majority. And they're still being denied the leadership they've earned.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MULTI-FIELD BAR CHART -->
+
+<section class="bars-section">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">The Data</div>
+      <h2 class="section-title">Women in the Workforce vs. Women in Leadership — By Field</h2>
+      <p class="section-body">Every field tells the same story. Women are the workforce majority but the leadership minority.</p>
+    </div>
+    <div id="barsChart" style="margin-top:50px;">
+      <div class="bars-header">
+        <span></span>
+        <span>% Women in Workforce</span>
+        <span>% Women in Leadership</span>
+      </div>
+
+      <div class="field-row" data-w="70" data-l="25">
+        <div class="field-label">Veterinary Medicine</div>
+        <div class="bar-cell"><div class="bar-track workforce"></div><span class="bar-pct w-pct"></span></div>
+        <div class="bar-cell"><div class="bar-track leadership"></div><span class="bar-pct l-pct"></span></div>
+      </div>
+      <div class="field-row" data-w="89" data-l="15">
+        <div class="field-label">Nursing</div>
+        <div class="bar-cell"><div class="bar-track workforce"></div><span class="bar-pct w-pct"></span></div>
+        <div class="bar-cell"><div class="bar-track leadership"></div><span class="bar-pct l-pct"></span></div>
+      </div>
+      <div class="field-row" data-w="39" data-l="14">
+        <div class="field-label">Physicians</div>
+        <div class="bar-cell"><div class="bar-track workforce"></div><span class="bar-pct w-pct"></span></div>
+        <div class="bar-cell"><div class="bar-track leadership"></div><span class="bar-pct l-pct"></span></div>
+      </div>
+      <div class="field-row" data-w="68" data-l="68">
+        <div class="field-label">Pharmacy</div>
+        <div class="bar-cell"><div class="bar-track workforce"></div><span class="bar-pct w-pct"></span></div>
+        <div class="bar-cell"><div class="bar-track leadership"></div><span class="bar-pct l-pct"></span></div>
+      </div>
+      <div class="field-row" data-w="71" data-l="0">
+        <div class="field-label">Physician Assistants</div>
+        <div class="bar-cell"><div class="bar-track workforce"></div><span class="bar-pct w-pct"></span></div>
+        <div class="bar-cell"><div class="bar-track leadership"></div><span class="bar-pct l-pct"></span></div>
+      </div>
+      <div class="field-row" data-w="80" data-l="15">
+        <div class="field-label">Healthcare Overall</div>
+        <div class="bar-cell"><div class="bar-track workforce"></div><span class="bar-pct w-pct"></span></div>
+        <div class="bar-cell"><div class="bar-track leadership"></div><span class="bar-pct l-pct"></span></div>
+      </div>
+
+      <div class="bar-legend fade-in">
+        <div class="legend-item"><div class="legend-swatch w"></div>Women in Workforce</div>
+        <div class="legend-item"><div class="legend-swatch l"></div>Women in Leadership</div>
+      </div>
+
+      <div class="bars-sources fade-in">
+        <strong>Sources:</strong> Bureau of Labor Statistics (2023) &middot; National Nursing Workforce Survey (2024) &middot; HRSA National Center for Health Workforce Analysis (2024) &middot; AAMC Faculty Roster &middot; National Pharmacist Workforce Study (2024) &middot; NCCPA Statistical Profile (2023) &middot; JAMA Network Open (2021) &middot; WVLDI &middot; Oliver Wyman<br>
+        <em>Note: Veterinary leadership = industry leadership roles (WVLDI/dvm360). Nursing leadership = hospital CEO roles held by women (JAMA). Physician leadership = department chairs (AAMC). Pharmacy leadership = management positions (2024 NPWS). PA leadership data is limited; no large-scale study exists. Healthcare overall leadership = health system CEO positions (JAMA Network Open).</em>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- STORYBOARD -->
+
+<section class="storyboard-section">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">The Video</div>
+      <h2 class="section-title">60–90 Second Reel: Three Acts</h2>
+      <p class="section-body" style="margin-bottom:10px;">Cinematic. Defiant. Emotionally gripping. Anchored in veterinary medicine, resonating across all of healthcare. Every woman wears FIGS throughout. Campaign name: <strong>Women Rising</strong>.</p>
+    </div>
+    <div class="acts-grid">
+      <div class="act-card fade-in">
+        <div class="act-header">
+          <div class="act-number">Act I</div>
+          <div class="act-title">"They Say"</div>
+          <div class="act-time">0:00 – 0:25</div>
+        </div>
+        <div class="act-body">
+          <div class="act-beat">
+            <div class="beat-text-screen">"They say we're too emotional."</div>
+            <div class="beat-visual">SMASH CUT: Female ER vet performing chest compressions on a critical patient. Face steady, focused. Heart rhythm returns. She exhales — then immediately turns to the next case. No celebration. Just the work.</div>
+          </div>
+          <div class="act-beat">
+            <div class="beat-text-screen">"They say we care too much."</div>
+            <div class="beat-visual">A veterinarian crouched beside a frightened dog in a kennel at 4am, hand gently on its head, IV running. Then: a surgeon delivering devastating news to a family with composure and compassion. Caring isn't weakness — it's the job.</div>
+          </div>
+          <div class="act-beat">
+            <div class="beat-text-screen">"Our empathy is our precision. Our care is our edge."</div>
+            <div class="beat-visual">CLOSE-UP on steady hands mid-surgery. She looks at camera. Calm. Certain.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="act-card fade-in fade-in-delay-1">
+        <div class="act-header">
+          <div class="act-number">Act II</div>
+          <div class="act-title">"The Truth"</div>
+          <div class="act-time">0:25 – 0:45</div>
+        </div>
+        <div class="act-body">
+          <div class="act-beat">
+            <div class="beat-text-screen">"They say we're not leadership material."</div>
+            <div class="beat-visual">Quick-cut montage: Women in FIGS across medicine — vet suturing at 3am, ER nurse running triage, surgeon scrubbing in, pharmacist compounding a critical med, PA leading a team huddle.</div>
+          </div>
+          <div class="act-beat">
+            <div class="beat-text-screen">"70% of vets. 89% of nurses. 80% of the healthcare workforce. But only 15% of hospital CEOs."</div>
+            <div class="beat-visual">Screen goes white. Kinetic typography. Data builds stat by stat. Side-by-side bar graph animates on screen — workforce vs. leadership — field by field.</div>
+          </div>
+          <div class="act-beat">
+            <div class="beat-text-screen">"The majority built medicine. The minority still runs it. Until now."</div>
+            <div class="beat-visual">Woman in FIGS at the head of an empty 12-seat conference table. Direct eye contact with camera. She doesn't look away.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="act-card fade-in fade-in-delay-2">
+        <div class="act-header">
+          <div class="act-number">Act III</div>
+          <div class="act-title">"The Movement"</div>
+          <div class="act-time">0:45 – 0:75</div>
+        </div>
+        <div class="act-body">
+          <div class="act-beat">
+            <div class="beat-text-screen">"We didn't wait for permission. We prepared."</div>
+            <div class="beat-visual">Rapid montage: Women in FIGS stepping into leadership — signing practice ownership papers, taking a conference podium, mentoring a student, leading morning rounds.</div>
+          </div>
+          <div class="act-beat">
+            <div class="beat-text-screen">"We coached. We grew. We led."</div>
+            <div class="beat-visual">HERO SHOT: Dr. Beth center frame. Behind her, women from every discipline step forward one by one — vet, nurse, surgeon, pharmacist, PA. United in FIGS.</div>
+          </div>
+          <div class="act-beat">
+            <div class="beat-text-screen">Women Rising. The Evolved Vets. From Force to Flow.</div>
+            <div class="beat-visual">Women Rising title card → The Evolved Vets logo → FIGS sponsor card: "A brand that always believed in women in medicine."</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- WHY FIGS -->
+
+<section class="value-section">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">Why This Partnership</div>
+      <h2 class="section-title">What FIGS Gets</h2>
+    </div>
+    <div class="value-grid">
+      <div class="value-item fade-in">
+        <div class="value-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div class="value-title">92,000+ Female Veterinarians — and Millions More Across Medicine</div>
+        <div class="value-desc">Direct access through The Evolved Vets community, Dr. Beth the Vet's cross-platform following, and VEG's national network — with expansion into nursing, pharmacy, and physician communities underway.</div>
+      </div>
+      <div class="value-item fade-in fade-in-delay-1">
+        <div class="value-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <div class="value-title">A Real Movement, Not Performative Allyship</div>
+        <div class="value-desc">The Evolved Vets is actively coaching women into leadership roles right now. This isn't a hashtag that disappears — it's a coaching platform, a growing community, and a founder who practices emergency medicine full-time.</div>
+      </div>
+      <div class="value-item fade-in">
+        <div class="value-icon"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <div class="value-title">Organic Virality Potential</div>
+        <div class="value-desc">FIGS' own women-in-healthcare campaign hit 10 million views in 4 days. This concept taps the same emotional nerve with a sharper, data-driven angle: the cross-industry leadership gap.</div>
+      </div>
+      <div class="value-item fade-in fade-in-delay-1">
+        <div class="value-icon"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+        <div class="value-title">Mission Alignment at the DNA Level</div>
+        <div class="value-desc">FIGS was the first dual-female-founder IPO on the NYSE. This campaign doesn't ask FIGS to take a new position — it amplifies the one they already own.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+
+<section class="about-section">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">Who's Behind This</div>
+      <h2 class="section-title">A Veterinarian Building for All of Medicine</h2>
+    </div>
+    <div class="about-grid">
+      <div class="about-card fade-in">
+        <div class="about-card-label">The Founder</div>
+        <div class="about-card-title">Dr. Bethany Weinheimer</div>
+        <div class="about-card-body">Career emergency veterinarian. Field Medical Director at VEG (Veterinary Emergency Group). Founder of The Evolved Vets. She knows what it feels like to run a code at 3am — and to look around the leadership table and see no one who looks like her.</div>
+        <ul class="credential-list">
+          <li>Emergency veterinarian — practicing, not retired</li>
+          <li>Field Medical Director, VEG (nationwide ER network)</li>
+          <li>Founder, The Evolved Vets (leadership coaching)</li>
+          <li>@drbeththevet across Instagram, TikTok, LinkedIn</li>
+        </ul>
+      </div>
+      <div class="about-card fade-in fade-in-delay-1">
+        <div class="about-card-label">The Platform</div>
+        <div class="about-card-title">The Evolved Vets</div>
+        <div class="about-card-body">Leadership coaching born in veterinary medicine, built for all women in medicine. Grounded in neuroscience, positive psychology, and organizational behavior. Four pillars: medical excellence, emotional intelligence, business acumen, and empowered leadership.</div>
+        <ul class="credential-list">
+          <li>Evidence-based coaching methodology</li>
+          <li>Started in vet med — expanding across healthcare</li>
+          <li>Focused on closing the leadership gap</li>
+          <li>Philosophy: from force to flow</li>
+          <li>theevolvedvets.com</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PHASES -->
+
+<section class="phase-section">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">The Bigger Play</div>
+      <h2 class="section-title">This Isn't a One-Off Sponsorship</h2>
+      <p class="section-body">The campaign lands in veterinary medicine first and ripples outward — giving FIGS a long-term brand partnership, not a single post.</p>
+    </div>
+    <div class="phase-timeline">
+      <div class="phase-item fade-in">
+        <div class="phase-label">Phase 1 — Launch</div>
+        <div class="phase-title">Veterinary-Anchored</div>
+        <div class="phase-desc">The original Women Rising video drops across @drbeththevet, @theevolvedvets, and @wearfigs. Vet-specific visuals, vet-specific data. The footage stops the scroll.</div>
+      </div>
+      <div class="phase-item fade-in fade-in-delay-1">
+        <div class="phase-label">Phase 2 — Expand</div>
+        <div class="phase-title">Discipline-Specific Variations</div>
+        <div class="phase-desc">New Women Rising editions featuring nurses, physicians, PAs, and pharmacists. Same framework, new footage, discipline-specific data. Each tags back to the original. FIGS throughout.</div>
+      </div>
+      <div class="phase-item fade-in fade-in-delay-2">
+        <div class="phase-label">Phase 3 — Movement</div>
+        <div class="phase-title">The Leadership Home for Women in Medicine</div>
+        <div class="phase-desc">The Evolved Vets becomes the leadership platform for women across all of healthcare — with FIGS as the founding brand partner who was there from the beginning.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VOICES -->
+
+<section class="voices-section">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">Voices from the Field</div>
+      <h2 class="section-title">Women in Medicine on Leading —<br>The Wins and The Real Challenges</h2>
+      <p class="voices-intro">What does being a woman leader in medicine actually feel like — the wins and the real challenges? Below are composite voices representing the themes we hear across veterinary medicine, nursing, pharmacy, and physician communities. <strong style="color:var(--hunter);">These are illustrative, not direct quotes</strong> — drawn from patterns in real conversations, published research, and community discussions. We are actively collecting real stories for the final campaign.</p>
+    </div>
+    <div class="fade-in">
+      <div class="voices-disclaimer"><strong>Note:</strong> Composite voices — representative of themes across women in medicine, not direct quotes. Real stories are being collected for the final campaign.</div>
+    </div>
+    <div class="voices-tabs fade-in">
+      <button class="voices-tab active" onclick="switchTab('all',this)">All Voices</button>
+      <button class="voices-tab" onclick="switchTab('wins',this)">The Wins</button>
+      <button class="voices-tab" onclick="switchTab('challenges',this)">The Challenges</button>
+      <button class="voices-tab" onclick="switchTab('aspiring',this)">Aspiring Leaders</button>
+    </div>
+    <div class="voices-grid" id="voicesGrid">
+      <div class="voice-card fade-in" data-type="wins">
+        <div class="voice-quote">The first time a young female intern told me I was the reason she chose emergency medicine, I realized mentorship isn't optional — it's the whole point. We didn't have women to look up to. Now we get to be that for someone else.</div>
+        <div class="voice-author"><div class="voice-avatar"><span>SM</span></div><div><div class="voice-name">Dr. S. Martinez</div><div class="voice-role">Emergency Veterinarian, 14 years</div></div></div>
+        <div class="voice-tag win">Win</div>
+      </div>
+      <div class="voice-card fade-in fade-in-delay-1" data-type="challenges">
+        <div class="voice-quote">I was told — to my face — that I got the department chair role because they "needed a woman." Not because of my research. Not because of my twenty years of clinical work. That stays with you. You learn to lead anyway, but it stays with you.</div>
+        <div class="voice-author"><div class="voice-avatar"><span>JR</span></div><div><div class="voice-name">Dr. J. Reeves</div><div class="voice-role">Physician, Internal Medicine</div></div></div>
+        <div class="voice-tag challenge">Challenge</div>
+      </div>
+      <div class="voice-card fade-in" data-type="wins">
+        <div class="voice-quote">I bought my own practice at 34. Every banker I talked to asked where my husband was. I signed the papers alone, built the team myself, and last year we were named the top-rated clinic in our county.</div>
+        <div class="voice-author"><div class="voice-avatar"><span>AL</span></div><div><div class="voice-name">Dr. A. Lawson</div><div class="voice-role">Veterinary Practice Owner</div></div></div>
+        <div class="voice-tag win">Win</div>
+      </div>
+      <div class="voice-card fade-in fade-in-delay-1" data-type="challenges">
+        <div class="voice-quote">The hardest part isn't the clinical work — it's being expected to carry the emotional labor for your entire team while also being told you're "too emotional" to lead. You can't be the caretaker and the CEO in everyone's eyes. I'm learning to be both anyway.</div>
+        <div class="voice-author"><div class="voice-avatar"><span>KT</span></div><div><div class="voice-name">K. Thompson, RN, MSN</div><div class="voice-role">Nurse Director, Level 1 Trauma Center</div></div></div>
+        <div class="voice-tag challenge">Challenge</div>
+      </div>
+      <div class="voice-card fade-in" data-type="aspiring">
+        <div class="voice-quote">I'm a third-year vet student and I look at the leadership in our profession and I still don't see myself. Not because I can't do it — because no one has shown me the path. I don't need inspiration. I need a roadmap.</div>
+        <div class="voice-author"><div class="voice-avatar"><span>MH</span></div><div><div class="voice-name">M. Hernandez</div><div class="voice-role">DVM Candidate, Class of 2027</div></div></div>
+        <div class="voice-tag challenge">Aspiring Leader</div>
+      </div>
+      <div class="voice-card fade-in fade-in-delay-1" data-type="wins">
+        <div class="voice-quote">When I became Chief of Surgery, my daughter drew a picture of me in scrubs with a cape. She's seven. She doesn't know yet that women aren't "supposed" to be in charge. And now, because of my role, maybe she never will.</div>
+        <div class="voice-author"><div class="voice-avatar"><span>DP</span></div><div><div class="voice-name">Dr. D. Park</div><div class="voice-role">Chief of Surgery, Academic Medical Center</div></div></div>
+        <div class="voice-tag win">Win</div>
+      </div>
+      <div class="voice-card fade-in" data-type="challenges">
+        <div class="voice-quote">I've been a pharmacist for 22 years. I've trained three men who became my boss. Not because they were better — because they were louder, and they asked. No one told me I could ask too.</div>
+        <div class="voice-author"><div class="voice-avatar"><span>RW</span></div><div><div class="voice-name">R. Williams, PharmD</div><div class="voice-role">Clinical Pharmacist, 22 years</div></div></div>
+        <div class="voice-tag challenge">Challenge</div>
+      </div>
+      <div class="voice-card fade-in fade-in-delay-1" data-type="aspiring">
+        <div class="voice-quote">I'm a PA student and I already feel the pull between being "nice enough" and being taken seriously. I want to lead differently — not quieter, not louder, just more aligned. I just need someone to show me how.</div>
+        <div class="voice-author"><div class="voice-avatar"><span>EN</span></div><div><div class="voice-name">E. Nguyen</div><div class="voice-role">PA Student, Class of 2027</div></div></div>
+        <div class="voice-tag challenge">Aspiring Leader</div>
+      </div>
+    </div>
+    <div class="voices-cta fade-in">
+      <p class="voices-cta-text">These are the voices Women Rising was built for.</p>
+      <p class="voices-cta-sub">Real stories. Real stakes. One movement.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-content">
+      <div class="fade-in">
+        <div class="section-label" style="color:var(--gold);text-align:center;">Let's Build This</div>
+        <h2 class="cta-title">The women who keep medicine running deserve to lead it.</h2>
+        <p class="cta-subtitle">Let's build the campaign that says so.</p>
+      </div>
+      <div class="fade-in fade-in-delay-1">
+        <a href="https://evolvedvets.com/figs" class="cta-button">Visit evolvedvets.com/figs</a>
+        <p class="cta-sponsor">Learn how to become a female leader in medicine</p>
+      </div>
+      <div class="cta-brands fade-in fade-in-delay-2">
+        <div class="cta-brand-name">The Evolved Vets</div>
+        <div class="cta-brand-divider"></div>
+        <div class="cta-brand-name">FIGS</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// Fade-in observer
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold:.15, rootMargin:'0px 0px -40px 0px' });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// Bar chart animation
+const barsObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting) {
+      document.querySelectorAll('.field-row').forEach(row => {
+        const w = parseInt(row.dataset.w);
+        const l = parseInt(row.dataset.l);
+        const maxPct = 89; // max value for scaling
+        const wBar = row.querySelector('.bar-track.workforce');
+        const lBar = row.querySelector('.bar-track.leadership');
+        const wPct = row.querySelector('.w-pct');
+        const lPct = row.querySelector('.l-pct');
+        setTimeout(() => {
+          wBar.style.width = (w/maxPct*100) + '%';
+          lBar.style.width = l === 0 ? '2%' : (l/maxPct*100) + '%';
+          animateNum(wPct, 0, w, 1200);
+          if(l === 0) {
+            lPct.textContent = 'N/A';
+            lPct.style.fontSize = '13px';
+            lPct.style.color = 'rgba(255,255,255,.4)';
+          } else {
+            animateNum(lPct, 0, l, 1200);
+          }
+        }, 200);
+      });
+      barsObserver.unobserve(e.target);
+    }
+  });
+}, { threshold:.3 });
+const bc = document.getElementById('barsChart');
+if(bc) barsObserver.observe(bc);
+
+function animateNum(el, from, to, dur) {
+  const start = performance.now();
+  function step(now) {
+    const p = Math.min((now-start)/dur,1);
+    const eased = 1-Math.pow(1-p,3);
+    el.textContent = Math.round(from+(to-from)*eased) + '%';
+    if(p<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// Voices tab filtering
+function switchTab(filter, btn) {
+  document.querySelectorAll('.voices-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.voice-card').forEach(card => {
+    if(filter==='all' || card.dataset.type===filter) {
+      card.style.display='block';
+      card.style.opacity='0';
+      card.style.transform='translateY(15px)';
+      requestAnimationFrame(() => {
+        card.style.transition='opacity .4s ease,transform .4s ease';
+        card.style.opacity='1';
+        card.style.transform='translateY(0)';
+      });
+    } else {
+      card.style.display='none';
+    }
+  });
+}
+</script>
+
+</body>
+</html>
