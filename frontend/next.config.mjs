@@ -4,14 +4,7 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.js');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: '/figs',
-        destination: '/figs.html',
-      },
-    ];
-  },
+  /* config options here */
 };
 
 export default withNextIntl(nextConfig);
