@@ -12,7 +12,7 @@
 
 One thing, kept simple: **VEGgies get access to the existing Evolved Vets Membership at a 99% reduced cost.** VEG covers part of the expenses to develop and run the program for its people — no margin, no markup — and membership opens to every VEGgie who wants it. Similar playbook to the farm-training program: an initiative, run independently, that gives VEGgies extra support at cost because of its impact. The public version stays fully separate and never carries VEG branding.
 
-**Access is one click:** the membership website becomes a tile in VEG's Okta dashboard, right next to the tools VEGgies already use every shift. A VEGgie clicks the tile and lands in the member portal. Bethany will partner with VEG's technology team to stand up the tile and access.
+**Access is one click:** the membership website becomes a tile in VEG's Okta dashboard, right next to the tools VEGgies already use every shift. A VEGgie clicks the tile and lands in the member portal — and for access on the go, VEGgies can also log in through the TEV app. Bethany will partner with VEG's technology team to stand up the tile and access.
 
 ## 2. What the membership is
 
@@ -64,14 +64,7 @@ Business coaching (With Enthusiasm Coaching) is intentionally **not** included i
 - VEG breaks even if just **49 of its 5,200 VEGgies (under 1%)** ever use the membership; every VEGgie beyond that is free.
 - **An ongoing arrangement:** open-ended terms with regular reviews — enrollment, engagement, and costs looked at together on a set cadence, with terms renegotiated as the program grows.
 
-## 5. Privacy & boundaries
-
-- What VEGgies share in coaching calls and the TEV Connect community stays inside the membership — VEG never receives names, session content, or anything a member says.
-- VEG receives aggregate, anonymized program metrics only: enrollment, active usage, opt-in satisfaction surveys.
-- A safe place to be honest: real growth requires honesty about the hard days, and the membership gives VEGgies a confidential space to work through them with peers who understand.
-- The independent public membership carries no VEG branding or sponsorship claims.
-
-## 6. Next steps
+## 5. Next steps
 
 1. Shelly & Jonathan review; if aligned, take it to the board with the deck.
 2. Partner with VEG IT to add the Okta tile; enrollment opens to every VEGgie.
@@ -92,7 +85,7 @@ Business coaching (With Enthusiasm Coaching) is intentionally **not** included i
 >
 > - **The headline:** every VEGgie gets the $1,200/year membership at a 99% reduced cost — $11.31 per VEGgie per year across all 5,200.
 > - **The program cost:** $4,900/month flat — the exact operating cost (expenses plus my administration time, capped at 10 hours/month at $100/hr). No margin, no per-seat fees, no enrollment cap; the figure never grows however many VEGgies join. VEG breaks even if fewer than 1% of VEGgies ever use it.
-> - **Access:** the membership site becomes a tile in VEG's Okta dashboard — I'd love to partner with your IT team to set that up so a VEGgie just clicks and they're in.
+> - **Access:** the membership site becomes a tile in VEG's Okta dashboard — I'd love to partner with your IT team to set that up so a VEGgie just clicks and they're in. VEGgies can also log in through the TEV app for easy access on the go.
 > - **Terms:** open-ended and ongoing — we review enrollment, engagement, and costs together on a regular cadence and renegotiate as the program grows.
 >
 > I've attached the full deck with the line-item breakdown. Happy to walk through any of it.
