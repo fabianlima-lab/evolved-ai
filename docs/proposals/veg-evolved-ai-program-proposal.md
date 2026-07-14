@@ -10,7 +10,7 @@
 
 ## 1. The offer
 
-One thing, kept simple: **VEGgies get access to the existing Evolved Vets Membership at a 99% reduced cost.** VEG covers part of the expenses to develop and run the program for its people — no margin, no markup — and membership opens to every VEGgie who wants it. Similar playbook to the farm-training program: an initiative, run independently, that gives VEGgies extra support at cost because of its impact. The public version stays fully separate and never carries VEG branding.
+One thing, kept simple: **VEGgies get access to the existing Evolved Vets Membership at a 99% reduced cost.** VEG covers part of the expenses to develop and run the program for its people — no margin — and membership opens to every VEGgie who wants it. Similar playbook to the farm-training program: an initiative, run independently, that gives VEGgies extra support at cost because of its impact. The public version stays fully separate and never carries VEG branding.
 
 **Access is one click:** the membership website becomes a tile in VEG's Okta dashboard, right next to the tools VEGgies already use every shift. A VEGgie clicks the tile and lands in the member portal — and for access on the go, VEGgies can also log in through the TEV app. Bethany will partner with VEG's technology team to stand up the tile and access.
 
@@ -18,6 +18,7 @@ One thing, kept simple: **VEGgies get access to the existing Evolved Vets Member
 
 - **Suicide risk is elevated across the whole veterinary team.** Veterinarians die by suicide at 2.1× (men) and 3.5× (women) the rate of the general U.S. population (Tomasi SE et al., *JAVMA* 2019;254(1):104–112, CDC/NIOSH). For veterinary technicians and technologists the ratios are 5.0× (men — a small-sample estimate, fewer than 20 deaths) and 2.3× (women) (Witte TK, Nett RJ et al., *JAVMA* 2019;255(5):595–608, CDC/NIOSH).
 - **The strain reaches the whole team.** In the peer-reviewed Merck Animal Health Veterinary Team study, conducted with the AVMA, serious psychological distress was twice as prevalent among nonveterinarian practice team members as among veterinarians, and their reported wellbeing was lower (*JAVMA* 2024;262(10)). AVMA leadership has made team wellbeing a stated priority for the profession.
+- **Meditation works — for burnout and for leadership.** A mindfulness course for physicians and healthcare providers significantly reduced burnout on every Maslach Burnout Inventory scale and improved mental wellbeing (Goodman MJ, Schorling JB, *Int J Psychiatry Med* 2012;43(2):119–128). A Lancet meta-analysis confirms burnout interventions, including mindfulness, produce meaningful reductions (West CP et al., *Lancet* 2016;388:2272–2281). Employees of supervisors higher in mindfulness show better wellbeing and performance (Reb J et al., *Mindfulness* 2014;5(1):36–45).
 - **Attrition is expensive.** Gallup estimates replacing one employee costs one-half to two times their annual salary; AAHA data cited by the AVMA puts average annual veterinary team turnover near 23%. Preventing even a handful of departures pays for this program many times over.
 - **Culture fit.** This program is VEG's care for its VEGgies made tangible — part of how "VEGgies brag about their jobs and their friends are jealous," living the ethos *"We treat pets like people and people like humans."*
 
@@ -38,14 +39,14 @@ Standard membership price: **$1,200/year per member** (contents valued at $6,800
 
 ## 4. Monthly operating costs (from receipts)
 
-Presented in the deck as three buckets, built from actual vendor receipts and stated rates:
+Presented in the deck as three buckets:
 
 | Category | What's inside | Monthly |
 |---|---|---:|
 | Wellness content & production | Production, new courses, meditations, and masterclass content | **$2,700** |
-| Member support & operations | Member support team, onboarding, and program administration | **$1,750** |
+| Member support & operations | Member support team, onboarding, RACE approval, and program administration | **$1,750** |
 | Technology & platform | Member portal, membership app, web hosting, email & messaging systems | **~$450** |
-| **Total program cost** | No margin, no markup | **~$4,900/mo** |
+| **Total program cost** | No margin | **~$4,900/mo** |
 
 <details>
 <summary>Line-item detail (for reference — keep handy if VEG asks)</summary>
@@ -69,12 +70,11 @@ Business coaching (With Enthusiasm Coaching) is intentionally **not** included i
 - **A 99% reduced cost for every VEGgie:** $11.31 per person per year ($0.94/month) against the standard $1,200 per person/year membership price.
 - **The program cost is $4,900/month flat** — the exact operating cost, expenses plus capped administration time, no margin. No per-seat fees, no cap — it never grows with enrollment.
 - VEG breaks even if just **49 of its 5,200 VEGgies** were to join at full price — every VEGgie beyond that is free. With the membership open to all VEGgies, the effective cost lands **under 1% of the standard price**.
-- **An ongoing partnership:** terms reevaluated biannually — VEG shares what VEGgies need, and Bethany keeps building the courses and meditations for them. At-cost membership gives VEG employees more resources while Bethany expands her reach beyond her region.
+- **An ongoing partnership:** VEG shares what VEGgies need, and Bethany keeps building the courses and meditations with their needs in mind. At-cost membership gives VEG employees more resources while Bethany expands her reach beyond her region — and the cost stays fixed even as VEG grows. With VEG opening another 30 hospitals next year, that's at least another 900 VEGgies.
 
-## 6. Next steps
+## 6. Closing
 
-1. Shelly & Jonathan review; if aligned, take it to the board with the deck.
-2. Partner with VEG IT to add the Okta tile; enrollment opens to every VEGgie.
+Thank you for being open to this. The whole point is helping our people stay in the profession they love — and I'd be proud to build that in a way that supports VEG. — Bethany
 
 ---
 
