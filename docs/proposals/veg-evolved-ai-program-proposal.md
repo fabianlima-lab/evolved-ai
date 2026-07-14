@@ -68,7 +68,7 @@ Business coaching (With Enthusiasm Coaching) is intentionally **not** included i
 
 - What VEGgies share in coaching calls and the TEV Connect community stays inside the membership — VEG never receives names, session content, or anything a member says.
 - VEG receives aggregate, anonymized program metrics only: enrollment, active usage, opt-in satisfaction surveys.
-- The membership works for the VEGgie, not for management — that trust is what drives adoption.
+- A safe place to be honest: real growth requires honesty about the hard days, and the membership gives VEGgies a confidential space to work through them with peers who understand.
 - The independent public membership carries no VEG branding or sponsorship claims.
 
 ## 6. Next steps
