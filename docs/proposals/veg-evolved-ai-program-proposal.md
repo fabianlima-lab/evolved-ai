@@ -25,6 +25,8 @@ The Evolved Vets Membership is a year-round roadmap to building confidence, mana
 - **RACE-approved CE** — 30 hours of RACE approval available throughout the year
 - **Audio archive** — every meditation, elevation, and integration from TEV Masterclasses, on demand
 
+And it never stands still: veggies get every **new course, meditation, and monthly coaching call** as they're released — the membership grows all year, at no added cost to VEG.
+
 Standard membership price: **$1,200/year per member** (contents valued at $6,800/year).
 
 ## 3. Monthly operating costs (from receipts)
@@ -76,7 +78,7 @@ Podcast production was renegotiated down from $5,650/month (Dec–May) to $2,700
 >
 > Thank you again for being open to this. As promised, here's the cost breakdown for making the membership available to veggies.
 >
-> Keeping it simple, per our conversation: this stays an independent program that I own and run, VEG sponsors it at cost, and every veggie who wants access gets it. The public version stays fully separate with no VEG branding.
+> Keeping it simple, per our conversation: this stays an independent program that I own and run, VEG sponsors it at cost, and every veggie who wants access gets it — including all new courses, meditations, and the monthly coaching call as they're released. The public version stays fully separate with no VEG branding.
 >
 > The short version:
 >
