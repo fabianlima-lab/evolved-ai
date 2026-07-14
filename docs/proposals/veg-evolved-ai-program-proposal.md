@@ -64,7 +64,7 @@ Podcast production was renegotiated down from $5,650/month (Dec–May) to $2,700
 
 1. Bethany attaches final statements for the remaining cost lines.
 2. Shelly & Jonathan review; if aligned, take it to the board with the deck.
-3. VEG IT adds the Okta tile (standard OIDC app — about 15 minutes); enrollment opens to every veggie.
+3. VEG IT adds the Okta tile (standard app configuration — about 15 minutes); enrollment opens to every veggie.
 
 ---
 
