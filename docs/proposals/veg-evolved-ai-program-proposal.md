@@ -14,7 +14,14 @@ One thing, kept simple: **VEGgies get access to the existing Evolved Vets Member
 
 **Access is one click:** the membership website becomes a tile in VEG's Okta dashboard, right next to the tools VEGgies already use every shift. A VEGgie clicks the tile and lands in the member portal — and for access on the go, VEGgies can also log in through the TEV app. Bethany will partner with VEG's technology team to stand up the tile and access.
 
-## 2. What the membership is
+## 2. Why this matters (evidence for the board)
+
+- **Suicide risk is elevated across the whole veterinary team.** Veterinarians die by suicide at 2.1× (men) and 3.5× (women) the rate of the general U.S. population (Tomasi SE et al., *JAVMA* 2019;254(1):104–112, CDC/NIOSH). For veterinary technicians and technologists the ratios are 5.0× (men) and 2.3× (women) (*JAVMA* 2019;255(5):595–608, CDC/NIOSH).
+- **Burnout isn't budging.** Roughly half of veterinarians report burnout, a figure that has held across three consecutive cycles of the 10,000-person Merck Animal Health Veterinary Wellbeing Study, conducted with the AVMA — whose leadership has made team wellbeing a stated priority for the profession (2024).
+- **Attrition is expensive.** Gallup estimates replacing one employee costs one-half to two times their annual salary; AAHA data cited by the AVMA puts average annual veterinary team turnover near 23%. Preventing even a handful of departures pays for this program many times over.
+- **Culture fit.** This program is VEG's care for its VEGgies made tangible — part of how "VEGgies brag about their jobs and their friends are jealous," living the ethos *"We treat pets like people and people like humans."*
+
+## 3. What the membership is
 
 The Evolved Vets Membership is a year-round roadmap to building confidence, managing energy, improving communication, and stepping into leadership — made by a veterinarian, for veterinary professionals:
 
@@ -29,15 +36,15 @@ And it never stands still: VEGgies get every **new course, meditation, and month
 
 Standard membership price: **$1,200/year per member** (contents valued at $6,800/year).
 
-## 3. Monthly operating costs (from receipts)
+## 4. Monthly operating costs (from receipts)
 
 Presented in the deck as three buckets, built from actual vendor receipts and stated rates:
 
 | Category | What's inside | Monthly |
 |---|---|---:|
-| Wellness content & production | Podcast production, new courses, meditations, and masterclass content | **$2,700** |
-| Member support & operations | Member support team, onboarding, office hours, and program administration | **$1,750** |
-| Technology & platform | Member portal, web hosting, AI & automation tools, email & messaging systems | **~$450** |
+| Wellness content & production | Production, new courses, meditations, and masterclass content | **$2,700** |
+| Member support & operations | Member support team, onboarding, and program administration | **$1,750** |
+| Technology & platform | Member portal, membership app, web hosting, email & messaging systems | **~$450** |
 | **Total program cost** | No margin, no markup | **~$4,900/mo** |
 
 <details>
@@ -57,14 +64,14 @@ Presented in the deck as three buckets, built from actual vendor receipts and st
 Business coaching (With Enthusiasm Coaching) is intentionally **not** included in the VEG cost basis.
 </details>
 
-## 4. The ask
+## 5. The ask
 
-- **A 99% reduced cost for every VEGgie:** $11.31 per VEGgie per year ($0.94/month) against the standard $1,200/year membership price.
+- **A 99% reduced cost for every VEGgie:** $11.31 per person per year ($0.94/month) against the standard $1,200 per person/year membership price.
 - **The program cost is $4,900/month flat** — the exact operating cost, expenses plus capped administration time, no margin. No per-seat fees, no cap — it never grows with enrollment.
-- VEG breaks even if just **49 of its 5,200 VEGgies (under 1%)** ever use the membership; every VEGgie beyond that is free.
-- **An ongoing arrangement:** open-ended terms with regular reviews — enrollment, engagement, and costs looked at together on a set cadence, with terms renegotiated as the program grows.
+- VEG breaks even if just **49 of its 5,200 VEGgies** were to join at full price — every VEGgie beyond that is free. With the membership open to all VEGgies, the effective cost lands **under 1% of the standard price**.
+- **An ongoing partnership:** terms reevaluated biannually — VEG shares what VEGgies need, and Bethany keeps building the courses and meditations for them. At-cost membership gives VEG employees more resources while Bethany expands her reach beyond her region.
 
-## 5. Next steps
+## 6. Next steps
 
 1. Shelly & Jonathan review; if aligned, take it to the board with the deck.
 2. Partner with VEG IT to add the Okta tile; enrollment opens to every VEGgie.
@@ -79,7 +86,7 @@ Business coaching (With Enthusiasm Coaching) is intentionally **not** included i
 >
 > Thank you again for being open to this. As promised, here's the cost breakdown for making the membership available to VEGgies.
 >
-> Keeping it simple, per our conversation: this stays an independent program that I own and run, and every VEGgie who wants access gets it — including all new courses, meditations, and the monthly coaching call as they're released. The public version stays fully separate with no VEG branding.
+> Keeping it simple: this stays an independent program that I own and run, and every VEGgie who wants access gets it — including all new courses, meditations, and the monthly coaching call as they're released. The public version stays fully separate with no VEG branding.
 >
 > The short version:
 >
@@ -90,7 +97,7 @@ Business coaching (With Enthusiasm Coaching) is intentionally **not** included i
 >
 > I've attached the full deck with the line-item breakdown. Happy to walk through any of it.
 >
-> The goal, as always: help our people stay in the profession longer. Even if it only helps one — but it's built to help many.
+> The goal, as always: help our people stay in the profession longer.
 >
 > Thank you both,
 > Bethany
