@@ -39,16 +39,17 @@ These are TEV's actual monthly expenses — pulled from vendor receipts and invo
 | Server hosting (DigitalOcean) | Each member's private, isolated AI workspace | _confirming_ |
 | Google Workspace + domain (evolvedvets.com) | Business email, shared docs, website domain | ~$20 |
 | Messaging automation (Manychat) | Member messaging & sign-up flows | ~$20 |
-| **Documented total** | | **~$3,900/mo** |
+| Program administration (Bethany) | Onboarding support, member questions, office hours, VEG coordination — capped at 10 hrs/month × $100/hr | **$1,000.00** |
+| **Total program cost** | Expenses + administration, no margin | **~$4,900/mo** |
 
-Podcast production was renegotiated down from $5,650/month (Dec–May) to $2,700/month effective June. † Kajabi is shown at the current plan list rate and hosting is being pulled from statements — both will be matched to statements before any agreement. No margin, no markup — receipts available for every line.
+Podcast production was renegotiated down from $5,650/month (Dec–May) to $2,700/month effective June. † Kajabi is shown at the current plan list rate and hosting is being pulled from statements — both will be matched to statements before any agreement. No margin, no markup — a receipt or a stated rate for every line.
 
 ## 4. The ask
 
-- **Flat monthly sponsorship: $5,000/month, covering all 5,200 veggies.** No per-seat fees, no cap — the fee never grows with enrollment.
-- That works out to **$0.96 per veggie per month** ($11.54/veggie/year) against a standard membership price of **$1,200/year** — a **99% discount** from standard pricing.
-- VEG breaks even if just **50 of its 5,200 veggies (under 1%)** ever use the membership; every veggie beyond that is free.
-- **90-day initial term** ($15,000 total commitment), then review enrollment together: continue, adjust, or wind down cleanly.
+- **Flat monthly sponsorship: $4,900/month, covering all 5,200 veggies.** This is the exact program cost — expenses plus capped administration time, no margin. No per-seat fees, no cap — the fee never grows with enrollment.
+- That works out to **$0.94 per veggie per month** ($11.31/veggie/year) against a standard membership price of **$1,200/year** — a **99% discount** from standard pricing.
+- VEG breaks even if just **49 of its 5,200 veggies (under 1%)** ever use the membership; every veggie beyond that is free.
+- **90-day initial term** ($14,700 total commitment), then review enrollment together: continue, adjust, or wind down cleanly.
 - **If Bethany ever parts from VEG**, the contract is simply reevaluated at that time — no disruption for enrolled veggies.
 
 ## 5. Privacy & boundaries
@@ -78,11 +79,11 @@ Podcast production was renegotiated down from $5,650/month (Dec–May) to $2,700
 >
 > The short version:
 >
-> - **The ask:** a flat $5,000/month sponsorship that opens the membership to all 5,200 veggies and covers the program's operating costs (receipts attached for every line — a couple of figures are still being matched to statements and will be finalized before anything is signed). No per-seat fees, no enrollment cap.
-> - **The math:** that's 96 cents per veggie per month — $11.54 per veggie per year against the standard $1,200/year membership price, a 99% discount. VEG breaks even if fewer than 1% of veggies ever use it.
+> - **The ask:** a flat $4,900/month sponsorship that opens the membership to all 5,200 veggies. It's the program's exact cost — vendor expenses (receipts attached for every line) plus my administration time, capped at 10 hours/month at $100/hr. No margin, no per-seat fees, no enrollment cap. A couple of vendor figures are still being matched to statements and will be finalized before anything is signed.
+> - **The math:** that's 94 cents per veggie per month — $11.31 per veggie per year against the standard $1,200/year membership price, a 99% discount. VEG breaks even if fewer than 1% of veggies ever use it.
 > - **If I ever part from VEG**, we'd simply reevaluate the contract at that time — no disruption for enrolled veggies.
 > - **Access:** the app becomes a tile in VEG's Okta dashboard — single sign-on is already built, so a veggie just clicks the tile and they're in. No IT project, no cost to VEG.
-> - **Term:** a 90-day initial run ($15,000), then we look at enrollment and actual costs together and decide.
+> - **Term:** a 90-day initial run ($14,700), then we look at enrollment and actual costs together and decide.
 >
 > I've attached the full deck with the line-item breakdown. Happy to walk through any of it.
 >
