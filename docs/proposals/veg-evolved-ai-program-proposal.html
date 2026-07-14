@@ -1,0 +1,397 @@
+<title>Evolved AI × VEG — Program Proposal</title>
+<style>
+  :root {
+    --cream: #F7F4EE;
+    --ink: #222220;
+    --teal: #2A7C7B;
+    --teal-deep: #1E5150;
+    --mint: #B8D8D0;
+    --paper: #FFFFFF;
+    --muted: #6B6B64;
+    --line: #DDD8CC;
+    --radius: 2px;
+
+    --bg: var(--cream);
+    --fg: var(--ink);
+    --accent: var(--teal);
+    --accent-soft: var(--mint);
+    --card: var(--paper);
+    --rule: var(--line);
+    --dim: var(--muted);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #191B1A;
+      --fg: #EDEAE2;
+      --accent: #7FBDB4;
+      --accent-soft: #2A4B47;
+      --card: #222523;
+      --rule: #3A3E3B;
+      --dim: #A5A399;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #191B1A;
+    --fg: #EDEAE2;
+    --accent: #7FBDB4;
+    --accent-soft: #2A4B47;
+    --card: #222523;
+    --rule: #3A3E3B;
+    --dim: #A5A399;
+  }
+  :root[data-theme="light"] {
+    --bg: var(--cream);
+    --fg: var(--ink);
+    --accent: var(--teal);
+    --accent-soft: var(--mint);
+    --card: var(--paper);
+    --rule: var(--line);
+    --dim: var(--muted);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-snap-type: y proximity; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "DM Sans", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+  }
+  .display, h1, h2 {
+    font-family: "Cormorant", "Cormorant Garamond", Didot, "Playfair Display", Georgia, serif;
+    font-weight: 500;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0;
+  }
+  h1 { font-size: clamp(2.6rem, 6vw, 4.6rem); }
+  h2 { font-size: clamp(1.9rem, 4vw, 2.9rem); }
+  em { font-style: italic; }
+
+  .slide {
+    min-height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4.5rem clamp(1.2rem, 5vw, 4rem);
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+  }
+  .inner { width: 100%; max-width: 62rem; }
+
+  .eyebrow {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--accent);
+    font-weight: 600;
+    margin: 0 0 1.1rem;
+  }
+  .lede { font-size: 1.15rem; max-width: 40rem; }
+  p { max-width: 42rem; }
+  .dim { color: var(--dim); }
+
+  .slide-num {
+    position: absolute;
+    top: 1.4rem;
+    right: clamp(1.2rem, 5vw, 4rem);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    color: var(--dim);
+  }
+
+  /* Title slide */
+  .slide.cover { background: var(--teal-deep); color: #F3F1E9; border-bottom: none; }
+  .slide.cover .eyebrow { color: var(--mint); }
+  .slide.cover .dim { color: #BCC9C2; }
+  .cover-rule { width: 4.5rem; height: 2px; background: var(--mint); margin: 1.8rem 0; }
+  .cover-meta { display: flex; flex-wrap: wrap; gap: 2.5rem; margin-top: 2.6rem; font-size: 0.95rem; }
+  .cover-meta div span { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.18em; color: #9FB4AC; margin-bottom: 0.25rem; }
+
+  /* Cards & grids */
+  .grid { display: grid; gap: 1rem; margin-top: 2rem; }
+  .grid.cols-2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .grid.cols-3 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 1.3rem 1.4rem;
+  }
+  .card h3 {
+    margin: 0 0 0.5rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .card p { margin: 0; font-size: 0.95rem; }
+
+  ul.clean { list-style: none; padding: 0; margin: 1.4rem 0 0; max-width: 44rem; }
+  ul.clean li { padding: 0.65rem 0 0.65rem 1.6rem; position: relative; border-bottom: 1px solid var(--rule); }
+  ul.clean li::before { content: "—"; position: absolute; left: 0; color: var(--accent); }
+  ul.clean li:last-child { border-bottom: none; }
+
+  /* Tables */
+  .tablewrap { overflow-x: auto; margin-top: 1.8rem; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--card); }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 0.93rem; }
+  th, td { text-align: left; padding: 0.7rem 1rem; border-bottom: 1px solid var(--rule); }
+  th {
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.14em;
+    color: var(--dim); font-weight: 600; background: color-mix(in srgb, var(--accent-soft) 26%, transparent);
+  }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.total td { font-weight: 700; border-top: 2px solid var(--accent); }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .callout {
+    margin-top: 1.8rem;
+    border-left: 3px solid var(--accent);
+    background: color-mix(in srgb, var(--accent-soft) 22%, transparent);
+    padding: 1rem 1.3rem;
+    border-radius: var(--radius);
+    max-width: 44rem;
+  }
+  .callout p { margin: 0; font-size: 0.95rem; }
+
+  .big-compare { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 2rem; }
+  .big-compare .card { flex: 1 1 220px; }
+  .big-compare .figure {
+    font-family: "Cormorant", Georgia, serif;
+    font-size: 2.6rem; line-height: 1; margin: 0.3rem 0 0.4rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .figure.accent { color: var(--accent); }
+
+  .footnote { font-size: 0.8rem; color: var(--dim); margin-top: 1.4rem; max-width: 44rem; }
+
+  /* Dots nav */
+  nav.dots {
+    position: fixed; right: 0.9rem; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 0.55rem; z-index: 10;
+  }
+  nav.dots a {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--dim); opacity: 0.45; display: block;
+  }
+  nav.dots a:hover, nav.dots a:focus-visible { opacity: 1; background: var(--accent); outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (max-width: 720px) { nav.dots { display: none; } }
+
+  @media print {
+    nav.dots { display: none; }
+    html { scroll-snap-type: none; }
+    .slide { min-height: auto; page-break-after: always; border-bottom: none; padding: 2rem; }
+    .slide.cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+
+<nav class="dots" aria-label="Slides">
+  <a href="#s1" aria-label="Slide 1"></a><a href="#s2" aria-label="Slide 2"></a>
+  <a href="#s3" aria-label="Slide 3"></a><a href="#s4" aria-label="Slide 4"></a>
+  <a href="#s5" aria-label="Slide 5"></a><a href="#s6" aria-label="Slide 6"></a>
+  <a href="#s7" aria-label="Slide 7"></a><a href="#s8" aria-label="Slide 8"></a>
+  <a href="#s9" aria-label="Slide 9"></a><a href="#s10" aria-label="Slide 10"></a>
+</nav>
+
+<!-- 1 · Cover -->
+<section class="slide cover" id="s1">
+  <div class="inner">
+    <p class="eyebrow">Program Proposal · Prepared for Shelly &amp; Jonathan</p>
+    <h1>An AI companion for every veggie.</h1>
+    <div class="cover-rule"></div>
+    <p class="lede">A VEG-sponsored, cost-basis wellness &amp; productivity program — built and run by one of your own, offered to veggies at cost, on the model of our sponsored training partnerships.</p>
+    <div class="cover-meta">
+      <div><span>Presented by</span>Dr. Bethany Weinheimer</div>
+      <div><span>Program</span>The Evolved AI</div>
+      <div><span>Date</span>July 2026</div>
+      <div><span>Status</span>Draft for discussion</div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · Why -->
+<section class="slide" id="s2">
+  <span class="slide-num">02 · Why</span>
+  <div class="inner">
+    <p class="eyebrow">Why this matters</p>
+    <h2>Help people stay in the profession <em>longer</em>.</h2>
+    <p class="lede" style="margin-top:1.2rem">Emergency medicine asks more of our people than almost any corner of vet med: overnights, compassion fatigue, decision load, and the administrative weight that follows everyone home.</p>
+    <ul class="clean">
+      <li>Burnout and attrition are the profession's defining retention problem — and ER shifts concentrate both.</li>
+      <li>Mental-health risk in veterinary medicine is well documented; support that meets people <em>where they already are</em> gets used, support that requires another app or portal doesn't.</li>
+      <li>The cost of losing one trained ER doctor or nurse — recruiting, credentialing, ramp-up — dwarfs the cost of a wellness program for an entire hospital.</li>
+    </ul>
+    <div class="callout"><p>The goal is simple: reduce the daily load that drives burnout, so veggies stay healthier, happier, and at VEG longer. Even if it only helps one, it's worth doing — but it's built to help many.</p></div>
+  </div>
+</section>
+
+<!-- 3 · What it is -->
+<section class="slide" id="s3">
+  <span class="slide-num">03 · The Program</span>
+  <div class="inner">
+    <p class="eyebrow">What the program is</p>
+    <h2>A personal AI companion that lives in WhatsApp.</h2>
+    <p class="lede" style="margin-top:1.2rem">No new app, no portal, no login friction. Each veggie gets their own private AI assistant that learns them over time and handles the daily load.</p>
+    <div class="grid cols-3">
+      <div class="card"><h3>Daily load</h3><p>Calendar management, daily briefings, task capture, reminders, email triage and drafted replies.</p></div>
+      <div class="card"><h3>Wellness</h3><p>Energy and wellness check-ins, decompression support after hard shifts, boundary scripting for saying no without guilt.</p></div>
+      <div class="card"><h3>Grows with you</h3><p>Learns each person's life and builds for them over time — personal dashboards, shift trackers, weekly reviews.</p></div>
+    </div>
+    <p class="footnote">Retail, this product sells to the public at $49/month. VEG would never pay retail — this proposal is cost-basis only, per our conversation.</p>
+  </div>
+</section>
+
+<!-- 4 · How it works -->
+<section class="slide" id="s4">
+  <span class="slide-num">04 · Under the Hood</span>
+  <div class="inner">
+    <p class="eyebrow">How it works</p>
+    <h2>One private AI per person — not a shared chatbot.</h2>
+    <div class="grid cols-2">
+      <div class="card"><h3>Isolated &amp; personal</h3><p>Every veggie gets their own dedicated AI workspace. Their assistant's memory, personality, and files belong to them alone.</p></div>
+      <div class="card"><h3>Already built &amp; running</h3><p>The platform is live today with active subscribers: WhatsApp messaging, voice notes, memory, and personal page-building all work now.</p></div>
+      <div class="card"><h3>ER-aware onboarding</h3><p>A VEG cohort would launch with a veterinary starter pack — the AI understands shift work, caseload stress, and clinical vocabulary from day one.</p></div>
+      <div class="card"><h3>Zero IT burden on VEG</h3><p>Hosting, security, provisioning, and support are all handled by the program. VEG's only role is sponsorship and sign-up promotion.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · The model -->
+<section class="slide" id="s5">
+  <span class="slide-num">05 · The Model</span>
+  <div class="inner">
+    <p class="eyebrow">The sponsorship model</p>
+    <h2>Same playbook as the large-animal training partnership.</h2>
+    <p class="lede" style="margin-top:1.2rem">Exactly like the farm-training program with Rachel and Megan's family: a veggie-owned initiative, run independently, that VEG sponsors at cost because it benefits veggies.</p>
+    <ul class="clean">
+      <li><strong>Bethany owns and operates the program.</strong> It is an independent initiative, not a VEG product.</li>
+      <li><strong>VEG sponsors the cost, not the price.</strong> VEG pays actual expenses to run the program for its people — no margin, no markup.</li>
+      <li><strong>Veggies opt in.</strong> Sign-up is voluntary; VEG pays only for veggies who actually enroll.</li>
+      <li><strong>Outside sales stay separate.</strong> The public-facing product continues independently and will never present itself as VEG-sponsored or VEG-branded.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 6 · Cost anatomy -->
+<section class="slide" id="s6">
+  <span class="slide-num">06 · Costs</span>
+  <div class="inner">
+    <p class="eyebrow">What the money actually pays for</p>
+    <h2>The anatomy of a monthly cost.</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Expense</th><th>What it covers</th><th class="num">Est. monthly</th></tr></thead>
+        <tbody>
+          <tr><td>Server hosting</td><td>Dedicated cloud infrastructure running each veggie's private AI workspace</td><td class="num">$60–120 fixed</td></tr>
+          <tr><td>Billing &amp; sign-up platform</td><td>Enrollment, account management, program administration tooling</td><td class="num">$50 fixed</td></tr>
+          <tr><td>Monitoring &amp; backups</td><td>Uptime monitoring, data backups, security upkeep</td><td class="num">$20 fixed</td></tr>
+          <tr><td>AI model usage</td><td>The intelligence itself — per-message AI processing</td><td class="num">$4.00 / veggie</td></tr>
+          <tr><td>Voice transcription</td><td>Voice-note support (veggies talk to it hands-free)</td><td class="num">$0.50 / veggie</td></tr>
+          <tr><td>Message delivery</td><td>WhatsApp delivery infrastructure &amp; reliability buffer</td><td class="num">$1.00 / veggie</td></tr>
+          <tr><td>Support &amp; administration</td><td>Onboarding help, troubleshooting, program management time</td><td class="num">$4–6 / veggie</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="footnote">Figures are good-faith estimates from current operating costs of the live platform; final numbers to be confirmed together before launch. Support cost per veggie falls as the cohort grows.</p>
+  </div>
+</section>
+
+<!-- 7 · Tiers -->
+<section class="slide" id="s7">
+  <span class="slide-num">07 · Pricing</span>
+  <div class="inner">
+    <p class="eyebrow">Cost at three cohort sizes</p>
+    <h2>The bigger the cohort, the cheaper per veggie.</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Cohort size</th><th class="num">Fixed / mo</th><th class="num">Variable / mo</th><th class="num">Total / mo</th><th class="num">Per veggie / mo</th><th class="num">vs. $49 retail</th></tr></thead>
+        <tbody>
+          <tr><td>25 veggies (pilot)</td><td class="num">$130</td><td class="num">$288</td><td class="num">$418</td><td class="num">$16.70</td><td class="num">66% below</td></tr>
+          <tr><td>50 veggies</td><td class="num">$150</td><td class="num">$525</td><td class="num">$675</td><td class="num">$13.50</td><td class="num">72% below</td></tr>
+          <tr><td>100 veggies</td><td class="num">$200</td><td class="num">$950</td><td class="num">$1,150</td><td class="num">$11.50</td><td class="num">77% below</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="big-compare">
+      <div class="card"><h3>Retail price</h3><p class="figure">$49<span class="dim" style="font-size:1rem">/mo</span></p><p>What the public pays</p></div>
+      <div class="card"><h3>VEG cost (pilot)</h3><p class="figure accent">$16.70<span class="dim" style="font-size:1rem">/mo</span></p><p>Per enrolled veggie, at cost</p></div>
+      <div class="card"><h3>VEG cost (at scale)</h3><p class="figure accent">$11.50<span class="dim" style="font-size:1rem">/mo</span></p><p>Per veggie at 100 enrolled</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 · Setup -->
+<section class="slide" id="s8">
+  <span class="slide-num">08 · Setup</span>
+  <div class="inner">
+    <p class="eyebrow">One-time program setup</p>
+    <h2>What it takes to stand up a VEG cohort.</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Setup item</th><th>Deliverable</th><th class="num">Est. hours</th></tr></thead>
+        <tbody>
+          <tr><td>Veterinary starter pack</td><td>ER-specific domain knowledge so every AI understands vet med from message one</td><td class="num">20</td></tr>
+          <tr><td>Cohort enrollment flow</td><td>VEG sign-up path, batch provisioning, welcome sequence</td><td class="num">12</td></tr>
+          <tr><td>Program reporting</td><td>Aggregate, anonymized usage reporting for VEG (enrollment, engagement — never content)</td><td class="num">10</td></tr>
+          <tr><td>Launch materials &amp; office hours</td><td>Intro materials, live Q&amp;A sessions during pilot onboarding</td><td class="num">8</td></tr>
+          <tr class="total"><td>Total</td><td>One-time, before pilot launch</td><td class="num">~50 hrs</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="footnote">Setup billed at a to-be-agreed hourly rate (illustrative: 50 hrs × $75/hr = $3,750 one-time). Platform development itself is already complete and sunk — VEG is not being asked to fund product development, only VEG-specific setup.</p>
+  </div>
+</section>
+
+<!-- 9 · Privacy -->
+<section class="slide" id="s9">
+  <span class="slide-num">09 · Privacy</span>
+  <div class="inner">
+    <p class="eyebrow">Privacy &amp; boundaries</p>
+    <h2>What a veggie tells their AI stays <em>theirs</em>.</h2>
+    <div class="grid cols-2">
+      <div class="card"><h3>Private by design</h3><p>Conversations, memories, and personal files live in each veggie's isolated workspace. Nothing is shared between users — or with VEG.</p></div>
+      <div class="card"><h3>What VEG sees</h3><p>Aggregate, anonymized program metrics only: enrollment, active usage, and opt-in satisfaction surveys. Never message content.</p></div>
+      <div class="card"><h3>Not an employer tool</h3><p>The AI works for the veggie, not for management. That trust is what makes people actually use it — and what makes it work.</p></div>
+      <div class="card"><h3>Clean separation</h3><p>The independent, public version of the product carries no VEG branding or sponsorship claims, protecting both sides.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 · Pilot & next steps -->
+<section class="slide" id="s10">
+  <span class="slide-num">10 · Next Steps</span>
+  <div class="inner">
+    <p class="eyebrow">Proposed path forward</p>
+    <h2>A 90-day pilot, then a decision with real data.</h2>
+    <div class="grid cols-3">
+      <div class="card"><h3>Pilot scope</h3><p>25 veggies, opt-in, 90 days. Estimated cost: ~$3,750 setup + ~$420/month (~$5,000 total).</p></div>
+      <div class="card"><h3>Success metrics</h3><p>Weekly active usage, self-reported stress &amp; workload pulse, retention intent, and veggie satisfaction (NPS).</p></div>
+      <div class="card"><h3>Decision point</h3><p>At day 90, review the data together: expand to more veggies, adjust, or wind down cleanly — no long-term commitment.</p></div>
+    </div>
+    <ul class="clean">
+      <li>Bethany finalizes exact costs and confirms the setup rate.</li>
+      <li>Shelly &amp; Jonathan review and, if aligned, take the pilot to the board with this deck.</li>
+      <li>Pick a pilot hospital or open enrollment to the first 25 volunteers.</li>
+    </ul>
+    <div class="callout"><p>Thank you for being open to this. The whole point is helping our people stay in the profession they love — and I'd be proud to build that with VEG.  — Bethany</p></div>
+  </div>
+</section>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'PageDown' && e.key !== 'PageUp') return;
+    if (/input|textarea/i.test(document.activeElement.tagName)) return;
+    e.preventDefault();
+    const y = scrollY + 10;
+    const idx = slides.findIndex(s => s.offsetTop + s.offsetHeight > y);
+    const next = (e.key === 'ArrowDown' || e.key === 'PageDown') ? Math.min(idx + 1, slides.length - 1) : Math.max(idx - 1, 0);
+    slides[next].scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  });
+</script>
