@@ -34,20 +34,21 @@ These are TEV's actual monthly expenses — pulled from vendor receipts and invo
 |---|---|---:|
 | AI engine (Anthropic) | The intelligence behind every member's companion | **$213.20** |
 | Member ops & marketing team (Virtualee & Co) | Onboarding help, member support, content operations | **$750.00** |
-| Podcast production (Produce Your Podcast) | The Evolved Vets Podcast — free wellness content for the profession | _confirming_ |
-| Membership platform (Kajabi) | Enrollment, billing, member portal | _confirming_ |
+| Podcast production (Produce Your Podcast) | The Evolved Vets Podcast — free wellness content for the profession | **$2,700.00** |
+| Membership platform (Kajabi) | Enrollment, billing, member portal | **$199.00** † |
 | Server hosting (DigitalOcean) | Each member's private, isolated AI workspace | _confirming_ |
 | Google Workspace + domain (evolvedvets.com) | Business email, shared docs, website domain | ~$20 |
 | Messaging automation (Manychat) | Member messaging & sign-up flows | ~$20 |
+| **Documented total** | | **~$3,900/mo** |
 
-Lines marked _confirming_ are billed on statements being pulled now; final figures attach before any agreement. No margin, no markup — receipts available for every line.
+Podcast production was renegotiated down from $5,650/month (Dec–May) to $2,700/month effective June. † Kajabi is shown at the current plan list rate and hosting is being pulled from statements — both will be matched to statements before any agreement. No margin, no markup — receipts available for every line.
 
 ## 4. The ask
 
-- **Flat monthly sponsorship: $2,500/month** (proposed; trued up to receipts once the remaining lines are confirmed).
+- **Flat monthly sponsorship: $4,000/month** (proposed; trued up to receipts once the remaining lines are confirmed).
 - **Unlimited veggie enrollment** — no per-seat fees, no cap. The sponsorship never grows with enrollment.
-- Break-even against retail is **51 enrolled veggies**; at 100 enrolled the effective cost is **$25/veggie/month** (49% below retail), and it keeps falling as more join.
-- **90-day initial term** (~$7,500 total commitment), then review enrollment and actual costs together: continue, adjust, or wind down cleanly.
+- Break-even against retail is **82 enrolled veggies**; at 200 enrolled the effective cost is **$20/veggie/month** (59% below retail), and it keeps falling as more join.
+- **90-day initial term** (~$12,000 total commitment), then review enrollment and actual costs together: continue, adjust, or wind down cleanly.
 
 ## 5. Privacy & boundaries
 
@@ -76,10 +77,10 @@ Lines marked _confirming_ are billed on statements being pulled now; final figur
 >
 > The short version:
 >
-> - **The ask:** a flat $2,500/month sponsorship that covers the program's documented operating costs (receipts attached for every line — a couple of figures are still being pulled from statements and will be finalized before anything is signed). No per-seat fees, no enrollment cap.
-> - **The math:** break-even against the $49/month retail price is just 51 veggies; at 100 enrolled it works out to $25/veggie/month, and it keeps dropping as more join.
+> - **The ask:** a flat $4,000/month sponsorship that covers the program's documented operating costs (receipts attached for every line — a couple of figures are still being matched to statements and will be finalized before anything is signed). No per-seat fees, no enrollment cap.
+> - **The math:** break-even against the $49/month retail price is 82 veggies; at 200 enrolled it works out to $20/veggie/month, and it keeps dropping as more join.
 > - **Access:** the app becomes a tile in VEG's Okta dashboard — single sign-on is already built, so a veggie just clicks the tile and they're in. No IT project, no cost to VEG.
-> - **Term:** a 90-day initial run (~$7,500), then we look at enrollment and actual costs together and decide.
+> - **Term:** a 90-day initial run (~$12,000), then we look at enrollment and actual costs together and decide.
 >
 > I've attached the full deck with the line-item breakdown. Happy to walk through any of it.
 >
