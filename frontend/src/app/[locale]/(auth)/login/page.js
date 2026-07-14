@@ -323,15 +323,24 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Footer link */}
-          <div className="mt-6 text-center">
+          {/* Footer links */}
+          <div className="mt-6 text-center space-y-2">
             <Link
               href="/forgot-password"
-              className="text-[0.75rem] no-underline hover:underline"
+              className="block text-[0.75rem] no-underline hover:underline"
               style={{ color: 'var(--color-brand-brown)' }}
             >
               {t('forgotPassword')}
             </Link>
+            {process.env.NEXT_PUBLIC_SSO_LOGIN_URL && (
+              <a
+                href={process.env.NEXT_PUBLIC_SSO_LOGIN_URL}
+                className="block text-[0.75rem] no-underline hover:underline"
+                style={{ color: 'var(--color-brand-teal)' }}
+              >
+                {t('ssoOrgSignIn')}
+              </a>
+            )}
           </div>
         </div>
       </div>

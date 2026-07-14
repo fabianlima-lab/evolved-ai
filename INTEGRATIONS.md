@@ -135,3 +135,43 @@ nohup openclaw gateway run --force > /var/log/openclaw-gateway.log 2>&1 &
 3. Configure Maton API for Fathom + Xero OAuth
 4. Set up Calendly API integration
 5. Consider adding: Notion, Trello, Weather, Summarize, API Gateway
+
+---
+
+## Okta SSO (Partner-Org Tile, e.g. VEG)
+
+The backend supports Okta OIDC sign-in so a partner organization can add the
+web app as a tile in their Okta dashboard. Clicking the tile signs the user in
+(auto-provisioning a subscriber with `authProvider: 'okta'`, `tier: 'active'`
+on first click) and lands them on the dashboard.
+
+**Backend env vars** (all four required to enable; routes return 503 otherwise):
+
+```bash
+OKTA_ISSUER=https://<org>.okta.com/oauth2/default   # authorization server URL, no trailing slash
+OKTA_CLIENT_ID=...
+OKTA_CLIENT_SECRET=...
+OKTA_REDIRECT_URI=https://<api-host>/api/auth/okta/callback
+```
+
+**Frontend env var** (optional — shows a "Sign in with your organization" link on /login):
+
+```bash
+NEXT_PUBLIC_SSO_LOGIN_URL=https://<api-host>/api/auth/okta/login
+```
+
+**Okta admin app settings** (what the partner org's IT configures):
+
+- App type: **OIDC — Web Application**
+- Sign-in redirect URI: `https://<api-host>/api/auth/okta/callback`
+- Initiate login URI: `https://<api-host>/api/auth/okta/login` (this makes the tile work)
+- Login initiated by: **Either Okta or App**
+- Scopes: `openid profile email`
+
+**Flow:** tile / login link → `GET /api/auth/okta/login` → Okta authorize →
+`GET /api/auth/okta/callback` (code exchange, claim checks, find-or-create
+subscriber by `oktaId` then email) → redirect to `${APP_URL}/sso#token=...` →
+the `/sso` page stores the JWT in localStorage and routes into the app.
+
+Run `npx prisma migrate deploy` after pulling — this adds the
+`subscribers.okta_id` column (migration `20260714000000_add_okta_sso`).

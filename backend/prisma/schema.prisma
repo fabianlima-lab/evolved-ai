@@ -17,6 +17,7 @@ model Subscriber {
   googleAccessToken        String?   @map("google_access_token") @db.Text
   googleAccessTokenExpiry  DateTime? @map("google_access_token_expiry")
   googleScopes             String?   @map("google_scopes") @db.VarChar(500)
+  oktaId                   String?   @unique @map("okta_id") @db.VarChar(255)
   authProvider             String    @default("email") @map("auth_provider") @db.VarChar(20)
   tier                     String    @default("trial") @db.VarChar(20)
   trialEndsAt              DateTime? @map("trial_ends_at")

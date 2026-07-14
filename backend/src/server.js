@@ -5,6 +5,7 @@ import rateLimit from '@fastify/rate-limit';
 import env from './config/env.js';
 
 import authRoutes from './routes/auth.js';
+import oktaAuthRoutes from './routes/okta-auth.js';
 import agentRoutes from './routes/agents.js';
 import dashboardRoutes from './routes/dashboard.js';
 import webhookRoutes from './routes/webhooks.js';
@@ -96,6 +97,7 @@ async function build() {
 
   // Routes
   app.register(authRoutes, { prefix: '/api/auth' });
+  app.register(oktaAuthRoutes, { prefix: '/api/auth/okta' });
   app.register(agentRoutes, { prefix: '/api/agents' });
   app.register(dashboardRoutes, { prefix: '/api/dashboard' });
   app.register(webhookRoutes, { prefix: '/api/webhooks' });

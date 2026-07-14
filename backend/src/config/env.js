@@ -29,6 +29,13 @@ const env = {
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI,
 
+  // Okta OIDC SSO (partner-org tile, e.g. VEG). Issuer is the full authorization
+  // server URL, e.g. https://<org>.okta.com/oauth2/default
+  OKTA_ISSUER: (process.env.OKTA_ISSUER || '').replace(/\/$/, ''),
+  OKTA_CLIENT_ID: process.env.OKTA_CLIENT_ID,
+  OKTA_CLIENT_SECRET: process.env.OKTA_CLIENT_SECRET,
+  OKTA_REDIRECT_URI: process.env.OKTA_REDIRECT_URI,
+
   // AI Models — Primary: Anthropic Claude, Fallback: Groq, Safety net: NVIDIA
   ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
   NVIDIA_API_KEY: process.env.NVIDIA_API_KEY,
