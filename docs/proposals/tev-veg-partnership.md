@@ -55,11 +55,7 @@ Standard membership price: **$1,200/year per member** (contents valued at $6,800
 - **Includes everything:** the full membership, every new course and meditation, the monthly coaching call, RACE-approved CE, Okta and app access, and Bethany's ongoing program leadership.
 - **An ongoing partnership:** VEG shares what its people need, and Bethany keeps building the courses and meditations with their needs in mind — reviewed together on an ongoing basis.
 
-## 6. Created by
-
-**Bethany Weinheimer, DVM** — emergency veterinarian and VEG Field Medical Director; founder of The Evolved Vets; RACE CE provider; host of The Evolved Vets Podcast; national speaker on veterinary wellbeing and leadership. This isn't an outside vendor — it's an internal leadership initiative, proposed by one of VEG's own physician leaders.
-
-## 7. Closing
+## 6. Closing
 
 Thank you for being open to this. The whole point is helping our people stay in the profession they love — and I'd be proud to build that in a way that supports VEG. — Bethany
 
