@@ -45,7 +45,7 @@ Standard membership price: **$1,200/year per member** (contents valued at $6,800
 
 ## 4. The return
 
-- **One retained veterinarian:** given the cost of replacing a veterinarian — widely estimated at 1.5–2× annual salary — retaining even one team member has the potential to offset a significant portion, or even all, of the annual investment.
+- **One retained veterinarian more than covers the entire annual investment.** The average practice generates ~$555,000 in revenue per veterinarian per year (AVMA Economic State of the Veterinary Profession benchmarking, 2024), and the average DVM hire takes 15 months to fill (AAHA survey, 2023) — an empty seat costs roughly $46,000 a month in lost production alone.
 - **One leader developed:** a leader promoted — or kept in seat — through greater emotional regulation and growth shapes the experience of every VEGgie they lead. Leadership development compounds.
 - **The scale of turnover:** at the industry's ~23% team turnover (AAHA), 5,200 VEGgies means roughly 1,200 team transitions a year. If this program prevented even 1–2% of those departures, it would return several multiples of its annual cost.
 - **Beyond retention:** lower burnout and stronger day-to-day wellbeing show up in engagement, culture, and quality of care — the outcomes VEG already measures and celebrates.
@@ -75,7 +75,7 @@ I'd be honored to partner with VEG in building the healthiest, most resilient ve
 >
 > The structure is simple: an enterprise partnership that provides unlimited access for every VEG employee through one annual organizational investment — $58,800 per year, billed monthly at $4,900, fixed regardless of enrollment and fixed as VEG grows. Every VEGgie gets the full membership, including all new courses, meditations, and the monthly coaching call as they're released. I own and operate the program as an independent initiative, not VEG-branded, per your requests.
 >
-> The return story is in the deck, but the short version: given what it costs to replace a veterinarian, retaining even one team member has the potential to offset a significant portion — or all — of the annual investment. And we'd measure success together with real numbers, not assumptions.
+> The return story is in the deck, but the short version: the average practice generates about $555,000 in revenue per veterinarian per year (AVMA), and the average DVM hire takes 15 months to fill (AAHA) — so one retained veterinarian more than covers the entire annual investment. And we'd measure success together with real numbers, not assumptions.
 >
 > Access is one click: the membership site becomes a tile in VEG's Okta dashboard, and VEGgies can also use the TEV app on the go. I'd love to partner with your IT team to set that up.
 >
