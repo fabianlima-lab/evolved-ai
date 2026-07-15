@@ -67,7 +67,7 @@ Business coaching (With Enthusiasm Coaching) is intentionally **not** included i
 
 ## 5. The ask
 
-- **A 99% reduced cost for every VEGgie:** $11.31 per person per year ($0.94/month) against the standard $1,200 per person/year membership price.
+- **A 99% reduced cost for every VEGgie.** The math: $4,900/month is $58,800/year; spread across all 5,200 VEGgies, that comes to $11.31 per person per year ($0.94/month) — about 1% of the standard $1,200 per person/year membership price, a 99% reduction.
 - **The program cost is $4,900/month flat** — the exact operating cost, expenses plus capped administration time, no margin. No per-seat fees, no cap — it never grows with enrollment.
 - VEG breaks even if just **49 of its 5,200 VEGgies** were to join at full price — every VEGgie beyond that is free. With the membership open to all VEGgies, the effective cost lands **under 1% of the standard price**.
 - **An ongoing partnership:** VEG shares what VEGgies need, and Bethany keeps building the courses and meditations with their needs in mind. At-cost membership gives VEG employees more resources while Bethany expands her reach beyond her region — and the cost stays fixed even as VEG grows. With VEG opening another 30 hospitals next year, that's at least another 900 VEGgies.
