@@ -1,4 +1,4 @@
-# The Evolved Vets × VEG — Sponsored Membership Proposal
+# TEV & VEG Partnership
 
 **Prepared by:** Dr. Bethany Weinheimer
 **For:** Shelly & Jonathan (VEG)
