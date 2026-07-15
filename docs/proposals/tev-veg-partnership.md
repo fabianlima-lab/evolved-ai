@@ -42,20 +42,24 @@ Standard membership price: **$1,200/year per member** (contents valued at $6,800
 ## 4. The return
 
 - **One retained veterinarian more than covers the entire annual investment.** Replacing a single employee costs one-half to two times their annual salary (Gallup) — for an emergency veterinarian, a six-figure event.
-- **The scale of turnover:** at the industry's ~23% team turnover (AAHA), a 5,200-person organization faces on the order of a thousand departures a year. Moving that number even slightly is worth multiples of this program.
+- **The scale of turnover:** at the industry's ~23% team turnover (AAHA), 5,200 VEGgies means roughly 1,200 team transitions a year. If this program prevented even 1–2% of those departures, it would return several multiples of its annual cost.
 - **Beyond retention:** lower burnout and stronger day-to-day wellbeing show up in engagement, culture, and quality of care — the outcomes VEG already measures and celebrates.
 - **VEG's strategic priorities:** with volumes growing, retaining highly skilled talent is vital — and the capabilities this membership builds (self-compassion, grace under pressure, and mindset shifts around feedback) are exactly what keeps people at VEG.
-- **Success gets measured, not assumed:** enrollment, monthly engagement, CE hours claimed, a wellbeing pulse, and member-vs-non-member retention from VEG's own data — reviewed together.
+- **Success gets measured, not assumed:** enrollment, monthly engagement, CE hours claimed, and a wellbeing pulse — and over time, the metrics VEG already tracks: retention, engagement, absenteeism, and recruitment. Projected year-one activation: 30–50% of VEGgies.
 
 ## 5. The investment
 
 - **$58,800 per year** (billed monthly at $4,900) — one organizational investment, fixed regardless of enrollment.
 - **Every VEGgie included:** all 5,200+ employees, unlimited access, all new content as it's released.
-- **Fixed as VEG grows:** thirty new hospitals next year — roughly 900 more VEGgies — are covered by the same investment.
+- **Fixed as VEG grows:** scales automatically — thirty new hospitals next year (~900 more VEGgies) with no per-user licensing, no implementation project, no IT lift. Structured as a fixed annual operating agreement.
 - **Includes everything:** the full membership, every new course and meditation, the monthly coaching call, RACE-approved CE, Okta and app access, and Bethany's ongoing program leadership.
 - **An ongoing partnership:** VEG shares what its people need, and Bethany keeps building the courses and meditations with their needs in mind — reviewed together on an ongoing basis.
 
-## 6. Closing
+## 6. Created by
+
+**Bethany Weinheimer, DVM** — emergency veterinarian and VEG Field Medical Director; founder of The Evolved Vets; RACE CE provider; host of The Evolved Vets Podcast; national speaker on veterinary wellbeing and leadership. This isn't an outside vendor — it's an internal leadership initiative, proposed by one of VEG's own physician leaders.
+
+## 7. Closing
 
 Thank you for being open to this. The whole point is helping our people stay in the profession they love — and I'd be proud to build that in a way that supports VEG. — Bethany
 
@@ -86,7 +90,17 @@ Thank you for being open to this. The whole point is helping our people stay in 
 
 ---
 
-## Appendix — expense-labeled budget (for the CLO only; not part of the pitch)
+## Appendix A — founder questions, answered ahead of time
+
+- **Will people actually use it?** Access is one click via Okta and the app, content is built for shift life (10-minute resets, on-demand audio), and RACE CE gives every VEGgie a concrete reason to log in. Projected year-one activation: 30–50%, measured monthly.
+- **Does it improve retention?** That's the metric we'll watch together: member-vs-non-member retention from VEG's own HR data, alongside wellbeing pulses. The research base (JAVMA, Lancet, Mindfulness) says the mechanism is real.
+- **Is it okay that Bethany runs it?** The program is an independent initiative, not VEG-branded, per your requests — structured as a fixed annual operating agreement, reviewed by VEG legal like any vendor relationship.
+- **Can it scale to 10,000+ VEGgies?** Yes — digital content and community scale automatically; the coaching call is a group format. No per-user licensing, no added IT.
+- **What happens if circumstances change?** The agreement is reviewed together on an ongoing basis and can be renegotiated at any review — with no disruption to enrolled VEGgies.
+- **Can the content stay current?** That's the partnership: VEG shares what VEGgies need, and Bethany builds new courses and meditations with their needs in mind, all included.
+- **Why not build this internally?** It exists today, built by one of VEG's own, with RACE approval, a content library, and a live community — years of head start for a fraction of one internal hire.
+
+## Appendix B — expense-labeled budget (for the CLO only; not part of the pitch)
 
 VEG's legal/accounting team asked for the arrangement to be labeled as expenses. Keep this breakdown out of the board conversation and provide it only when accounting requests it:
 
