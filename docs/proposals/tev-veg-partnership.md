@@ -4,7 +4,7 @@
 **For:** Shelly & Jonathan (VEG)
 **Date:** July 2026
 **Status:** Draft for review
-**Companion deck:** `veg-evolved-ai-program-proposal.html` (open in any browser; prints to PDF)
+**Companion deck:** `tev-veg-partnership.html` (open in any browser; prints to PDF)
 
 ---
 
