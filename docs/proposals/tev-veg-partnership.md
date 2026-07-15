@@ -30,7 +30,7 @@ The Evolved Vets Membership is a year-round roadmap to building confidence, mana
 
 - **TEV Connect** — a private community of veterinary professionals supporting each other's growth, expansion, and leadership
 - **Vet Resets** — a library of quick meditations made for veterinary professionals (Shift Shedding, Surgery Confidence Boost, Reconnecting With Your Why)
-- **Live coaching** — monthly live group coaching calls, plus hospital-wide facilitations as requested
+- **Live coaching** — monthly live group coaching calls
 - **Masterclass Evolutions** — biannual group programs (Summer & New Year) working through a new Masterclass week by week
 - **RACE-approved CE** — 30 hours of RACE approval available throughout the year
 - **Audio archive** — every meditation, elevation, and integration from TEV Masterclasses, on demand
@@ -38,6 +38,8 @@ The Evolved Vets Membership is a year-round roadmap to building confidence, mana
 And it never stands still: VEGgies get every **new course, meditation, and monthly coaching call** as they're released — the membership grows all year, at no added cost to VEG.
 
 Standard membership price: **$1,200/year per member** (contents valued at $6,800/year).
+
+> **VEG Bonus:** hospital-wide facilitations — available to individual VEG hospital locations upon request.
 
 ## 4. The return
 
@@ -51,13 +53,13 @@ Standard membership price: **$1,200/year per member** (contents valued at $6,800
 
 - **$58,800 per year** (billed monthly at $4,900) — one organizational investment, fixed regardless of enrollment.
 - **Every VEGgie included:** all 5,200+ employees, unlimited access, all new content as it's released.
-- **Fixed as VEG grows:** scales automatically — thirty new hospitals next year (~1,000 more VEGgies and 30 more opportunities for hospital facilitations) with no per-user licensing, no implementation project, no IT lift. Structured as a fixed annual operating agreement.
-- **Includes everything:** the full membership, every new course and meditation, the monthly coaching call, hospital-wide facilitations as requested, RACE-approved CE, Okta and app access, and Bethany's ongoing program leadership.
+- **Fixed as VEG grows:** scales automatically — 28 new hospitals next year (~900 more VEGgies and 28 more opportunities for hospital facilitations) with no per-user licensing, no implementation project, no IT lift. Structured as a fixed annual operating agreement.
+- **Includes everything:** the full membership, every new course and meditation, the monthly coaching call, hospital-wide facilitations for individual locations upon request, RACE-approved CE, Okta and app access, and Bethany's ongoing program leadership.
 - **An ongoing partnership:** VEG shares what its people need, and Bethany keeps building the courses and meditations with their needs in mind — reviewed together on an ongoing basis.
 
 ## 6. Closing
 
-Thank you for being open to this. The whole point is helping our people stay in the profession they love — and I'd be proud to build that in a way that supports VEG. — Bethany
+Thank you for brainstorming ways we can partner together. The whole point is helping our people stay in the profession they love — and I'd be proud to build that in a way that supports VEG.
 
 ---
 
