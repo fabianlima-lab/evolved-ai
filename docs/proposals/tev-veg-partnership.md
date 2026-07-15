@@ -30,7 +30,7 @@ The Evolved Vets Membership is a year-round roadmap to building confidence, mana
 
 - **TEV Connect** — a private community of veterinary professionals supporting each other's growth, expansion, and leadership
 - **Vet Resets** — a library of quick meditations made for vets (Shift Shedding, Surgery Confidence Boost, Reconnecting With Your Why)
-- **Live coaching** — monthly live group coaching calls
+- **Live coaching** — monthly live group coaching calls, plus hospital-wide facilitations as requested
 - **Masterclass Evolutions** — biannual group programs (Summer & New Year) working through a new Masterclass week by week
 - **RACE-approved CE** — 30 hours of RACE approval available throughout the year
 - **Audio archive** — every meditation, elevation, and integration from TEV Masterclasses, on demand
@@ -41,18 +41,18 @@ Standard membership price: **$1,200/year per member** (contents valued at $6,800
 
 ## 4. The return
 
-- **One retained veterinarian more than covers the entire annual investment.** Replacing a single employee costs one-half to two times their annual salary (Gallup) — for an emergency veterinarian, a six-figure event.
+- **One retained veterinarian more than covers the entire annual investment.** Replacing a single veterinarian is widely estimated at 1.5–2× their annual salary — a six-figure event.
+- **One leader developed:** a leader promoted — or kept in seat — through greater emotional regulation and growth shapes the experience of every VEGgie they lead. Leadership development compounds.
 - **The scale of turnover:** at the industry's ~23% team turnover (AAHA), 5,200 VEGgies means roughly 1,200 team transitions a year. If this program prevented even 1–2% of those departures, it would return several multiples of its annual cost.
 - **Beyond retention:** lower burnout and stronger day-to-day wellbeing show up in engagement, culture, and quality of care — the outcomes VEG already measures and celebrates.
-- **VEG's strategic priorities:** with volumes growing, retaining highly skilled talent is vital — and the capabilities this membership builds (self-compassion, grace under pressure, and mindset shifts around feedback) are exactly what keeps people at VEG.
-- **Success gets measured, not assumed:** enrollment, monthly engagement, CE hours claimed, and a wellbeing pulse — and over time, the metrics VEG already tracks: retention, engagement, absenteeism, and recruitment. Projected year-one activation: 30–50% of VEGgies.
+- **VEG's strategic priorities:** with growing case volumes, retaining highly skilled talent is vital — and the capabilities this membership builds (self-compassion, grace under pressure, and mindset shifts around feedback) are exactly what keeps people at VEG, because it fosters an even deeper culture.
 
 ## 5. The investment
 
 - **$58,800 per year** (billed monthly at $4,900) — one organizational investment, fixed regardless of enrollment.
 - **Every VEGgie included:** all 5,200+ employees, unlimited access, all new content as it's released.
-- **Fixed as VEG grows:** scales automatically — thirty new hospitals next year (~900 more VEGgies) with no per-user licensing, no implementation project, no IT lift. Structured as a fixed annual operating agreement.
-- **Includes everything:** the full membership, every new course and meditation, the monthly coaching call, RACE-approved CE, Okta and app access, and Bethany's ongoing program leadership.
+- **Fixed as VEG grows:** scales automatically — thirty new hospitals next year (~1,000 more VEGgies and 30 more opportunities for hospital facilitations) with no per-user licensing, no implementation project, no IT lift. Structured as a fixed annual operating agreement.
+- **Includes everything:** the full membership, every new course and meditation, the monthly coaching call, hospital-wide facilitations as requested, RACE-approved CE, Okta and app access, and Bethany's ongoing program leadership.
 - **An ongoing partnership:** VEG shares what its people need, and Bethany keeps building the courses and meditations with their needs in mind — reviewed together on an ongoing basis.
 
 ## 6. Closing
