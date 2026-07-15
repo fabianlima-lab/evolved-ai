@@ -10,7 +10,7 @@
 
 ## 1. The offer
 
-One thing, kept simple: **VEGgies get access to the existing Evolved Vets Membership at a 99% reduced cost.** VEG covers part of the expenses to develop and run the program for its people — no margin — and membership opens to every VEGgie who wants it. Similar playbook to the farm-training program: an initiative, run independently, that gives VEGgies extra support at cost because of its impact. The public version stays fully separate and never carries VEG branding.
+One thing, kept simple: **VEGgies get access to the existing Evolved Vets Membership at a 99% reduced cost.** VEG covers part of the expenses to develop and run the program for its people — no margin — and membership opens to every VEGgie who wants it. Similar playbook to the farm-training program: an initiative, run independently, that gives VEGgies extra support at cost because of its impact. Bethany owns and operates the program as an independent initiative, not VEG-branded, per your requests.
 
 **Access is one click:** the membership website becomes a tile in VEG's Okta dashboard, right next to the tools VEGgies already use every shift. A VEGgie clicks the tile and lands in the member portal — and for access on the go, VEGgies can also log in through the TEV app. Bethany will partner with VEG's technology team to stand up the tile and access.
 
@@ -86,7 +86,7 @@ Thank you for being open to this. The whole point is helping our people stay in 
 >
 > Thank you again for being open to this. As promised, here's the cost breakdown for making the membership available to VEGgies.
 >
-> Keeping it simple: this stays an independent program that I own and run, and every VEGgie who wants access gets it — including all new courses, meditations, and the monthly coaching call as they're released. The public version stays fully separate with no VEG branding.
+> Keeping it simple: I own and operate the program as an independent initiative, not VEG-branded, per your requests — and every VEGgie who wants access gets it, including all new courses, meditations, and the monthly coaching call as they're released.
 >
 > The short version:
 >
