@@ -16,7 +16,9 @@ Similar playbook to the farm-training program: an initiative, run independently,
 
 **Access is one click:** the membership website becomes a tile in VEG's Okta dashboard, right next to the tools VEGgies already use every shift — and for access on the go, VEGgies can also log in through the TEV app. Bethany will partner with VEG's technology team to stand up the tile and access.
 
-## 2. Why this matters (evidence for the board)
+## 2. The vision (and the evidence for the board)
+
+**VEG has reimagined emergency medicine for pets. This partnership extends that same innovation to the wellbeing and leadership of the people delivering that care every day.**
 
 - **Suicide risk is elevated across the whole veterinary team.** Veterinarians die by suicide at 2.1× (men) and 3.5× (women) the rate of the general U.S. population (Tomasi SE et al., *JAVMA* 2019;254(1):104–112, CDC/NIOSH). For veterinary technicians the ratios are 5.0× (men — a small-sample estimate, fewer than 20 deaths) and 2.3× (women) (Witte TK, Nett RJ et al., *JAVMA* 2019;255(5):595–608, CDC/NIOSH).
 - **The strain reaches the whole team.** In the peer-reviewed Merck Animal Health Veterinary Team study, conducted with the AVMA, serious psychological distress was twice as prevalent among nonveterinarian practice team members as among veterinarians, and their reported wellbeing was lower (*JAVMA* 2024;262(10)). AVMA leadership has made team wellbeing a stated priority for the profession.
@@ -43,7 +45,7 @@ Standard membership price: **$1,200/year per member** (contents valued at $6,800
 
 ## 4. The return
 
-- **One retained veterinarian more than covers the entire annual investment.** Replacing a single veterinarian is widely estimated at 1.5–2× their annual salary — a six-figure event.
+- **One retained veterinarian:** given the cost of replacing a veterinarian — widely estimated at 1.5–2× annual salary — retaining even one team member has the potential to offset a significant portion, or even all, of the annual investment.
 - **One leader developed:** a leader promoted — or kept in seat — through greater emotional regulation and growth shapes the experience of every VEGgie they lead. Leadership development compounds.
 - **The scale of turnover:** at the industry's ~23% team turnover (AAHA), 5,200 VEGgies means roughly 1,200 team transitions a year. If this program prevented even 1–2% of those departures, it would return several multiples of its annual cost.
 - **Beyond retention:** lower burnout and stronger day-to-day wellbeing show up in engagement, culture, and quality of care — the outcomes VEG already measures and celebrates.
@@ -59,7 +61,7 @@ Standard membership price: **$1,200/year per member** (contents valued at $6,800
 
 ## 6. Closing
 
-Thank you for brainstorming ways we can partner together. The whole point is helping our people stay in the profession they love — and I'd be proud to build that in a way that supports VEG.
+I'd be honored to partner with VEG in building the healthiest, most resilient veterinary workforce in the profession.
 
 ---
 
@@ -73,7 +75,7 @@ Thank you for brainstorming ways we can partner together. The whole point is hel
 >
 > The structure is simple: an enterprise partnership that provides unlimited access for every VEG employee through one annual organizational investment — $58,800 per year, billed monthly at $4,900, fixed regardless of enrollment and fixed as VEG grows. Every VEGgie gets the full membership, including all new courses, meditations, and the monthly coaching call as they're released. I own and operate the program as an independent initiative, not VEG-branded, per your requests.
 >
-> The return story is in the deck, but the short version: replacing a single employee costs one-half to two times their annual salary, so one retained veterinarian more than covers the entire annual investment — and we'd measure success together with real numbers, not assumptions.
+> The return story is in the deck, but the short version: given what it costs to replace a veterinarian, retaining even one team member has the potential to offset a significant portion — or all — of the annual investment. And we'd measure success together with real numbers, not assumptions.
 >
 > Access is one click: the membership site becomes a tile in VEG's Okta dashboard, and VEGgies can also use the TEV app on the go. I'd love to partner with your IT team to set that up.
 >
@@ -81,7 +83,7 @@ Thank you for brainstorming ways we can partner together. The whole point is hel
 >
 > Happy to walk through any of it.
 >
-> The goal, as always: help our people stay in the profession they love.
+> I'd be honored to partner with VEG in building the healthiest, most resilient veterinary workforce in the profession.
 >
 > Thank you both,
 > Bethany
