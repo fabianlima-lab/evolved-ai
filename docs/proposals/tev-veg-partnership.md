@@ -29,7 +29,7 @@ Similar playbook to the farm-training program: an initiative, run independently,
 The Evolved Vets Membership is a year-round roadmap to building confidence, managing energy, improving communication, and stepping into leadership — made by a veterinarian, for veterinary professionals:
 
 - **TEV Connect** — a private community of veterinary professionals supporting each other's growth, expansion, and leadership
-- **Vet Resets** — a library of quick meditations made for vets (Shift Shedding, Surgery Confidence Boost, Reconnecting With Your Why)
+- **Vet Resets** — a library of quick meditations made for veterinary professionals (Shift Shedding, Surgery Confidence Boost, Reconnecting With Your Why)
 - **Live coaching** — monthly live group coaching calls, plus hospital-wide facilitations as requested
 - **Masterclass Evolutions** — biannual group programs (Summer & New Year) working through a new Masterclass week by week
 - **RACE-approved CE** — 30 hours of RACE approval available throughout the year
