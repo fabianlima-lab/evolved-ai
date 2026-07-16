@@ -12,7 +12,7 @@
 
 **This enterprise partnership provides unlimited access for every VEG employee through one annual organizational investment.**
 
-Like the farm-training program, this is an independent initiative that VEG invests in because of its impact on VEGgies. Bethany owns and operates the program as an independent initiative, not VEG-branded, per your requests. The public version stays fully separate.
+Like the farm-training program, this is an independent initiative that VEG invests in because of its impact on VEGgies. Bethany owns and operates the program as an independent initiative, no external VEG partnership, per your requests. The public version stays fully separate.
 
 **Access is one click:** the membership website becomes a tile in VEG's Okta dashboard, right next to the tools VEGgies already use every shift — and for access on the go, VEGgies can also log in through the TEV app. Bethany will partner with VEG's technology team to stand up the tile and access.
 
@@ -75,7 +75,7 @@ I'd be honored to partner with VEG in building the healthiest, most resilient ve
 >
 > VEG has reimagined emergency medicine for pets. This partnership extends that same innovation to the wellbeing and leadership of the people delivering that care every day.
 >
-> The structure is simple: **an enterprise partnership that provides unlimited access for every VEG employee through one annual organizational investment — $58,800 per year** (billed monthly at $4,900), fixed regardless of enrollment and fixed as VEG grows. Every VEGgie gets the full membership — the community, the meditation library, monthly live coaching, 30 hours of RACE-approved CE, and every new course and meditation as it's released — plus hospital-wide facilitations available to individual locations upon request. I own and operate the program as an independent initiative, not VEG-branded, per your requests.
+> The structure is simple: **an enterprise partnership that provides unlimited access for every VEG employee through one annual organizational investment — $58,800 per year** (billed monthly at $4,900), fixed regardless of enrollment and fixed as VEG grows. Every VEGgie gets the full membership — the community, the meditation library, monthly live coaching, 30 hours of RACE-approved CE, and every new course and meditation as it's released — plus hospital-wide facilitations available to individual locations upon request. I own and operate the program as an independent initiative, no external VEG partnership, per your requests.
 >
 > The full return story is in the deck, but the number that matters most: the average practice generates about $555,000 in revenue per veterinarian per year (AVMA), and the average DVM hire takes 15 months to fill (AAHA). One retained veterinarian more than covers the entire annual investment — and we'd measure success together with real data: enrollment, engagement, and retention.
 >
@@ -95,7 +95,7 @@ I'd be honored to partner with VEG in building the healthiest, most resilient ve
 
 - **Will people actually use it?** Access is one click via Okta and the app, content is built for shift life (10-minute resets, on-demand audio), and RACE CE gives every VEGgie a concrete reason to log in. Projected year-one activation: 30–50%, measured monthly.
 - **Does it improve retention?** That's the metric we'll watch together: member-vs-non-member retention from VEG's own HR data, alongside wellbeing pulses. The research base (JAVMA, Lancet, Mindfulness) says the mechanism is real.
-- **Is it okay that Bethany runs it?** The program is an independent initiative, not VEG-branded, per your requests — structured as a fixed annual operating agreement, reviewed by VEG legal like any vendor relationship.
+- **Is it okay that Bethany runs it?** The program is an independent initiative, no external VEG partnership, per your requests — structured as a fixed annual operating agreement, reviewed by VEG legal like any vendor relationship.
 - **Can it scale to 10,000+ VEGgies?** Yes — digital content and community scale automatically; the coaching call is a group format. No per-user licensing, no added IT.
 - **What happens if circumstances change?** The agreement is reviewed together on an ongoing basis and can be renegotiated at any review — with no disruption to enrolled VEGgies.
 - **Can the content stay current?** That's the partnership: VEG shares what VEGgies need, and Bethany builds new courses and meditations with their needs in mind, all included.
