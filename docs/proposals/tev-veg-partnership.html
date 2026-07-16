@@ -195,10 +195,35 @@
   @media (max-width: 720px) { nav.dots { display: none; } }
 
   @media print {
+    @page { size: 13.333in 7.5in; margin: 0; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     nav.dots { display: none; }
     html { scroll-snap-type: none; }
-    .slide { min-height: auto; page-break-after: always; border-bottom: none; padding: 2rem; }
-    .slide.cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { font-size: 13.5px; }
+    .slide {
+      width: 13.333in; height: 7.5in; min-height: 0;
+      padding: 0.55in 0.85in;
+      page-break-after: always; page-break-inside: avoid;
+      border-bottom: none; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .slide:last-of-type { page-break-after: auto; }
+    h1 { font-size: 3.4rem; }
+    h2 { font-size: 2.1rem; }
+    .lede { font-size: 1.05rem; }
+    .grid { gap: 0.7rem; margin-top: 1.3rem; }
+    .card { padding: 0.85rem 1rem; }
+    .card p { font-size: 0.82rem; }
+    .card h3 { font-size: 0.68rem; }
+    ul.clean li { padding: 0.45rem 0 0.45rem 1.4rem; }
+    .callout { padding: 0.7rem 1rem; margin-top: 1.1rem; }
+    .callout p { font-size: 0.85rem; }
+    .banner { padding: 0.8rem 1.1rem; margin-top: 1.1rem; }
+    .banner p { font-size: 0.85rem; }
+    .footnote { font-size: 0.62rem; margin-top: 0.9rem; }
+    .big-compare { gap: 0.7rem; margin-top: 1.3rem; }
+    .big-compare .figure { font-size: 2.1rem; }
+    .slide-num { top: 0.35in; right: 0.85in; }
   }
 </style>
 
