@@ -71,7 +71,7 @@ I'd be honored to partner with VEG in building the healthiest, most resilient ve
 >
 > Hi Shelly and Jonathan,
 >
-> Thank you again for being open to this. Attached is the proposal for making the Evolved Vets Membership available to VEGgies.
+> Thank you again for being open to this. Attached is the proposal for making the Evolved Vets Membership available to VEGgies. This work draws on more than a decade of study I've invested in neuroscience, neuroplasticity, and executive coaching — I've been a Certified 3VQ Coach since 2019 — applied to the realities of emergency practice.
 >
 > The structure is simple: an enterprise partnership that provides unlimited access for every VEG employee through one annual organizational investment — $58,800 per year, billed monthly at $4,900, fixed regardless of enrollment and fixed as VEG grows. Every VEGgie gets the full membership, including all new courses, meditations, and the monthly coaching call as they're released. I own and operate the program as an independent initiative, not VEG-branded, per your requests.
 >
