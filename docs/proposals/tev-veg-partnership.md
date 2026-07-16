@@ -12,7 +12,7 @@
 
 **This enterprise partnership provides unlimited access for every VEG employee through one annual organizational investment.**
 
-Similar playbook to the farm-training program: an initiative, run independently, that VEG invests in because of its impact on VEGgies. Bethany owns and operates the program as an independent initiative, not VEG-branded, per your requests. The public version stays fully separate.
+Like the farm-training program, this is an independent initiative that VEG invests in because of its impact on VEGgies. Bethany owns and operates the program as an independent initiative, not VEG-branded, per your requests. The public version stays fully separate.
 
 **Access is one click:** the membership website becomes a tile in VEG's Okta dashboard, right next to the tools VEGgies already use every shift — and for access on the go, VEGgies can also log in through the TEV app. Bethany will partner with VEG's technology team to stand up the tile and access.
 
