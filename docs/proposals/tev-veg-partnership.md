@@ -71,21 +71,22 @@ I'd be honored to partner with VEG in building the healthiest, most resilient ve
 >
 > Hi Shelly and Jonathan,
 >
-> Thank you again for being open to this. Attached is the proposal for making the Evolved Vets Membership available to VEGgies. As a Certified 3VQ Coach since 2019, I've lectured to hospitals on culture and wellbeing, and I've spent 12 years studying and applying neuroplasticity to help prevent burnout in our profession — that work became the TEV Method, a process for executive coaching centered on wellbeing and leadership development.
+> Thank you again for being open to this conversation. Attached is the proposal we discussed for making the Evolved Vets Membership available to VEGgies.
 >
-> The structure is simple: an enterprise partnership that provides unlimited access for every VEG employee through one annual organizational investment — $58,800 per year, billed monthly at $4,900, fixed regardless of enrollment and fixed as VEG grows. Every VEGgie gets the full membership, including all new courses, meditations, and the monthly coaching call as they're released. I own and operate the program as an independent initiative, not VEG-branded, per your requests.
+> VEG has reimagined emergency medicine for pets. This partnership extends that same innovation to the wellbeing and leadership of the people delivering that care every day.
 >
-> The return story is in the deck, but the short version: the average practice generates about $555,000 in revenue per veterinarian per year (AVMA), and the average DVM hire takes 15 months to fill (AAHA) — so one retained veterinarian more than covers the entire annual investment. And we'd measure success together with real numbers, not assumptions.
+> The structure is simple: **an enterprise partnership that provides unlimited access for every VEG employee through one annual organizational investment — $58,800 per year** (billed monthly at $4,900), fixed regardless of enrollment and fixed as VEG grows. Every VEGgie gets the full membership — the community, the meditation library, monthly live coaching, 30 hours of RACE-approved CE, and every new course and meditation as it's released — plus hospital-wide facilitations available to individual locations upon request. I own and operate the program as an independent initiative, not VEG-branded, per your requests.
 >
-> Access is one click: the membership site becomes a tile in VEG's Okta dashboard, and VEGgies can also use the TEV app on the go. I'd love to partner with your IT team to set that up.
+> The full return story is in the deck, but the number that matters most: the average practice generates about $555,000 in revenue per veterinarian per year (AVMA), and the average DVM hire takes 15 months to fill (AAHA). One retained veterinarian more than covers the entire annual investment — and we'd measure success together with real data: enrollment, engagement, and retention.
 >
-> For accounting purposes, I can also provide an expense-labeled budget breakdown in whatever format the CLO needs.
+> A bit of background you may not know: I've been a Certified 3VQ Coach since 2019, lecturing to hospitals on culture and wellbeing, and I've spent the last 12 years studying and applying neuroplasticity to help prevent burnout in our profession. That work became the TEV Method — the executive coaching process at the heart of this membership.
 >
-> Happy to walk through any of it.
+> Access is one click: the membership becomes a tile in VEG's Okta dashboard, and VEGgies can also use the TEV app on the go. I'd love to partner with your IT team to set that up. And for accounting purposes, I can provide an expense-labeled budget breakdown in whatever format the CLO needs.
+>
+> Happy to walk through any of it, together or with the board.
 >
 > I'd be honored to partner with VEG in building the healthiest, most resilient veterinary workforce in the profession.
 >
-> Thank you both,
 > Bethany
 
 ---
