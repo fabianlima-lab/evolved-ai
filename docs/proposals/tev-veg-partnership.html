@@ -207,7 +207,7 @@
       border-bottom: none; overflow: hidden;
       display: flex; align-items: center; justify-content: flex-start;
     }
-    .slide.cover, #s9 { align-items: center; justify-content: center; }
+    .slide.cover, #s10 { align-items: center; justify-content: center; }
     .slide:last-of-type { page-break-after: auto; }
     /* use the full 16:9 width */
     .inner { max-width: none; width: 100%; }
@@ -250,6 +250,10 @@
     .banner { padding: 0.6rem 0.95rem; margin-top: 0.7rem; }
     .banner p { font-size: 0.82rem; }
     .footnote { font-size: 0.58rem; margin-top: 0.8rem; line-height: 1.3; max-width: none; }
+    .tablewrap { margin-top: 1.1rem; }
+    table { font-size: 0.85rem; min-width: 0; }
+    th, td { padding: 0.55rem 1rem; }
+    tr.total td { font-size: 0.9rem; }
     .big-compare { gap: 0.7rem; margin-top: 1.1rem; }
     .big-compare .card { flex: 1 1 0; }
     .big-compare .figure { font-size: 2.2rem; }
@@ -263,7 +267,7 @@
   <a href="#s3" aria-label="Slide 3"></a><a href="#s4" aria-label="Slide 4"></a>
   <a href="#s5" aria-label="Slide 5"></a><a href="#s6" aria-label="Slide 6"></a>
   <a href="#s7" aria-label="Slide 7"></a><a href="#s8" aria-label="Slide 8"></a>
-  <a href="#s9" aria-label="Slide 9"></a>
+  <a href="#s9" aria-label="Slide 9"></a><a href="#s10" aria-label="Slide 10"></a>
 </nav>
 
 <!-- 1 · Cover -->
@@ -381,9 +385,31 @@
   </div>
 </section>
 
-<!-- 8 · Setup -->
+<!-- 8 · Cost breakdown -->
 <section class="slide" id="s8">
-  <span class="slide-num">08 · Okta Access</span>
+  <span class="slide-num">08 · Cost Breakdown</span>
+  <div class="inner">
+    <p class="eyebrow">Where the investment goes</p>
+    <h2>The monthly cost breakdown.</h2>
+    <p class="lede" style="margin-top:1.2rem">The annual investment covers the program's documented monthly operating costs — no margin, no markup.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Category</th><th>What's inside</th><th class="num">Monthly</th></tr></thead>
+        <tbody>
+          <tr><td>Wellness content &amp; production</td><td>Production, new courses, meditations, and masterclass content</td><td class="num">$2,700</td></tr>
+          <tr><td>Member support &amp; operations</td><td>Member support team, onboarding, RACE approval, and program administration</td><td class="num">$1,750</td></tr>
+          <tr><td>Technology &amp; platform</td><td>Member portal, membership app, web hosting, email &amp; messaging systems</td><td class="num">~$450</td></tr>
+          <tr class="total"><td>Total program cost</td><td>Billed as one fixed annual operating agreement ($58,800/year)</td><td class="num">~$4,900 / mo</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="footnote">Built from documented operating costs — no margin, no markup. A full line-item breakdown is available for VEG's finance team on request.</p>
+  </div>
+</section>
+
+<!-- 9 · Setup -->
+<section class="slide" id="s9">
+  <span class="slide-num">09 · Access</span>
   <div class="inner">
     <p class="eyebrow">Access</p>
     <h2>Two ways in — at work and on the go.</h2>
@@ -397,8 +423,8 @@
 </section>
 
 <!-- 9 · Next steps -->
-<section class="slide" id="s9">
-  <span class="slide-num">09 · Thank You</span>
+<section class="slide" id="s10">
+  <span class="slide-num">10 · Thank You</span>
   <div class="inner">
     <p class="eyebrow">In closing</p>
     <h2>I'd be honored to partner with VEG in building the healthiest, most resilient veterinary workforce in the profession.</h2>
