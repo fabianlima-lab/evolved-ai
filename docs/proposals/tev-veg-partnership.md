@@ -101,15 +101,19 @@ I'd be honored to partner with VEG in building the healthiest, most resilient ve
 - **Can the content stay current?** That's the partnership: VEG shares what VEGgies need, and Bethany builds new courses and meditations with their needs in mind, all included.
 - **Why not build this internally?** It exists today, built by one of VEG's own, with RACE approval, a content library, and a live community — years of head start for a fraction of one internal hire.
 
-## Appendix B — expense-labeled budget (for the CLO only; not part of the pitch)
+## Appendix B — expense-labeled budget (for the CLO / accounting)
 
-VEG's legal/accounting team asked for the arrangement to be labeled as expenses. Keep this breakdown out of the board conversation and provide it only when accounting requests it:
+VEG asked for the arrangement to be labeled as expenses. This is the same breakdown shown on the deck's cost page — every operating line, monthly and annualized. The annual column totals the $58,800 investment.
 
-| Category | What's inside | Monthly |
-|---|---|---:|
-| Wellness content & production | Production, new courses, meditations, and masterclass content | $2,700 |
-| Member support & operations | Member support team, onboarding, RACE approval, and program administration | $1,750 |
-| Technology & platform | Member portal, membership app, web hosting, email & messaging systems | ~$450 |
-| **Total** | | **~$4,900/mo** |
+| Line item | Category | Monthly | Annual |
+|---|---|---:|---:|
+| Content production | Content | $2,700 | $32,400 |
+| Program administration | Support & ops | $1,000 | $12,000 |
+| Member support | Support & ops | $750 | $9,000 |
+| AI & automation tools | Technology | $213 | $2,556 |
+| Membership platform & billing | Technology | $199 | $2,388 |
+| Website, email & domain | Technology | $20 | $240 |
+| Messaging automation | Technology | $20 | $240 |
+| **Total** | | **~$4,900** | **~$58,800** |
 
-Line-item backup: production (Produce Your Podcast) $2,700; member ops & marketing team (Virtualee & Co) $750; program administration (Bethany, 10 hrs/mo × $100/hr) $1,000; AI & automation tools (Anthropic) $213.20; membership platform (Kajabi, list rate) $199; web hosting (DigitalOcean) confirming; Google Workspace + domain ~$20; Manychat ~$20. Business coaching (With Enthusiasm Coaching) is intentionally excluded.
+Vendor backup (for finance): content production (Produce Your Podcast) $2,700; program administration (Bethany, 10 hrs/mo × $100/hr) $1,000; member support (Virtualee & Co) $750; AI & automation tools (Anthropic) $213.20; membership platform & billing (Kajabi, list rate) $199; website, email & domain (Google Workspace + domain) ~$20; messaging automation (Manychat) ~$20. Figures reflect current documented operating costs — no margin, no markup. Business coaching (With Enthusiasm Coaching) is intentionally excluded.
